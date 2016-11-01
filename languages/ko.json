@@ -1,0 +1,46 @@
+{
+	"text":{
+		"folder_name":"폴더명",
+		"error_item":"오류가 발생한 항목",
+		"suggest_copy":"이동하려는 항목을 복사하거나, 이동을 취소할 수 있습니다.",
+		"confirm_duplicated":"이동/복사하려는 위치에 같은 이름을 가진 항목이 이미 있습니다.<br>기존 항목을 대치하시겠습니까?",
+		"origin_item":"기존항목",
+		"current_item":"현재항목",
+		"option_continue":"이후에도 선택 옵션 계속 적용"
+	},
+	"button":{
+		"copy":"복사하기",
+		"replace":"대치하기",
+		"merge":"폴더합치기"
+	},
+	"error":{
+		"NOT_FOUND_FOLDER":"폴더를 찾을 수 없습니다.",
+		"NOT_ALLOWED_CHARACTER_IN_FORDER_NAME":"폴더명에 특수문자(',\",?,<,>,%,#,/,|,\\)를 사용할 수 없습니다.",
+		"INVALID_FOLDER_NAME":"폴더명이 부적절합니다.",
+		"INVALID_FOLDER_NAME_LENGTH":"폴더명이 너무 짧거나, 너무 깁니다.",
+		"DUPLICATED_FOLDER_NAME":"이미 존재하는 폴더명입니다.",
+		"NOT_ALLOWED_FOR_DELETED_ITEM":"삭제된 항목에는 할 수 없습니다.",
+		"NOT_ALLOWED_MOVE_TO_PARENT_TO_CHILD":"상위폴더를 하위폴더로 이동할 수 없습니다.",
+		"NOT_ALLOWED_MOVE_TO_SAME_PARENT":"이동하려는 위치와 폴더의 현재 위치가 동일합니다.",
+		"NOT_ALLOWED_MOVE_FOR_LOCK_ITEM":"이동하려는 항목이 이동/삭제가 불가능하도록 잠겨있습니다.",
+		"NOT_ALLOWED_DELETE_IN_TARGET":"항목이 위치한 폴더에 삭제할 수 있는 권한이 없습니다.",
+		"MOVE_FAILED":"항목이동중 에러가 발생하였습니다.",
+		"CHECKED_DUPLICATED_ITEM":"중복된 이름 확인"
+	},
+	"admin":{
+		"contexts":{
+			"explorer":"웹하드 탐색기"
+		},
+		"configs":{
+			"form":{
+				"default_setting":"모듈기본설정",
+				"templet":"템플릿",
+				"root_setting":"루트폴더설정",
+				"root_name":"루트폴더명",
+				"root_name_help":"사용자의 루트폴더 기본이름을 설정합니다.<br>{NAME}을 사용하여 회원이름을 추가할 수 있습니다.",
+				"root_size":"옹량제한",
+				"root_size_help":"루트폴더의 용량을 MB단위로 제한할 수 있습니다.<br>(1000 입력시 최대 1GB)"
+			}
+		}
+	}
+}

@@ -1,0 +1,107 @@
+/**
+ * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodule.kr)
+ * 
+ * 웹하드 탐색기 기본 스타일을 지정한다.
+ *
+ * @file /modules/webhard/styles/style.css
+ * @author Arzz (arzz@arzz.com)
+ * @license MIT License
+ * @version 3.0.0.160923
+ *
+ * @param string $view 종류
+ * @param string $path 경로
+ * @return object $results
+ */
+
+body.dragging, body.dragging * {-webkit-touch-callout:none; -webkit-user-select:none; -khtml-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none;}
+body.resizing, body.resizing * {cursor:ew-resize !important;}
+
+body.noDrop, body.noDrop * {cursor:no-drop !important;}
+
+div[data-module=webhard] {width:100%; height:100%;}
+div[data-module=webhard] > form {width:100%; height:100%;}
+
+div[data-module=webhard] {padding:0px; margin:0px; width:100%; height:100%; -webkit-touch-callout:none; -webkit-user-select:none; -khtml-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none; cursor:default !important; overflow:auto;}
+
+
+div[data-module=webhard] div[data-role=loading] {width:100%; height:100%; display:table; position:absolute; top:0; left:0; z-index:1000; background:rgba(0,0,0,0.3);}
+div[data-module=webhard] div[data-role=loading] > div {display:table-cell; vertical-align:middle; text-align:center; color:#fff; font-size:20px;}
+
+
+div[data-module=webhard] section[data-role=nbreadcrumb] {height:38px; border-bottom:1px solid #d8dee5; padding:0px 15px; font-size:0;}
+div[data-module=webhard] section[data-role=nbreadcrumb] i {display:inline-block; height:38px; line-height:39px; color:#909499; font-size:14px; margin-right:10px; vertical-align:middle;}
+div[data-module=webhard] section[data-role=nbreadcrumb] a, div[data-module=webhard] section[data-role=nbreadcrumb] button {display:inline-block; height:38px; line-height:39px; color:#222; font-size:12px; text-decoration:none; vertical-align:middle; border:0; background:transparent; cursor:pointer;}
+div[data-module=webhard] section[data-role=nbreadcrumb] button {margin-right:10px;}
+div[data-module=webhard] section[data-role=nbreadcrumb] a:hover, div[data-module=webhard] section[data-role=nbreadcrumb] button:hover {color:#0370a6;}
+
+
+div[data-module=webhard] section[data-role=container] {display:table; table-layout:fixed; width:100%; height:calc(100% - 39px); position:relative;}
+div[data-module=webhard] nav[data-role=sidebar] {display:table-cell; vertical-align:top; position:relative;}
+div[data-module=webhard] nav[data-role=sidebar] > div[data-role=panel] {width:100%; height:100%; overflow-y:hidden; overflow-y:auto;}
+div[data-module=webhard] nav[data-role=sidebar] > div[data-role=resizer] {position:absolute; top:0; right:-6px; width:10px; height:100%; background:transparent; z-index:100; cursor:ew-resize;}
+div[data-module=webhard] nav[data-role=sidebar] > div[data-role=resizer].dragging {width:5px;}
+div[data-module=webhard] section[data-role=explorer] {display:table-cell; width:100%; vertical-align:top;}
+div[data-module=webhard] section[data-role=explorer] > div[data-role=panel] {width:100%; height:100%; overflow:hidden; background:blue;}
+div[data-module=webhard] aside[data-role=detail] {display:table-cell; vertical-align:top;}
+div[data-module=webhard] aside[data-role=detail] > div[data-role=panel] {width:100%; height:100%; overflow:hidden; background:blue;}
+
+
+div[data-module=webhard] ul[data-role=tree] {position:relative; list-style:none;}
+
+
+
+div[data-module=webhard] div[data-role=files] {height:100%; position:relative; overflow-y:scroll; background:green;}
+div[data-module=webhard] div[data-role=file-item] > div.owner > div.photo {background-repeat:no-repeat; background-size:cover; background-position:50% 50%;}
+
+div[data-module=webhard] *[data-role=selection] {width:10px; height:10px; position:absolute; z-index:1000; box-sizing:border-box;}
+
+
+div[data-module=webhard] div[data-role=dragging] {position:absolute; top:0; left:0; z-index:10000; width:100px; height:140px;}
+div[data-module=webhard] div[data-role=dragging] > i {display:block; width:100px; height:100px; background-color:rgba(0,137,240,0.4); position:relative;}
+div[data-module=webhard] div[data-role=dragging] > label {max-height:40px; line-height:20px; text-align:center;}
+
+
+
+#ModuleWebhardDragToggle {position:absolute; top:0; left:0; border:1px solid #000; padding:8px; font-size:12px; cursor:default !important; z-index:10000; background:#fff;}
+#ModuleWebhardUploadList {position:absolute; bottom:0px; right:10px; z-index:100; display:none;}
+
+#ModuleWebfolderContextMenu {list-style:none; position:absolute; z-index:100;}
+
+div[data-module=webhard][data-mode=upload] *[data-role=explorer] {display:none;}
+div[data-module=webhard][data-mode=upload] *[data-role=sidemenu] > div[data-role=resizer] {display:none;}
+
+
+
+
+/**
+ * 모달창 특수항목 스타일
+ */
+div[data-role=modal] ul[data-role=duplicated] {list-style:none; border:1px solid #d9dadb; background:#f4f4f4; padding:10px; margin-top:10px;}
+div[data-role=modal] ul[data-role=duplicated] > li {height:24px; line-height:24px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;}
+div[data-role=modal] ul[data-role=duplicated] > li.title {height:30px; line-height:30px; border-bottom:1px solid #d9dadb; margin-bottom:8px;}
+div[data-role=modal] ul[data-role=duplicated] > li.item > span.size {color:#666; float:right;}
+
+
+/**
+ * 파일아이콘
+ */
+div[data-module=webhard] i.icon {display:inline-block; background-repeat:no-repeat; background-position:50% 50%; background-image:url(../images/icon_large_etc.png);}
+div[data-module=webhard] i.icon.small {}
+
+div[data-module=webhard] i.icon[data-type=folder] {background-image:url(../images/icon_large_folder.png);}
+
+
+div[data-module=webhard] i.icon {display:inline-block; background-image:url(../images/icon_type_etc.png);}
+div[data-module=webhard] i.icon.folder {background-image:url(../images/icon_type_folder.png);}
+div[data-module=webhard] i.icon.document {background-image:url(../images/icon_type_document.png);}
+div[data-module=webhard] i.icon.image {background-image:url(../images/icon_type_image.png);}
+div[data-module=webhard] i.icon.archive {background-image:url(../images/icon_type_archive.png);}
+
+div[data-module=webhard] i.icon.pptx {background-image:url(../images/icon_type_ppt.png);}
+div[data-module=webhard] i.icon.ppt {background-image:url(../images/icon_type_ppt.png);}
+div[data-module=webhard] i.icon.doc {background-image:url(../images/icon_type_doc.png);}
+div[data-module=webhard] i.icon.docx {background-image:url(../images/icon_type_doc.png);}
+div[data-module=webhard] i.icon.xls {background-image:url(../images/icon_type_xls.png);}
+div[data-module=webhard] i.icon.xlsx {background-image:url(../images/icon_type_xls.png);}
+div[data-module=webhard] i.icon.hwp {background-image:url(../images/icon_type_hwp.png);}
+div[data-module=webhard] i.icon.pdf {background-image:url(../images/icon_type_pdf.png);}
