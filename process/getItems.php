@@ -33,17 +33,7 @@ if ($view == 'folder') {
 		$folders = $folders->get();
 		
 		for ($i=0, $loop=count($folders);$i<$loop;$i++) {
-			$item = new stdClass();
-			$item->type = 'folder';
-			
-			$item->idx = $folders[$i]->idx;
-			$item->path = $this->getFolderPath($folders[$i]->idx);
-			$item->permission = $this->getFolderPermission($folders[$i]->idx);
-			$item->name = $folders[$i]->name;
-			$item->uploaded = $folders[$i]->size;
-			$item->size = $folders[$i]->size;
-			
-			$items[] = $item;
+			$items[] = $this->getFolderMeta($folders[$i]);
 		}
 		
 		$files = $this->db()->select($this->table->file)->where('folder',$idx)->where('is_delete','FALSE');
@@ -51,10 +41,7 @@ if ($view == 'folder') {
 		$files = $files->get();
 		
 		for ($i=0, $loop=count($files);$i<$loop;$i++) {
-			$item = new stdClass();
-			$item->file = 'file';
-			
-			$items[] = $item;
+			$items[] = $this->getFileMeta($files[$i]);
 		}
 		
 		for ($i=0, $loop=count($items);$i<$loop;$i++) {
