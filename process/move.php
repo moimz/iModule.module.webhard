@@ -142,38 +142,36 @@ if ($folder == null || $this->checkFolderDeleted($target) == true) {
 			} else {
 				$file = $this->getFile($select[$i]->idx);
 				
-				/*
-				if ($file == null) {
-					$select[$i]->success = false;
-					$select[$i]->message = $this->getErrorText('NOT_FOUND');
-					continue;
+				if ($file == null || $this->checkFileDeleted($select[$i]->idx) == true) {
+					$results->modalHtml = $this->getMoveErrorModal($i,$select[$i]->mode,'NOT_FOUND',$select[$i]);
+					break;
 				}
 				
-				if ($mode == 'move' && $file->folder == $target) {
-					$select[$i]->success = false;
-					continue;
+				if ($select[$i]->mode == 'move' && $file->folder == $target) {
+					$results->modalHtml = $this->getMoveErrorModal($i,$select[$i]->mode,'NOT_ALLOWED_MOVE_TO_SAME_PARENT',$file);
+					break;
 				}
 				
-				if ($this->checkFilePermission($file->idx,'D') == false || $file->is_lock == 'TRUE') {
-					$select[$i]->success = false;
-					$select[$i]->message = $this->getErrorText('FORBIDDEN');
-					continue;
+				if ($select[$i]->mode == 'move') {
+					if ($file->is_lock == true) {
+						$results->modalHtml = $this->getMoveErrorModal($i,$select[$i]->mode,'NOT_ALLOWED_MOVE_FOR_LOCK_ITEM',$file);
+						break;
+					}
+					
+					if ($this->checkFilePermission($folder->parent,'D') == false) {
+						$results->modalHtml = $this->getMoveErrorModal($i,$select[$i]->mode,'NOT_ALLOWED_DELETE_IN_TARGET',$file);
+						break;
+					}
 				}
 				
-				$results->origin = $file->folder;
+				$origins[] = $file->folder;
+				$duplicated = $this->db()->select($this->table->file)->where('folder',$target)->where('name',$file->name)->where('is_delete','FALSE')->getOne();
 				
-				if ($target == 0) {
-					$duplicated = $this->db()->select($this->table->file)->where('folder',0)->where('owner',$this->IM->getModule('member')->getLogged())->where('name',$file->name)->where('is_delete','FALSE')->getOne();
-				} else {
-					$duplicated = $this->db()->select($this->table->file)->where('folder',$target)->where('name',$file->name)->where('is_delete','FALSE')->getOne();
-				}
-				
-				if ($duplicated == null || $file->folder == $target) {
-					if ($mode == 'move') {
+				if ($duplicated == null) {
+					if ($select[$i]->mode == 'move') {
 						$this->db()->update($this->table->file,array('folder'=>$target,'editor'=>$this->IM->getModule('member')->getLogged(),'update_date'=>time()))->where('idx',$file->idx)->execute();
 						$select[$i]->success = true;
 					} else {
-						if ($duplicated != null) $file->name = $this->getEscapeDuplicatedFileName($target,$file->name);
 						$select[$i]->success = $this->copyFile($file,$target);
 					}
 				} else {
@@ -197,7 +195,7 @@ if ($folder == null || $this->checkFolderDeleted($target) == true) {
 					}
 					
 					if ($select[$i]->duplicatedOption == 'rename') {
-						if ($mode == 'copy') {
+						if ($select[$i]->mode == 'move') {
 							$newname = $this->getEscapeDuplicatedFileName($target,$file->name);
 							$this->db()->update($this->table->file,array('folder'=>$target,'name'=>$newname,'editor'=>$this->IM->getModule('member')->getLogged(),'update_date'=>time()))->where('idx',$file->idx)->execute();
 							$select[$i]->success = true;
@@ -214,7 +212,7 @@ if ($folder == null || $this->checkFolderDeleted($target) == true) {
 						
 						$this->db()->delete($this->table->file)->where('idx',$duplicated->idx)->execute();
 						
-						if ($mode == 'copy') {
+						if ($select[$i]->mode == 'move') {
 							$this->db()->update($this->table->file,array('folder'=>$target,'editor'=>$this->IM->getModule('member')->getLogged(),'update_date'=>time()))->where('idx',$file->idx)->execute();
 							$select[$i]->success = true;
 						} else {
@@ -227,18 +225,13 @@ if ($folder == null || $this->checkFolderDeleted($target) == true) {
 					}
 					
 					if ($select[$i]->duplicatedOption == null) {
-						$results->modalHtml = $this->getFileDuplicatedOptionModal($i,$file,$duplicated,$templet);
+						$results->modalHtml = $this->getFileDuplicatedOptionModal($i,$file,$duplicated);
 						break;
 					}
 				}
-				*/
 			}
 		}
 	}
-	/*
-	$this->updateFolder($target);
-	if ($mode == 'move' && $results->origin) $this->updateFolder($results->origin);
-	*/
 	
 	$origins[] = $target;
 	
