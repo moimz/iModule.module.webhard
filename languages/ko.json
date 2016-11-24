@@ -6,12 +6,36 @@
 		"confirm_duplicated":"이동/복사하려는 위치에 같은 이름을 가진 항목이 이미 있습니다.<br>기존 항목을 대치하시겠습니까?",
 		"origin_item":"기존항목",
 		"current_item":"현재항목",
-		"option_continue":"이후에도 선택 옵션 계속 적용"
+		"option_continue":"이후에도 선택 옵션 계속 적용",
+		"drop":"파일을 {FOLDER} 폴더에 바로 업로드하려면 여기에 드롭하세요.",
+		"upload_canceled":"업로드가 취소되었습니다. 업로드중인 파일은 휴지통으로 이동되었습니다.",
+		"crop":"항목을 이동할 폴더에서 붙여넣기를 하시면 선택된 {COUNT}개의 항목이 이동됩니다.",
+		"copy":"항목을 복사할 폴더에서 붙여넣기를 하시면 선택된 {COUNT}개의 항목이 복사됩니다."
+	},
+	"toolbar":{
+		"upload":"업로드",
+		"download":"다운로드",
+		"create":"새폴더",
+		"delete":"삭제",
+		"restore":"복원",
+		"remove":"완전삭제",
+		"empty":"휴지통비우기",
+		"select_on":"선택 ...",
+		"select_all":"모두선택",
+		"select_off":"선택해제",
+		"detail":"상세정보"
+	},
+	"sort":{
+		"name":"이름",
+		"size":"크기",
+		"date":"업데이트 날짜"
 	},
 	"button":{
 		"copy":"복사하기",
 		"replace":"대치하기",
-		"merge":"폴더합치기"
+		"merge":"폴더합치기",
+		"rename":"이름바꾸기",
+		"continue":"이어올리기"
 	},
 	"error":{
 		"NOT_FOUND_FOLDER":"폴더를 찾을 수 없습니다.",
@@ -25,7 +49,15 @@
 		"NOT_ALLOWED_MOVE_FOR_LOCK_ITEM":"이동하려는 항목이 이동/삭제가 불가능하도록 잠겨있습니다.",
 		"NOT_ALLOWED_DELETE_IN_TARGET":"항목이 위치한 폴더에 삭제할 수 있는 권한이 없습니다.",
 		"MOVE_FAILED":"항목이동중 에러가 발생하였습니다.",
-		"CHECKED_DUPLICATED_ITEM":"중복된 이름 확인"
+		"CHECKED_DUPLICATED_ITEM":"중복된 이름 확인",
+		"UPLOAD_NOT_AVAILABLE":"이전 업로드작업을 처리중입니다. 잠시 후 다시 시도하여 주십시오.",
+		"INVALID_UPLOAD_FOLDER":"현재 경로에서는 업로드를 할 수 없습니다.",
+		"NOT_ALLOWED_FOLDER_UPLOAD":"폴더를 업로드할 수 없습니다. 폴더안의 파일만 선택하여 업로드하여 주십시오.",
+		"NOT_ENOUGH_DISK_SIZE":"용량이 부족합니다.",
+		"UPLOAD_RESTART_FAILED":"해당 파일의 업로드를 재개할 수 없습니다.",
+		"NOT_SELECTED_ITEM":"먼저 파일/폴더를 선택하여 주십시오.",
+		"DISABLED_SESSION_STORAGE":"개인정보보호모드나 사생활보호모드에서는 이동/복사할 항목을 임시로 저장할 수 없습니다.",
+		"NOT_FOUND_CLIPBOARD":"붙여넣기할 항목을 찾을 수 없습니다."
 	},
 	"admin":{
 		"contexts":{
