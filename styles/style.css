@@ -7,71 +7,198 @@
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
  * @version 3.0.0.160923
- *
- * @param string $view 종류
- * @param string $path 경로
- * @return object $results
  */
 
-body.dragging, body.dragging * {-webkit-touch-callout:none; -webkit-user-select:none; -khtml-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none;}
+body {overflow-x:hidden;}
+body.dragging, body.dragging * {-webkit-touch-callout:none; -webkit-user-select:none; -khtml-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none; cursor:move !important;}
 body.resizing, body.resizing * {cursor:ew-resize !important;}
 
 body.noDrop, body.noDrop * {cursor:no-drop !important;}
 
 div[data-module=webhard] {width:100%; height:100%;}
 div[data-module=webhard] > form {width:100%; height:100%;}
+div[data-module=webhard] > * {-webkit-tap-highlight-color:transparent;}
 
-div[data-module=webhard] {padding:0px; margin:0px; width:100%; height:100%; -webkit-touch-callout:none; -webkit-user-select:none; -khtml-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none; cursor:default !important; overflow:auto;}
-
-
+/**
+ * 컨테이너
+ */
+div[data-module=webhard] {padding:0px; margin:0px; width:100%; height:100%; -webkit-touch-callout:none; -webkit-user-select:none; -khtml-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none; cursor:default; overflow:auto; position:relative;}
 div[data-module=webhard] div[data-role=loading] {width:100%; height:100%; display:table; position:absolute; top:0; left:0; z-index:1000; background:rgba(0,0,0,0.3);}
 div[data-module=webhard] div[data-role=loading] > div {display:table-cell; vertical-align:middle; text-align:center; color:#fff; font-size:20px;}
+div[data-module=webhard] div[data-role=disable] {width:100%; height:100%; position:absolute; top:0; left:0; z-index:1000; background:rgba(0,0,0,0.3); display:none;}
+div[data-module=webhard] button[data-action=add] {display:none;}
 
-
-div[data-module=webhard] section[data-role=nbreadcrumb] {height:38px; border-bottom:1px solid #d8dee5; padding:0px 15px; font-size:0;}
-div[data-module=webhard] section[data-role=nbreadcrumb] i {display:inline-block; height:38px; line-height:39px; color:#909499; font-size:14px; margin-right:10px; vertical-align:middle;}
-div[data-module=webhard] section[data-role=nbreadcrumb] a, div[data-module=webhard] section[data-role=nbreadcrumb] button {display:inline-block; height:38px; line-height:39px; color:#222; font-size:12px; text-decoration:none; vertical-align:middle; border:0; background:transparent; cursor:pointer;}
-div[data-module=webhard] section[data-role=nbreadcrumb] button {margin-right:10px;}
-div[data-module=webhard] section[data-role=nbreadcrumb] a:hover, div[data-module=webhard] section[data-role=nbreadcrumb] button:hover {color:#0370a6;}
-
-
-div[data-module=webhard] section[data-role=container] {display:table; table-layout:fixed; width:100%; height:calc(100% - 39px); position:relative;}
-div[data-module=webhard] nav[data-role=sidebar] {display:table-cell; vertical-align:top; position:relative;}
-div[data-module=webhard] nav[data-role=sidebar] > div[data-role=panel] {width:100%; height:100%; overflow-y:hidden; overflow-y:auto;}
+/**
+ * 네비바
+ */
+div[data-module=webhard] nav[data-role=sidebar] > div[data-role=panel] {width:100%; height:100%; overflow:hidden; box-sizing:border-box;}
 div[data-module=webhard] nav[data-role=sidebar] > div[data-role=resizer] {position:absolute; top:0; right:-6px; width:10px; height:100%; background:transparent; z-index:100; cursor:ew-resize;}
-div[data-module=webhard] nav[data-role=sidebar] > div[data-role=resizer].dragging {width:5px;}
-div[data-module=webhard] section[data-role=explorer] {display:table-cell; width:100%; vertical-align:top;}
-div[data-module=webhard] section[data-role=explorer] > div[data-role=panel] {width:100%; height:100%; overflow:hidden; background:blue;}
-div[data-module=webhard] aside[data-role=detail] {display:table-cell; vertical-align:top;}
-div[data-module=webhard] aside[data-role=detail] > div[data-role=panel] {width:100%; height:100%; overflow:hidden; background:blue;}
+div[data-module=webhard] nav[data-role=sidebar] > div[data-role=resizer].dragging {width:5px; background:rgba(0,0,0,0.3);}
+
+div[data-module=webhard] nav[data-role=sidebar] div[data-role=slide_title] {display:none;}
+div[data-module=webhard] nav[data-role=sidebar] div[data-role=folder_title] {display:block;}
+div[data-module=webhard] nav[data-role=sidebar] button[data-tag=root] {display:none;}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu {overflow-y:scroll; -webkit-overflow-scrolling:touch;}
+
+/**
+ * 네비바 > 폴더트리
+ */
+ 
+/**
+ * 탐색기
+ */
+div[data-module=webhard] section[data-role=explorer] > div[data-role=panel] {width:100%; height:100%; overflow:hidden; box-sizing:border-box;}
+
+/**
+ * 탐색기 > 툴바
+ */
+div[data-module=webhard] div[data-role=toolbar] > h4[data-role=title] {display:none;}
+div[data-module=webhard] div[data-role=toolbar] > button[data-action=tree] {display:none; font-family:moimz; speak:none; font-style:normal; font-weight:400; font-variant:normal; text-transform:none; line-height:1; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-align:center; color:#666; font-size:16px;}
+div[data-module=webhard] div[data-role=toolbar] > button[data-action=tree].home:before {content:"\eb13";}
+div[data-module=webhard] div[data-role=toolbar] > button[data-action=tree].back:before {content:"\e900";}
+div[data-module=webhard] div[data-role=toolbar] > button[data-action=menu] {display:none;}
+div[data-module=webhard] div[data-role=toolbar] > div[data-role=menu] {display:inline-block;}
+
+/**
+ * 탐색기 > 헤더바
+ */
+div[data-module=webhard] div[data-role=headerbar] button[data-action=sort] {display:none; cursor:pointer;}
+div[data-module=webhard] div[data-role=headerbar] button[data-action=select] {display:inline-block; padding:0px; width:16px; height:16px; cursor:pointer; font-family:moimz; speak:none; font-style:normal; font-weight:400; font-variant:normal; text-transform:none; line-height:1; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-align:center; border:1px solid #d9dadb; font-size:12px; background:#fff;}
+div[data-module=webhard] div[data-role=headerbar] button[data-action=select].selected {border:1px solid #4993de; background:#1bb4ee; color:#fff;}
+div[data-module=webhard] div[data-role=headerbar] button[data-action=select].selected:before {content:"\eb10";}
+
+div[data-module=webhard] div[data-role=headerbar] button[data-action=favorite] {display:inline-block; padding:0px; width:16px; height:16px; background:transparent; vertical-align:middle; cursor:pointer; font-family:moimz; speak:none; font-style:normal; font-weight:400; font-variant:normal; text-transform:none; line-height:1; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-align:center; font-size:14px; color:#999; border:0px;}
+div[data-module=webhard] div[data-role=headerbar] button[data-action=favorite]:before {content:"\ec05";}
+div[data-module=webhard] div[data-role=headerbar] button[data-action=favorite].selected {color:#008be9;}
+/**
+ * 탐색기 > 파일목록
+ */
+div[data-module=webhard] div[data-role=files] {width:100%; height:100%; box-sizing:border-box; position:relative; overflow-y:scroll; -webkit-overflow-scrolling:touch;}
+div[data-module=webhard] div[data-role=selection] {width:10px; height:10px; position:absolute; z-index:1000; box-sizing:border-box; border:1px solid #4993de; background:rgba(73,147,222,0.3);}
+
+/**
+ * 탐색기 > 파일목록(공통) > 항목
+ */
+div[data-module=webhard] div[data-role=file-item] {cursor:pointer; position:relative; overflow:hidden;}
+div[data-module=webhard] div[data-role=file-item] > div > button {display:inline-block; border:0px; padding:0px; margin:0px; width:16px; height:16px; background:transparent; vertical-align:middle; cursor:pointer; font-family:moimz; speak:none; font-style:normal; font-weight:400; font-variant:normal; text-transform:none; line-height:1; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-align:center;}
+div[data-module=webhard] div[data-role=file-item] > div > button[data-action=select] {border:1px solid #d9dadb; font-size:12px;}
+div[data-module=webhard] div[data-role=file-item].selected > div > button[data-action=select] {border:1px solid #4993de; background:#1bb4ee; color:#fff;}
+div[data-module=webhard] div[data-role=file-item].selected > div > button[data-action=select]:before {content:"\eb10";}
+div[data-module=webhard] div[data-role=file-item].unselect {opacity:0.5; cursor:not-allowed;}
+div[data-module=webhard] div[data-role=file-item] > div > button[data-action=favorite] {font-size:16px; color:#ccc;}
+div[data-module=webhard] div[data-role=file-item] > div > button[data-action=favorite]:before {content:"\ec05";}
+div[data-module=webhard] div[data-role=file-item] > div > button[data-action=favorite].mi-loading {font-size:12px; color:#999;}
+div[data-module=webhard] div[data-role=file-item] > div > button[data-action=favorite].mi-loading:before {content:"\ed00";}
+div[data-module=webhard] div[data-role=file-item].favorite > div > button[data-action=favorite] {color:#008be9;}
+div[data-module=webhard] div[data-role=file-item].favorite > div > button[data-action=favorite][disabled] {color:#999; background:transparent;}
+div[data-module=webhard] div[data-role=file-item] > i.icon {width:100%; height:0px; padding-bottom:calc(100% - 2px); background-position:50% 50%; background-repeat:no-repeat; box-sizing:border-box; position:relative;}
+div[data-module=webhard] div[data-role=file-item] > i.icon > div.preview {display:inline-block; background-repeat:no-repeat; background-size:cover; background-position:50% 50%; width:100%; height:100%; box-sizing:border-box; background-color:#fff; position:absolute; top:0; left:0; z-index:10;}
+div[data-module=webhard] div[data-role=file-item].dragging {opacity:0.5;}
+div[data-module=webhard] div[data-role=file-item].clipboard {opacity:0.5;}
+
+div[data-module=webhard] div[data-role=file-item] div[data-role=progress] {height:6px; background:#ededed; border-radius:4px; border:1px solid #d9d9de; opacity:1;}
+div[data-module=webhard] div[data-role=file-item] div[data-role=progress] > div {width:0px; height:6px; background:#0089f0; border-radius:3px;}
+div[data-module=webhard] div[data-role=file-item] div.more {display:none;}
+
+/**
+ * 탐색기 > 파일목록(미리보기) > 항목
+ */
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item] {display:inline-block; width:100px; height:195px; margin:10px; vertical-align:top;}
+div[data-module=webhard][data-viewmode=card][data-mobile=TRUE] {width:100%;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item] > div.checkbox {width:16px; height:16px; display:inline-block; vertical-align:middle;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item] > div.favorite {width:16px; height:16px; display:inline-block; vertical-align:middle; margin-left:7px;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item] > i.icon {border:1px solid #e8e9eb; margin:10px 0px 5px 0px;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item] > i.icon > div[data-role=progress] {width:calc(100% - 20px); position:absolute; left:9px; bottom:9px; z-index:20;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item] > div.name {text-align:center; max-height:40px; overflow:hidden;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item] > div.name > span {display:inline-block; line-height:16px; font-size:12px; text-align:center; color:#333; border-radius:3px; padding:4px; word-break:break-all;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item] > div.size {text-align:center; height:14px; line-height:14px; font-size:11px; color:#999;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item] > div.size > div[data-role=progress] {display:none;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item] > div.date {display:none;}
 
 
-div[data-module=webhard] ul[data-role=tree] {position:relative; list-style:none;}
+/**
+ * 탐색기 > 파일목록(미리보기) > 항목(선택시, 클립보드에 있을시)
+ */
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item].selected > i.icon {border:2px solid #0089f0; overflow:hidden; padding-bottom:calc(100% - 4px);}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item].selected > i.icon > div.preview {width:calc(100% + 2px); height:calc(100% + 2px); margin:-1px;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item].selected > i.icon > div[data-role=progress] {width:calc(100% - 18px); left:8px; bottom:8px;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item].selected > div.name > span {background:#0089f0; color:#fff;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item].selected > div.size {color:#0089f0;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item].clipboard > i.icon {border:2px solid #0089f0; overflow:hidden; padding-bottom:calc(100% - 4px);}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item].clipboard > i.icon > div.preview {width:calc(100% + 2px); height:calc(100% + 2px); margin:-1px;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item].clipboard > i.icon > div[data-role=progress] {width:calc(100% - 18px); left:8px; bottom:8px;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item].clipboard > div.name > span {background:#0089f0; color:#fff;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item].clipboard > div.size {color:#0089f0;}
 
+/**
+ * 탐색기 > 파일목록(미리보기) > 항목(드래그시)
+ */
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item].dragging > i.icon {background-color:#fff !important;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item].dragging > div.name > span {background:#0089f0 !important; color:#fff;}
 
+/**
+ * 탐색기 > 파일목록(미리보기) > 항목(드롭시)
+ */
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item].droppable > i.icon {background-color:#008bea;}
+div[data-module=webhard][data-viewmode=card] div[data-role=file-item].droppable > div.name > span {background:#0089f0; color:#fff;}
 
-div[data-module=webhard] div[data-role=files] {height:100%; position:relative; overflow-y:scroll; background:green;}
-div[data-module=webhard] div[data-role=file-item] > div.owner > div.photo {background-repeat:no-repeat; background-size:cover; background-position:50% 50%;}
+/**
+ * 탐색기 > 파일목록(목록보기) > 항목
+ */
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] {display:table; width:100%; height:30px; table-layout:fixed; padding:3px;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > * {display:table-cell; vertical-align:middle;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > div.checkbox {width:30px; text-align:center; vertical-align:middle;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > div.checkbox > button {background-color:#fff;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > div.favorite {width:20px; vertical-align:middle;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > i.icon {width:30px; height:30px; background-size:20px auto; font-size:0; padding-bottom:0px;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > i.icon > div.preview {width:26px; height:26px; margin:2px;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > i.icon > div[data-role=progress] {display:none;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > div.name {width:100%;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > div.name > span {display:inline-block; padding-left:5px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > div.size {width:101px; text-align:right; position:relative;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > div.size > span {display:inline-block; padding-right:5px;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > div.size > div[data-role=progress] {margin:0 auto;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > div.size > div[data-role=progress] + span {display:none;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > div.date {width:181px; text-align:left;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > div.date > span {display:inline-block; padding-left:5px;}
 
-div[data-module=webhard] *[data-role=selection] {width:10px; height:10px; position:absolute; z-index:1000; box-sizing:border-box;}
+/**
+ * 탐색기 > 파일목록(목록보기) > 항목(선택시, 클립보드에 있을시)
+ */
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item].selected {background:#006cd3; color:#fff;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item].selected.favorite > div.favorite > button {color:#fff;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item]:hover {background:#f4f4f4;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item].selected:hover {background:#006cd3; color:#fff;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item].droppable {background:#008bea !important; color:#fff !important;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item].clipboard {background:#006cd3; color:#fff;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item].clipboard.favorite > div.favorite > button {color:#fff;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item]:hover {background:#f4f4f4;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item].clipboard:hover {background:#006cd3; color:#fff;}
 
+/**
+ * 탐색기 > 파일목록(목록보기) > 항목(드롭시)
+ */
+div[data-module=webhard][data-viewmode=grid] div[data-role=file-item].droppable {background:#008bea !important; color:#fff !important;}
 
+/**
+ * 탐색기 > 파일목록(공통) > 드래그항목
+ */
 div[data-module=webhard] div[data-role=dragging] {position:absolute; top:0; left:0; z-index:10000; width:100px; height:140px;}
 div[data-module=webhard] div[data-role=dragging] > i {display:block; width:100px; height:100px; background-color:rgba(0,137,240,0.4); position:relative;}
-div[data-module=webhard] div[data-role=dragging] > label {max-height:40px; line-height:20px; text-align:center;}
+div[data-module=webhard] div[data-role=dragging] > i > b {display:block; min-width:10px; height:20px; border-radius:10px; color:#fff; line-height:20px; padding:0px 5px; background:#f44336; font-style:normal; position:absolute; right:-5px; top:-5px; text-align:center;}
+div[data-module=webhard] div[data-role=dragging] > label {display:block; max-height:40px; overflow:hidden; margin-top:10px; text-align:center;}
+div[data-module=webhard] div[data-role=dragging] > label > span {display:inline-block; line-height:16px; text-align:center; color:#fff; background:#0089f0; border-radius:3px; padding:4px;}
 
+/**
+ * 상세정보
+ */
+div[data-module=webhard] aside[data-role=detail] {display:none;}
+div[data-module=webhard] aside[data-role=detail] > div[data-role=panel] {width:100%; height:100%; overflow:hidden; box-sizing:border-box;}
 
-
-#ModuleWebhardDragToggle {position:absolute; top:0; left:0; border:1px solid #000; padding:8px; font-size:12px; cursor:default !important; z-index:10000; background:#fff;}
-#ModuleWebhardUploadList {position:absolute; bottom:0px; right:10px; z-index:100; display:none;}
-
-#ModuleWebfolderContextMenu {list-style:none; position:absolute; z-index:100;}
-
-div[data-module=webhard][data-mode=upload] *[data-role=explorer] {display:none;}
-div[data-module=webhard][data-mode=upload] *[data-role=sidemenu] > div[data-role=resizer] {display:none;}
-
-
-
+/**
+ * 드랍존
+ */
+div[data-module=webhard] div[data-role=dropzone] {position:absolute; top:0; left:0; width:100%; height:100%; z-index:100000;}
 
 /**
  * 모달창 특수항목 스타일
@@ -81,7 +208,6 @@ div[data-role=modal] ul[data-role=duplicated] > li {height:24px; line-height:24p
 div[data-role=modal] ul[data-role=duplicated] > li.title {height:30px; line-height:30px; border-bottom:1px solid #d9dadb; margin-bottom:8px;}
 div[data-role=modal] ul[data-role=duplicated] > li.item > span.size {color:#666; float:right;}
 
-
 /**
  * 파일아이콘
  */
@@ -89,19 +215,172 @@ div[data-module=webhard] i.icon {display:inline-block; background-repeat:no-repe
 div[data-module=webhard] i.icon.small {}
 
 div[data-module=webhard] i.icon[data-type=folder] {background-image:url(../images/icon_large_folder.png);}
+div[data-module=webhard] i.icon[data-type=document] {background-image:url(../images/icon_large_document.png);}
+div[data-module=webhard] i.icon[data-type=image] {background-image:url(../images/icon_large_image.png);}
+div[data-module=webhard] i.icon[data-type=video] {background-image:url(../images/icon_large_video.png);}
+div[data-module=webhard] i.icon[data-type=audio] {background-image:url(../images/icon_large_audio.png);}
+div[data-module=webhard] i.icon[data-type=archive] {background-image:url(../images/icon_large_archive.png);}
+
+div[data-module=webhard] i.icon[data-extension^=ppt] {background-image:url(../images/icon_large_ppt.png);}
+div[data-module=webhard] i.icon[data-extension^=doc] {background-image:url(../images/icon_large_doc.png);}
+div[data-module=webhard] i.icon[data-extension^=xls] {background-image:url(../images/icon_large_xls.png);}
+div[data-module=webhard] i.icon[data-extension^=hwp] {background-image:url(../images/icon_large_hwp.png);}
+div[data-module=webhard] i.icon[data-extension^=pdf] {background-image:url(../images/icon_large_pdf.png);}
+
+@media (max-width:767px) {
+	/**
+	 * 네비바
+	 */
+	div[data-module=webhard] nav[data-role=sidebar] > div[data-role=resizer] {display:none;}
+	div[data-module=webhard] nav[data-role=sidebar] div[data-role=slide_title] {display:block;}
+	div[data-module=webhard] nav[data-role=sidebar] div[data-role=folder_title] {display:none;}
+	
+	/**
+	 * 탐색기 > 툴바
+	 */
+	div[data-module=webhard] div[data-role=toolbar] {overflow:visible;}
+	div[data-module=webhard] div[data-role=toolbar] > button[data-action=tree] {display:inline-block;}
+	div[data-module=webhard] div[data-role=toolbar] > h4[data-role=title] {display:inline-block;}
+	div[data-module=webhard] div[data-role=toolbar] > div[data-role=menu] {position:absolute; left:0px; bottom:0px; z-index:20000; display:none;}
+	div[data-module=webhard] div[data-role=toolbar] > button[data-action=menu] {display:inline-block;}
+	
+	/**
+	 * 탐색기 > 헤더바
+	 */
+	div[data-module=webhard] div[data-role=headerbar] > button[data-action=sort] {display:block;}
+	div[data-module=webhard] div[data-role=headerbar] > ul {position:absolute; z-index:20000;}
+	
+	/**
+	 * 탐색기 > 파일목록(미리보기) > 항목
+	 */
+	div[data-module=webhard][data-viewmode=card] div[data-role=files] {padding:5px 0px 5px 5px;}
+	div[data-module=webhard][data-viewmode=card] div[data-role=file-item] {padding:5px 5px 5px 0px; margin:0px; width:33.3333%; height:auto; box-sizing:border-box;}
+}
+
+@media (max-width:400px) {
+	div[data-module=webhard][data-viewmode=card] div[data-role=file-item] {width:50%;}
+}
 
 
-div[data-module=webhard] i.icon {display:inline-block; background-image:url(../images/icon_type_etc.png);}
-div[data-module=webhard] i.icon.folder {background-image:url(../images/icon_type_folder.png);}
-div[data-module=webhard] i.icon.document {background-image:url(../images/icon_type_document.png);}
-div[data-module=webhard] i.icon.image {background-image:url(../images/icon_type_image.png);}
-div[data-module=webhard] i.icon.archive {background-image:url(../images/icon_type_archive.png);}
 
-div[data-module=webhard] i.icon.pptx {background-image:url(../images/icon_type_ppt.png);}
-div[data-module=webhard] i.icon.ppt {background-image:url(../images/icon_type_ppt.png);}
-div[data-module=webhard] i.icon.doc {background-image:url(../images/icon_type_doc.png);}
-div[data-module=webhard] i.icon.docx {background-image:url(../images/icon_type_doc.png);}
-div[data-module=webhard] i.icon.xls {background-image:url(../images/icon_type_xls.png);}
-div[data-module=webhard] i.icon.xlsx {background-image:url(../images/icon_type_xls.png);}
-div[data-module=webhard] i.icon.hwp {background-image:url(../images/icon_type_hwp.png);}
-div[data-module=webhard] i.icon.pdf {background-image:url(../images/icon_type_pdf.png);}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * 모바일 > 컨테이너
+ */
+div[data-module=webhard][data-mobile=TRUE] button[data-action=add] {display:block; background:#2196f3; color:#fff; width:50px; height:50px; border-radius:50%; border:0px; box-shadow:1px 1px 2px rgba(0,0,0,0.3); position:absolute; right:20px; bottom:20px; z-index:10;}
+div[data-module=webhard][data-mobile=TRUE] button[data-action=add] > i {display:block; width:50px; height:50px; line-height:50px; font-family:moimz; speak:none; font-style:normal; font-weight:400; font-variant:normal; text-transform:none; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-align:center; font-size:24px;}
+div[data-module=webhard][data-mobile=TRUE] button[data-action=add] > i:before {content:"\eb00";}
+
+
+/**
+ * 모바일 > 네비바
+ */
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] > div[data-role=resizer] {display:none;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] button[data-tag=root] {display:block;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] div[data-role=slide_title] {display:block;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] div[data-role=folder_title] {display:none;}
+
+/**
+ * 모바일 > 네비바 > 폴더트리
+ */
+div[data-module=webhard][data-mobile=TRUE] ul[data-role=tree] {display:none;}
+
+
+/**
+ * 모바일 > 탐색기 > 툴바
+ */
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] {overflow:visible;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > button[data-action=tree] {display:inline-block;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > h4[data-role=title] {display:inline-block;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=menu] {position:absolute; left:0px; bottom:0px; z-index:20000; display:none;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > button[data-action=menu] {display:inline-block;}
+
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=menu] > button[data-action=download] {display:none;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=menu] > button[data-action=delete] {display:none;}
+
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=menu][data-mode=default] > button[data-action=create] {display:none;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=menu][data-mode=default] > button[data-action=upload] {display:none;}
+
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=menu][data-mode=add] > button {display:none;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=menu][data-mode=add] > span.split {display:none;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=menu][data-mode=add] > button[data-action=create] {display:block;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=menu][data-mode=add] > button[data-action=upload] {display:block;}
+
+/**
+ * 모바일 > 탐색기 > 파일목록(공통) > 항목
+ */
+div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.checkbox {display:none;}
+
+div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.checkbox > button {width:100%; height:100%; background:rgba(0,0,0,0.3); border-radius:50%; border:0;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.checkbox > button:before {content:"\eb10"; color:#fff; font-size:24px;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.favorite {display:none;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.more {display:block;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.more > button {font-family:moimz; speak:none; font-style:normal; font-weight:400; font-variant:normal; text-transform:none; line-height:1; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-align:center; color:#666; font-size:20px; text-align:center; width:100%; height:100%;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.more > button:before {content:"\eb11";}
+div[data-module=webhard][data-mobile=TRUE][data-mobile-select=TRUE] div[data-role=file-item] > div.checkbox {display:block;}
+div[data-module=webhard][data-mobile=TRUE][data-mobile-select=TRUE] div[data-role=file-item].selected > div.checkbox > button {background:rgba(27, 180, 238,0.8);}
+
+/**
+ * 모바일 > 탐색기 > 파일목록(미리보기)
+ */
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=files] {padding:5px 0px 5px 5px;}
+
+/**
+ * 모바일 > 탐색기 > 파일목록(미리보기) > 항목
+ */
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] {padding:5px 5px 5px 0px; margin:0px; width:20%; height:auto; box-sizing:border-box;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] > div.checkbox {position:absolute; width:60px; height:60px; top:calc(50% - 55px); left:calc(50% - 32.5px); z-index:10;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] {padding-top:0px; padding-bottom:5px;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] > i.icon {margin:0px; background-position-y:calc(50% - 20px);}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] > i.icon > div[data-role=progress] {width:calc(100% - 20px); position:absolute; left:9px; bottom:50px; z-index:20;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] > div.name {position:absolute; width:calc(100% - 5px); height:40px; left:0; bottom:9px; background:#f4f4f4; box-sizing:border-box; text-align:left; border:1px solid #e8e9eb; z-index:10;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] > div.name > span {width:calc(100% - 40px); height:40px; line-height:40px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; padding:0px 10px; text-align:left; font-size:13px; box-sizing:border-box; border-radius:0;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] > div.size {display:none;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] > div.more {width:38px; height:38px; position:absolute; right:7px; bottom:10px; z-index:20;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item].selected > div.name {background:#0089f0; border-color:#0089f0;}
+
+/**
+ * 모바일 > 탐색기 > 파일목록(목록보기) > 항목
+ */
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] {display:block; font-size:0; position:relative; height:60px; padding:12px 55px 0px 65px; box-sizing:border-box;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > div.checkbox {width:40px; height:40px; position:absolute; top:10px; left:10px; z-index:10;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > div.favorite {display:none;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > i.icon {width:60px; height:60px; background-size:35px auto; position:absolute; top:0; left:0;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > i.icon > div.preview {width:50px; height:50px; margin:5px;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > i.icon > div[data-role=progress] {width:48px; position:absolute; top:45px; left:5px;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > div.name {display:block; width:100%; height:18px; font-size:13px; line-height:18px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; padding:0px;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > div.name > span {padding:0px;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > div.size {display:inline-block; font-size:12px; color:#666; width:auto; height:12px; line-height:12px; margin-top:5px;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > div.size > span {display:none;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item].favorite > div.size:before {font-family:moimz; content:"\ec05"; margin-right:5px;}
+
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > div.date {display:inline-block; font-size:12px; color:#666; width:auto; height:12px; line-height:12px;  margin-top:5px;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > div.date > span {padding:0px;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > div.size > div[data-role=progress] {display:none;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > div.more {width:50px; height:60px; position:absolute; top:0; right:0;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > div.more > button {line-height:60px;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item].selected {background:#e5e5e5; color:#222;}
+
+@media (max-width:991px) {
+	div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] {width:25%;}
+}
+
+@media (max-width:767px) {
+	div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] {width:33.3333%;}
+}
+
+@media (max-width:400px) {
+	div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] {width:50%;}
+}
