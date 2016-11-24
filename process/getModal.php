@@ -21,7 +21,6 @@ $modal = Request('modal');
  * 새폴더 생성 모달
  */
 if ($modal == 'create') {
-	$templet = Request('templet');
 	$parent = Request('parent');
 	
 	if ($this->checkFolderPermission($parent,'W') == true) {
@@ -31,5 +30,16 @@ if ($modal == 'create') {
 		$results->success = false;
 		$results->message = $this->getErrorText('FORBIDDEN').$this->checkFolderPermission($parent);
 	}
+}
+
+/**
+ * 업로드 취소 모달
+ */
+if ($modal == 'cancel') {
+	$type = Request('type');
+	$idx = Request('idx');
+	
+	$results->success = true;
+	$results->modalHtml = $this->getCancelModal($type,$idx);
 }
 ?>
