@@ -49,6 +49,12 @@ class ModuleWebhard {
 	private $shareds = array();
 	private $deleteds = array();
 	
+	/**
+	 * 미리보기가 가능한 파일 확장자
+	 * 문서의 경우 구글드라이브 API를 이용하여 미리보기를 처리한다.
+	 */
+	public $enablePreview = array('jpg','gif','png','jpeg','ppt','pptx','rtf','doc','docx','xls','xlsx','pdf');
+	
 	
 	/**
 	 * class 선언
@@ -410,6 +416,49 @@ class ModuleWebhard {
 	}
 	
 	/**
+	 * 모듈 외부컨테이너를 가져온다.
+	 *
+	 * @param string $container 컨테이너명
+	 * @param object $idx 고유값
+	 * @return string $html 컨텍스트 HTML / FileBytes 파일 바이너리
+	 */
+	function getContainer($container,$idx=null) {
+		/**
+		 * 파일에 직접 접근하는 컨테이너의 경우
+		 */
+		if (in_array($container,array('origin','thumbnail','view','download')) == true) {
+			$idx = explode('/',$idx);
+			$share = null;
+			if (count($idx) == 3) list($idx,$share,$name) = $idx;
+			elseif (count($idx) == 2) list($idx,$name) = $idx;
+			else $this->IM->printError('NOT_FOUND_FILE');
+			
+			return $this->fileRead($idx,$container,$share);
+		}
+		
+		switch ($container) {
+			case 'origin' :
+				
+			break;
+		}
+		
+		
+		//	return $this->readFile();
+		$header = $this->getHeader($container);
+		$footer = $this->getFooter($container);
+		
+		/**
+		 * 모듈 헤더/푸터와 iModule 코어 헤더/푸터를 합친다.
+		 * 사이트템플릿은 제거한다.
+		 */
+		$this->IM->removeTemplet();
+		$footer = $footer.PHP_EOL.$this->IM->getFooter();
+		$header = $this->IM->getHeader().PHP_EOL.$header;
+		
+		return $header.PHP_EOL.$footer;
+	}
+	
+	/**
 	 * 컨텍스트 헤더를 가져온다.
 	 *
 	 * @param string $context 컨테이너 종류
@@ -488,11 +537,13 @@ class ModuleWebhard {
 			$pathIdx = implode('/',$pathIdxs);
 		}
 		
+		$this->IM->loadLanguage('module','webhard',$this->getModule()->getPackage()->language);
 		$header = PHP_EOL.'<form id="ModuleWebhardExplorerForm">'.PHP_EOL;
+		$header.= '<input type="file" id="ModuleWebhardUploadInput" multiple style="display:none;">'.PHP_EOL;
 		$header.= '<input type="hidden" name="view" value="'.$view.'">'.PHP_EOL;
 		$header.= '<input type="hidden" name="idx" value="'.$idx.'">'.PHP_EOL;
-		$header.= '<input type="text" name="path" value="'.$path.'">'.PHP_EOL;
-		$header.= '<input type="text" name="pathIdx" value="'.$pathIdx.'">'.PHP_EOL;
+		$header.= '<input type="hidden" name="path" value="'.$path.'">'.PHP_EOL;
+		$header.= '<input type="hidden" name="pathIdx" value="'.$pathIdx.'">'.PHP_EOL;
 		$header.= '<input type="hidden" name="templet" value="'.$this->getTemplet($configs)->getName().'">'.PHP_EOL;
 		$footer = PHP_EOL.'</form>'.PHP_EOL.'<script>Webhard.init();</script>'.PHP_EOL;
 		
@@ -514,9 +565,9 @@ class ModuleWebhard {
 	 *
 	 * @param int $parent 새 폴더를 생성할 폴더 고유번호
 	 * @return string $html 모달컨텍스트 HTML
+	 * @todo 언어셋
 	 */
 	function getCreateModal($parent) {
-		
 		$title = '새폴더 생성하기';
 		
 		$content = PHP_EOL;
@@ -525,6 +576,33 @@ class ModuleWebhard {
 		$content.= '<label>'.$this->getText('text/folder_name').'</label>';
 		$content.= '<div data-role="input"><input type="text" name="name"></div>';
 		
+		return $this->getTemplet()->getModal($title,$content);
+	}
+	
+	/**
+	 * 특정 액션 취소 모달 컨텍스트를 가져온다.
+	 *
+	 * @param string $type 취소타입
+	 * @param int $idx 고유번호
+	 * @return string $html 모달컨텍스트 HTML
+	 * @todo 언어셋
+	 */
+	function getCancelModal($type,$idx) {
+		$content = '<div data-role="message">';
+		
+		if ($type == 'upload') {
+			$title = '업로드 취소';
+			
+			if ($idx !== null && $this->getFile($idx) !== null) {
+				$file = $this->getFile($idx);
+				$content.= '<input type="hidden" name="idx" value="'.$file->idx.'">'.PHP_EOL;
+				$content.= $file->name.' 업로드를 취소하시겠습니까?<br>해당 파일은 휴지통으로 이동됩니다.';
+			} else {
+				$content.= '파일 업로드를 취소하시겠습니까?<br>업로드가 완료되지 않은 파일은 휴지통으로 이동됩니다.';
+			}
+		}
+		
+		$content.= '</div>';
 		
 		return $this->getTemplet()->getModal($title,$content);
 	}
@@ -599,7 +677,7 @@ class ModuleWebhard {
 			'<ul data-role="duplicated">',
 				'<li class="title">'.$this->getText('text/error_item').' : <b>'.$folder->name.'</b></li>',
 				'<li class="item"><b>'.$this->getText('text/origin_item').'</b> : <span data-role="time" data-moment="LLL" data-time="'.$duplicated->update_date.'"></span><span class="size">('.GetFileSize($duplicated->size).')</span></li>',
-				'<li class="item"><b>'.$this->getText('text/current_item').'</b> : <span data-role="time" data-moment="LLL" data-time="'.$folder->update_date.'"></span><span class="size">('.GetFileSize($duplicated->size).')</span></li>',
+				'<li class="item"><b>'.$this->getText('text/current_item').'</b> : <span data-role="time" data-moment="LLL" data-time="'.$folder->update_date.'"></span><span class="size">('.GetFileSize($folder->size).')</span></li>',
 			'</ul>'
 		);
 		
@@ -630,6 +708,142 @@ class ModuleWebhard {
 		$content.= '<div data-role="input"><label><input type="checkbox" name="continue">'.$this->getText('text/option_continue').'</label></div>';
 		
 		return $this->getTemplet()->getModal($title,$content,false,false,$buttons);
+	}
+	
+	/**
+	 * 항목 이동/복사시 대상폴더에 중복된 이름을 가진 파일을 확인하는 모달 컨텍스트를 가져온다.
+	 *
+	 * @param int $idx 에러가 발생한 객체순서
+	 * @param string $file 이동/복사되는 파일객체
+	 * @param object $duplicated 중복된 파일객체
+	 * @return string $html 모달컨텍스트 HTML
+	 */
+	function getFileDuplicatedOptionModal($idx,$file,$duplicated) {
+		$title = $this->getErrorText('CHECKED_DUPLICATED_ITEM');
+		
+		$content = PHP_EOL;
+		$content.= '<input type="hidden" name="idx" value="'.$idx.'">'.PHP_EOL;
+		$content.= '<input type="hidden" name="option" value="cancel">'.PHP_EOL;
+		
+		$content.= '<div class="text">';
+		$content.= $this->getText('text/confirm_duplicated');
+		
+		if ($duplicated->status == 'DRAFT') {
+			$duplicated->uploaded = is_file($this->getFilePath($duplicated->path)) == true ? filesize($this->getFilePath($duplicated->path)) : 0;
+		} else {
+			$duplicated->uploaded = $duplicated->size;
+		}
+		
+		$detail = array(
+			'<ul data-role="duplicated">',
+				'<li class="title">'.$this->getText('text/error_item').' : <b>'.$file->name.'</b></li>',
+				'<li class="item"><b>'.$this->getText('text/origin_item').'</b> : <span data-role="time" data-moment="LLL" data-time="'.$duplicated->update_date.'"></span><span class="size">('.GetFileSize($duplicated->uploaded).')</span></li>',
+				'<li class="item"><b>'.$this->getText('text/current_item').'</b> : <span data-role="time" data-moment="LLL" data-time="'.$file->update_date.'"></span><span class="size">('.GetFileSize($file->size).')</span></li>',
+			'</ul>'
+		);
+		
+		$content.= implode(PHP_EOL,$detail);
+		
+		
+		
+		
+		$buttons = array();
+		
+		$button = new stdClass();
+		$button->type = 'cancel';
+		$button->text = $this->getText('button/cancel');
+		$buttons[] = $button;
+		
+		if ($duplicated->creator == $this->IM->getModule('member')->getLogged() && $duplicated->status == 'DRAFT' && $file->size == $duplicated->size) {
+			$button = new stdClass();
+			$button->type = 'continue';
+			$button->class = 'submit';
+			$button->text = $this->getText('button/continue');
+			$buttons[] = $button;
+		} else {
+			$button = new stdClass();
+			$button->type = 'rename';
+			$button->class = 'submit';
+			$button->text = $this->getText('button/rename');
+			$buttons[] = $button;
+		}
+		
+		$button = new stdClass();
+		$button->type = 'replace';
+		$button->class = 'danger';
+		$button->text = $this->getText('button/replace');
+		$buttons[] = $button;
+		
+		$content.= '</div>';
+		
+		$content.= '<div data-role="input"><label><input type="checkbox" name="continue">'.$this->getText('text/option_continue').'</label></div>';
+		
+		return $this->getTemplet()->getModal($title,$content,false,false,$buttons);
+	}
+	
+	/**
+	 * 웹하드 파일이 저장되는 루트폴더를 반환한다.
+	 *
+	 * @return string $rootPath
+	 */
+	function getRootPath() {
+		if (is_dir($this->IM->getAttachmentPath().'/webhard') == false) {
+			mkdir($this->IM->getAttachmentPath().'/webhard');
+			chmod($this->IM->getAttachmentPath().'/webhard',0707);
+		}
+		return $this->IM->getAttachmentPath().'/webhard';
+	}
+	
+	/**
+	 * 임시파일을 업로드할 경로를 반환한다.
+	 *
+	 * @return string $tempPath
+	 */
+	function getTempPath($isFullPath=false) {
+		$folder = 'temp';
+		if (is_dir($this->getRootPath().'/'.$folder) == false) {
+			mkdir($this->getRootPath().'/'.$folder);
+			chmod($this->getRootPath().'/'.$folder,0707);
+		}
+		
+		if ($isFullPath == true) $folder = $this->getRootPath().'/'.$folder;
+		return $folder;
+	}
+	
+	/**
+	 * 현시점의 파일이 보관되는 경로를 반환한다.
+	 *
+	 * @return string $currentPath
+	 */
+	function getCurrentPath($isFullPath=false) {
+		$folder = date('Ym');
+		if (is_dir($this->getRootPath().'/'.$folder) == false) {
+			mkdir($this->getRootPath().'/'.$folder);
+			chmod($this->getRootPath().'/'.$folder,0707);
+		}
+		
+		if ($isFullPath == true) $folder = $this->IM->getAttachmentPath().'/'.$folder;
+		return $folder;
+	}
+	
+	/**
+	 * 파일의 상대경로로 파일의 절대경로를 반환한다.
+	 *
+	 * @param string $origin 파일의 상대경로
+	 * @return string $path 파일의 절대경로
+	 */
+	function getFilePath($origin) {
+		if (substr($origin,0,1) == '/') $path = $origin;
+		else $path = $this->getRootPath().'/'.$origin;
+		
+		$values = new stdClass();
+		$values->origin = $path;
+		$values->path = $path;
+		
+		$this->IM->fireEvent('afterGetData','webhard','filepath',$values);
+		$path = $values->path;
+		
+		return $path;
 	}
 	
 	/**
@@ -675,6 +889,34 @@ class ModuleWebhard {
 		}
 		
 		return $this->folders[$idx];
+	}
+	
+	/**
+	 * 폴더의 메타정보를 가져온다.
+	 *
+	 * @param int $idx 폴더고유번호 / object $folder 폴더정보
+	 * @return object $meta 파일메타정보
+	 */
+	function getFolderMeta($idx) {
+		if (is_object($idx) == true) {
+			$folder = $idx;
+		} else {
+			$folder = $this->getFolder();
+		}
+		
+		$meta = new stdClass();
+		$meta->type = 'folder';
+		$meta->idx = $folder->idx;
+		$meta->folder = $folder->parent;
+		$meta->path = $this->getFolderPath($folder->idx);
+		$meta->permission = $this->getFolderPermission($folder->idx);
+		$meta->name = $folder->name;
+		$meta->uploaded = $folder->size;
+		$meta->size = $folder->size;
+		$meta->date = $folder->update_date;
+		$meta->status = 'PUBLISHED';
+		
+		return $meta;
 	}
 	
 	/**
@@ -826,18 +1068,89 @@ class ModuleWebhard {
 	}
 	
 	/**
-	 * 폴더정보를 가져온다.
+	 * 파일정보를 가져온다.
 	 *
-	 * @param int $idx 폴더 고유정보
-	 * @return object $folder 폴더정보
+	 * @param int $idx 파일 고유정보
+	 * @return object $file 파일정보
 	 */
 	function getFile($idx) {
 		$file = $this->db()->select($this->table->file)->where('idx',$idx)->getOne();
 		if ($file == null) return null;
 		
+		$file->is_shared = $file->is_shared == 'TRUE';
 		$file->is_delete = $file->is_delete == 'TRUE';
+		$file->is_lock = $file->is_lock == 'TRUE';
 		
 		return $file;
+	}
+	
+	/**
+	 * 파일의 메타정보를 가져온다.
+	 *
+	 * @param int $idx 파일고유번호 / object $file 파일정보
+	 * @return object $meta 파일메타정보
+	 */
+	function getFileMeta($idx) {
+		if (is_object($idx) == true) {
+			$file = $idx;
+		} else {
+			$file = $this->getFile($idx);
+		}
+		
+		$meta = new stdClass();
+		$meta->type = 'file';
+		$meta->idx = $file->idx;
+		$meta->folder = $file->folder;
+		$meta->path = $this->getFolderPath($file->folder).'/'.$file->name;
+		$meta->permission = $this->getFilePermission($file->idx);
+		$meta->name = $file->name;
+		$meta->uploaded = $file->status == 'DRAFT' ? (is_file($this->getFilePath($file->path)) == true ? filesize($this->getFilePath($file->path)) : 0) : $file->size;
+		$meta->size = $file->size;
+		$meta->date = $file->update_date;
+		$meta->status = $file->status;
+		
+		$meta->filetype = $file->type;
+		$meta->mime = $file->mime;
+		$meta->extension = strtolower(pathinfo($file->name,PATHINFO_EXTENSION));
+		
+		if ($meta->filetype == 'image') {
+			$meta->width = $file->width;
+			$meta->height = $file->height;
+		}
+		
+		if (in_array($meta->extension,$this->enablePreview) == true) {
+			$meta->preview = $this->getFileUrl($file,'thumbnail');
+		}
+		
+		return $meta;
+	}
+	
+	/**
+	 * 파일의 URL 을 가져온다.
+	 * 공유정보가 없을 경우 파일소유자만이 해당 URL 로 파일에 접근할 수 있다.
+	 *
+	 * @param int $idx 파일고유번호
+	 * @param string $view 종류 (origin, view, thumbnail)
+	 * @param string $share 공유해시
+	 * @param boolean $isFullUrl 전체 URL 포함여부 (기본값 : false)
+	 */
+	function getFileUrl($idx,$view='view',$share=null,$isFullUrl=false) {
+		if (is_object($idx) == true) {
+			$file = $idx;
+		} else {
+			$file = $this->getFile($idx);
+		}
+		
+		if ($file == null) {
+			return null;
+		} else {
+//			$code = array('idx'=>$file->idx);
+//			if ($share != null) $code['share'] = $share;
+//			$code = Encoder(json_encode($code));
+
+			$idx = $file->idx.'/'.$file->name;
+			return $this->IM->getModuleUrl('webhard','thumbnail',$idx,$isFullUrl);
+		}
 	}
 	
 	/**
@@ -849,6 +1162,7 @@ class ModuleWebhard {
 	function getFilePermission($idx) {
 		$file = $this->getFile($idx);
 		
+		if ($file == null) return '';
 		if ($file->owner == $this->IM->getModule('member')->getLogged()) return 'RWD';
 		if ($this->IM->getModule('member')->isLogged() == false) return '';
 		return $this->getFolderPermission($file->folder);
@@ -1094,6 +1408,77 @@ class ModuleWebhard {
 		}
 	}
 	
+	/**
+	 * 파일 업로드 완료처리를 한다.
+	 *
+	 * @param int $idx 파일고유번호
+	 */
+	function fileUpload($idx) {
+		$mAttachment = $this->IM->getModule('attachment');
+		$file = $this->db()->select($this->table->file)->where('idx',$idx)->getOne();
+		$filePath = $this->getFilePath($file->path);
+		
+		$insert = array();
+		$insert['mime'] = $mAttachment->getFileMime($filePath);
+		$insert['type'] = $mAttachment->getFileType($insert['mime']);
+		$hash = md5_file($filePath);
+		$insert['path'] = $this->getCurrentPath().'/'.$hash.'.'.base_convert(microtime(true)*10000,10,32).'.'.$mAttachment->getFileExtension($file->name,$filePath);
+		$insert['width'] = 0;
+		$insert['height'] = 0;
+		if ($insert['type'] == 'image') {
+			$check = getimagesize($filePath);
+			$insert['width'] = $check[0];
+			$insert['height'] = $check[1];
+		}
+		$insert['status'] = 'PUBLISHED';
+
+		rename($filePath,$this->getRootPath().'/'.$insert['path']);
+		$this->db()->update($this->table->file,$insert)->where('idx',$idx)->execute();
+		
+		return $this->getFile($idx);
+	}
+	
+	/**
+	 * 파일을 읽는다.
+	 *
+	 * @param int $idx 파일고유번호
+	 * @param string $type 파일을 읽어올 종류 (origin, view, thumbnail, download)
+	 * @param string $share 공유코드 (옵션)
+	 * @return FileBytes 파일스트림
+	 */
+	function fileRead($idx,$type,$share=null) {
+		$file = $this->getFile($idx);
+		if ($file == null || $file->status == 'DRAFT') {
+			$this->printError('NOT_FOUND_FILE');
+		}
+		
+		/**
+		 * 공유코드가 없을경우, 현재 로그인한 유저의 파일의 접근권한을 확인한다.
+		 */
+		if ($share == null) {
+			if ($this->checkFilePermission($idx,'R') == true) {
+				header('Content-Type:'.$file->mime);
+				header('Content-Length:'.$file->size);
+				
+				/**
+				 * 파일을 바로 다운로드 받기 위한 헤더 설정
+				 */
+				if ($type == 'download') {
+					header("Pragma: no-cache");
+					header("Expires: 0");
+					header('Content-Disposition: attachment; filename="'.$file->name.'"; filename*=UTF-8\'\''.rawurlencode($file->name));
+					header("Content-Transfer-Encoding: binary");
+					header("Connection: Keep-Alive");
+				}
+				
+				//http://portfolio.moimz.link/ko/module/webhard/thumbnail/8/2.jpg
+				readfile($this->getFilePath($file->path));
+				exit;
+			} else {
+				$this->IM->printError('FORBIDDEN');
+			}
+		}
+	}
 	/**
 	 * 대상파일을 다른폴더로 복사한다.
 	 *
