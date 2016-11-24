@@ -50,9 +50,13 @@ if ($folder == null || $this->checkFolderDeleted($target) == true) {
 					break;
 				}
 				
-				if ($select[$i]->mode == 'move' && $folder->parent == $target) {
-					$results->modalHtml = $this->getMoveErrorModal($i,$select[$i]->mode,'NOT_ALLOWED_MOVE_TO_SAME_PARENT',$folder);
-					break;
+				if ($folder->parent == $target) {
+					if ($select[$i]->mode == 'move') {
+						$results->modalHtml = $this->getMoveErrorModal($i,$select[$i]->mode,'NOT_ALLOWED_MOVE_TO_SAME_PARENT',$folder);
+						break;
+					} else {
+						$folder->name = $this->getEscapeDuplicatedFolderName($target,$folder->name);
+					}
 				}
 				
 				if ($select[$i]->mode == 'move') {
@@ -147,9 +151,13 @@ if ($folder == null || $this->checkFolderDeleted($target) == true) {
 					break;
 				}
 				
-				if ($select[$i]->mode == 'move' && $file->folder == $target) {
-					$results->modalHtml = $this->getMoveErrorModal($i,$select[$i]->mode,'NOT_ALLOWED_MOVE_TO_SAME_PARENT',$file);
-					break;
+				if ($file->folder == $target) {
+					if ($select[$i]->mode == 'move') {
+						$results->modalHtml = $this->getMoveErrorModal($i,$select[$i]->mode,'NOT_ALLOWED_MOVE_TO_SAME_PARENT',$file);
+						break;
+					} else {
+						$file->name = $this->getEscapeDuplicatedFileName($target,$file->name);
+					}
 				}
 				
 				if ($select[$i]->mode == 'move') {
