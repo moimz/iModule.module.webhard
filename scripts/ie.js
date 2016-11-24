@@ -9,23 +9,6 @@ $(document).ready(function() {
 		return rv;
 	}
 	
-	var fixedHeight = function() {
-		var $container = $("div[data-module=webhard]");
-		$container.hide();
-		var $form = $("#ModuleWebhardExplorerForm");
-		var height = $container.parent().height();
-		console.log(height);
-		$container.height(height);
-		$form.height(height);
-		$container.show();
-
-		var $panel = $("div[data-role=panel]");
-		$panel.hide();
-		console.log($("section[data-role=container]").height());
-		$panel.height($("section[data-role=container]").height());
-		$panel.show();
-	};
-	
 	if (getInternetExplorerVersion() <= 9) {
 		var originalAddClassMethod = jQuery.fn.addClass;
 		var originalRemoveClassMethod = jQuery.fn.removeClass;
@@ -48,10 +31,4 @@ $(document).ready(function() {
 			return result;
 		};
 	}
-	
-	fixedHeight();
-	
-	$(window).on("resize",function() {
-		fixedHeight();
-	});
 });
