@@ -18,6 +18,8 @@ var Webhard = {
 	$headerbar:null,
 	$files:null,
 	$detail:null,
+	$upload:null,
+	$message:null,
 	templet:null,
 	/**
 	 * 웹하드 탐색기를 초기화한다.
@@ -32,7 +34,18 @@ var Webhard = {
 		Webhard.$headerbar = $("*[data-role=headerbar]",Webhard.$container);
 		Webhard.$files = $("div[data-role=files]",Webhard.$explorer);
 		Webhard.$detail = $("*[data-role=detail]",Webhard.$container);
+		Webhard.$upload = $("div[data-role=upload]",Webhard.$container);
+		Webhard.$message = $("div[data-role=message]",Webhard.$message);
 		Webhard.templet = $("input[name=templet]",Webhard.$form).val();
+		
+		if (iModule.isMobile == true) {
+			Webhard.$container.attr("data-mobile","TRUE");
+			Webhard.$container.attr("data-mobile-select","FALSE");
+			$("body").preventZoom();
+		} else {
+			Webhard.$container.attr("data-mobile","FALSE");
+			Webhard.$container.attr("data-mobile-select","FALSE");
+		}
 		
 		Webhard.loading(true);
 		Webhard.ui.init();
@@ -47,6 +60,19 @@ var Webhard = {
 		 * 단축키 이벤트 정의
 		 */
 		$(document).on("keydown",function(e) {
+			if (e.keyCode == 27) {
+				if (Webhard.ui.dragType != null) {
+					Webhard.ui.dragItem.removeClass("dragging");
+					if (Webhard.ui.dropZone != null) Webhard.ui.dropZone.removeClass("droppable");
+					$("body").removeClass("dragging").removeClass("resizing");
+					Webhard.ui.dragType = null;
+					Webhard.ui.dragStart = null;
+					Webhard.ui.dragItem = null;
+					Webhard.ui.dropZone = null;
+					$("div[data-role=dragging]",Webhard.$container).remove();
+				}
+			}
+			
 			if ($("#iModuleWindowDisabled").is(":visible") == false) {
 				if ((e.ctrlKey == true || e.metaKey == true) && e.altKey == false) {
 					if (e.keyCode == 65) {
@@ -87,36 +113,6 @@ var Webhard = {
 			console.log("메뉴 숨기기!");
 		});
 		
-		$(document).on("dragenter",function(e) {
-			if (e.originalEvent.dataTransfer.files && e.originalEvent.dataTransfer.files.length > 0) {
-				if ($("*[data-role=files]",$("#ModuleWebhardContainer")).attr("data-droppable") == "true") {
-					$("#ModuleWebhardDropHelp").show();
-				}
-			}
-		});
-		
-		$("#ModuleWebhardDropHelp").on("dragleave",function(e) {
-			Webhard.upload.dragFiles = null;
-			$("#ModuleWebhardDropHelp").hide();
-		});
-		
-		$(document).on("drop",function(e) {
-			//console.log("drop!!!!",e.originalEvent.dataTransfer.items[0].webkitGetAsEntry(),e.originalEvent.dataTransfer.types,e.originalEvent);
-
-			if (e.originalEvent.dataTransfer.files && e.originalEvent.dataTransfer.files.length > 0) {
-				if ($("*[data-role=files]",$("#ModuleWebhardContainer")).attr("data-droppable") == "true") {
-					Webhard.upload.select(e.originalEvent.dataTransfer.files);
-					$("#ModuleWebhardDropHelp").hide();
-				}
-			}
-			
-			e.stopPropagation();
-			e.preventDefault();
-		});
-		
-		$(document).on("dragover",function(e) {
-		});
-		
 		/**
 		 * popstate 이벤트처리 (브라우저의 뒤로가기 / 앞으로가기시 해당하는 폴더내용을 불러온다.
 		 */
@@ -139,6 +135,13 @@ var Webhard = {
 			$("div[data-role=loading]").show();
 		} else {
 			$("div[data-role=loading]").hide();
+		}
+	},
+	disable:function(is_loading) {
+		if (is_loading == true) {
+			$("div[data-role=disable]").show();
+		} else {
+			$("div[data-role=disable]").hide();
 		}
 	},
 	/**
@@ -170,7 +173,7 @@ var Webhard = {
 			});
 			
 			$("button[data-action=toggle-tree]",Webhard.$container).addClass("opened");
-			Webhard.$tree.show();
+//			Webhard.$tree.show();
 			
 			/**
 			 * 폴더트리 토글버튼
@@ -205,11 +208,264 @@ var Webhard = {
 			});
 			
 			/**
+			 * 네비 토클버튼
+			 */
+			$("button[data-action=tree]",Webhard.$container).on("click",function() {
+				if (Webhard.explorer.getView() == "folder" && Webhard.explorer.getFolderIdx() != Webhard.explorer.getFolderPathIdx().split("/").shift()) {
+					Webhard.explorer.up();
+				} else {
+					Webhard.ui.tree();
+				}
+			});
+			
+			/**
+			 * 메뉴 토클버튼
+			 */
+			$("button[data-action=menu]",Webhard.$container).on("click",function() {
+				Webhard.ui.menu();
+			});
+			
+			$("button[data-action=add]",Webhard.$container).on("click",function() {
+				Webhard.ui.menu(null,"add");
+			});
+			
+			/**
+			 * 정렬 토클버튼
+			 */
+			$("button[data-action=sort]",Webhard.$container).on("click",function() {
+				Webhard.ui.sort();
+			});
+			
+			/**
+			 * 전체선택
+			 */
+			$("button[data-action=select]",Webhard.$headerbar).on("click",function() {
+				if ($(this).hasClass("selected") == true) {
+					Webhard.explorer.unselectAll();
+					Webhard.$container.attr("data-mobile-select","FALSE");
+				} else {
+					Webhard.explorer.selectAll();
+					if (iModule.isMobile == true) Webhard.$container.attr("data-mobile-select","TRUE");
+				}
+			});
+			
+			/**
+			 * 중요파일만 보기
+			 */
+			$("button[data-action=favorite]",Webhard.$headerbar).on("click",function() {
+				Webhard.explorer.toggleFavorite(!$(this).hasClass("selected"));
+			});
+			
+			/**
 			 * 새폴더 만들기
 			 */
 			$("button[data-action=create]",Webhard.$container).on("click",function() {
 				Webhard.explorer.create();
 			});
+			
+			/**
+			 * 업로드
+			 */
+			$("button[data-action=upload]",Webhard.$container).on("click",function(e) {
+				$("#ModuleWebhardUploadInput").trigger("click");
+			});
+			
+			$("#ModuleWebhardUploadInput").on("change",function(e) {
+				console.log("change",e.target.files.length);
+				if (e.target.files.length > 0) {
+					Webhard.upload.select(e.target.files);
+				}
+				Webhard.ui.menu(false,$("div[data-role=menu]",Webhard.$toolbar).attr("data-mode"));
+			});
+			
+			/**
+			 * 확장메뉴 닫기
+			 */
+			$("div[data-role=menu] button[data-action]",Webhard.$toolbar).on("click",function() {
+				if (iModule.isMobile == true && $(this).attr("data-action") == "upload") return;
+				Webhard.ui.menu(false,$("div[data-role=menu]",Webhard.$toolbar).attr("data-mode"));
+			});
+			
+			/**
+			 * 정렬메뉴 닫기
+			 */
+			$("div[data-role=headerbar] button[data-sort]",Webhard.$toolbar).on("click",function() {
+				Webhard.ui.sort(false);
+			});
+			
+			/**
+			 * 모바일 선택모드
+			 */
+			$("button[data-action=select_on]",Webhard.$container).on("click",function() {
+				Webhard.$container.attr("data-mobile-select","TRUE");
+			});
+			
+			$("button[data-action=select_all]",Webhard.$container).on("click",function() {
+				Webhard.$container.attr("data-mobile-select","TRUE");
+				Webhard.explorer.selectAll();
+			});
+			
+			$("button[data-action=select_off]",Webhard.$container).on("click",function() {
+				Webhard.$container.attr("data-mobile-select","FALSE");
+				Webhard.explorer.unselectAll();
+			});
+			
+			/**
+			 * 모드변경버튼
+			 */
+			$("button[data-mode]",Webhard.$container).on("click",function() {
+				Webhard.$container.attr("data-viewmode",$(this).attr("data-mode"));
+				Webhard.explorer.update();
+			});
+			
+			/**
+			 * 정렬버튼
+			 */
+			$("button[data-sort]",Webhard.$container).on("click",function() {
+				if (Webhard.$container.attr("data-sort") == $(this).attr("data-sort")) {
+					Webhard.$container.attr("data-dir",Webhard.$container.attr("data-dir") == "asc" ? "desc" : "asc");
+				} else {
+					Webhard.$container.attr("data-sort",$(this).attr("data-sort"));
+					Webhard.$container.attr("data-dir",$(this).attr("data-sort") == "date" ? "desc" : "asc");
+				}
+				
+				Webhard.explorer.sort(Webhard.$container.attr("data-sort"),Webhard.$container.attr("data-dir"));
+			});
+			
+			/**
+			 * 업로드목록
+			 */
+			$("button[data-action]",Webhard.$upload).on("click",function() {
+				var action = $(this).attr("data-action");
+				
+				if (action == "toggle") {
+					Webhard.upload.toggle();
+				}
+				
+				if (action == "close") {
+					Webhard.upload.close();
+				}
+			});
+			
+			/**
+			 * 파일 드래그 앤 드랍 업로드
+			 */
+			$(document).on("dragenter",function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				
+				if ($("div[data-role=dropzone]",Webhard.$container).length == 0) {
+					var $dropzone = $("<div>").attr("data-role","dropzone");
+					Webhard.$container.append($dropzone);
+					
+					if (Webhard.upload.isUploadable == true) {
+						if (Webhard.explorer.getView() == "folder") {
+							Webhard.$files.addClass("droppable");
+							Webhard.message.show("info",Webhard.getText("text/drop").replace("{FOLDER}",Webhard.explorer.getFolderPath().split("/").pop()),0);
+							
+							$dropzone.on("dragleave",function(e) {
+								Webhard.message.hide();
+								Webhard.$files.removeClass("droppable");
+								$(this).remove();
+							});
+						} else {
+							Webhard.message.show("error",Webhard.getErrorText('INVALID_UPLOAD_FOLDER'),0);
+						}
+					} else {
+						Webhard.message.show("error",Webhard.getErrorText('UPLOAD_NOT_AVAILABLE'),0);
+					}
+				}
+			});
+			
+			$(document).on("dragover",function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+			});
+			
+			$(document).on("drop",function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				
+				Webhard.$files.removeClass("droppable");
+				Webhard.message.hide();
+				$("div[data-role=dropzone]",Webhard.$container).remove();
+				
+				if (Webhard.upload.isUploadable == true) {
+					if (Webhard.explorer.getView() == "folder") {
+						if (e.originalEvent.dataTransfer.files && e.originalEvent.dataTransfer.files.length > 0) {
+							var count = 0;
+							var files = e.originalEvent.dataTransfer.files;
+							var isFolderDetected = false;
+							
+							var checkingFolder = function() {
+								if (count == files.length) {
+									if (isFolderDetected == true) {
+										Webhard.message.show("error",Webhard.getErrorText('NOT_ALLOWED_FOLDER_UPLOAD'),5,false);
+									} else {
+										Webhard.upload.select(files);
+									}
+								}
+							};
+							
+							for (var i=0, loop=e.originalEvent.dataTransfer.files.length;i<loop;i++) {
+								try {
+									var reader = new FileReader();
+									reader.onload = function (e) {
+										count++;
+										checkingFolder();
+									};
+									reader.onerror = function (e) {
+										count++;
+										isFolderDetected = true;
+										checkingFolder();
+									};
+									reader.readAsText(e.originalEvent.dataTransfer.files[i]);
+								} catch(e) {}
+							}
+						}
+					} else {
+						Webhard.message.show("error",Webhard.getErrorText('INVALID_UPLOAD_FOLDER'),5,false);
+					}
+				} else {
+					Webhard.message.show("error",Webhard.getErrorText('UPLOAD_NOT_AVAILABLE'),5,false);
+				}
+			});
+			
+			$(window).on("resize",function() {
+				if (Webhard.$sidebar.is(":visible") == false && $(window).width() >= 768) {
+					Webhard.$sidebar.css("display","").css("left","").css("right","").css("top","").css("bottom","");
+				}
+				
+				if ($("ul",Webhard.$headerbar).is(":visible") == false && $(window).width() >= 768) {
+					$("ul",Webhard.$headerbar).css("display","").css("left","").css("right","").css("top","").css("bottom","");
+				}
+				
+				if ($("div[data-role=menu]",Webhard.$toolbar).is(":visible") == false && $(window).width() >= 768) {
+					$("div[data-role=menu]",Webhard.$toolbar).css("display","").css("left","").css("right","").css("top","").css("bottom","");
+				}
+				
+				Webhard.ui.initSize();
+			});
+			
+			
+			Webhard.ui.update();
+			Webhard.ui.initSize();
+			$("div[data-role=button]",Webhard.$toolbar).attr("data-init","TRUE");
+		},
+		/**
+		 * 탐색기 크기조절
+		 */
+		initSize:function() {
+			Webhard.$container.hide();
+			var height = Webhard.$container.parent().height();
+			Webhard.$container.height(height);
+			Webhard.$form.height(height);
+			Webhard.$container.show();
+	
+			var $panel = $("div[data-role=panel]");
+			$panel.hide();
+			$panel.height($("section[data-role=container]",Webhard.$container).height());
+			$panel.show();
 		},
 		/**
 		 * 탐색기 경로가 바뀔때마다 UI를 업데이트한다.
@@ -222,7 +478,7 @@ var Webhard = {
 			var $path = $("span[data-role=path]",$nbreadcrumb);
 			$path.empty();
 			
-			var $root = $("<button>").attr("type","button").html(path[0]);
+			var $root = $("<button>").attr("type","button").addClass("root").html(path[0]);
 			$root.on("click",function() {
 				Webhard.explorer.folder(pathIdx[0],path[0]);
 			});
@@ -232,11 +488,134 @@ var Webhard = {
 				for (var i=1, loop=path.length;i<loop;i++) {
 					$path.append($("<i>").addClass("fa fa-angle-right"));
 					var $folder = $("<button>").attr("type","button").attr("data-idx",pathIdx[i]).attr("data-path",path[i]).html(path[i]);
+					
+					if (i < loop - 1) $folder.addClass("parent");
+					else $folder.addClass("current");
+					
 					$folder.on("click",function() {
 						Webhard.explorer.folder($(this).attr("data-idx"),$(this).attr("data-path"));
 					});
 					$path.append($folder);
 				}
+				
+				$("h4[data-role=title]",Webhard.$toolbar).html(Webhard.explorer.getFolderPath().split("/").pop());
+				$("button[data-action=restore]",Webhard.$toolbar).hide();
+				$("button[data-action=remove]",Webhard.$toolbar).hide();
+				$("button[data-action=empty]",Webhard.$toolbar).hide();
+				
+				if (Webhard.explorer.getFolderIdx() == Webhard.explorer.getFolderPathIdx().split("/").shift()) {
+					$("button[data-action=tree]",Webhard.$toolbar).addClass("home").removeClass("back");
+				} else {
+					$("button[data-action=tree]",Webhard.$toolbar).addClass("back").removeClass("home");
+				}
+			}
+			
+			if (iModule.isMobile == false) {
+				$("button[data-action=select_on]",Webhard.$toolbar).hide();
+				$("button[data-action=select_all]",Webhard.$toolbar).hide();
+				$("button[data-action=select_off]",Webhard.$toolbar).hide();
+			} else {
+				if (Webhard.explorer.getSelected().length == 0) {
+					$("button[data-action=select_off]",Webhard.$toolbar).hide();
+				} else {
+					$("button[data-action=select_on]",Webhard.$toolbar).hide();
+				}
+			}
+			
+			var $menu = $("div[data-role=menu]",Webhard.$toolbar);
+			var $item = $("*:visible",$menu);
+			
+			var $prev = $item.eq(0);
+			if ($prev.is("span.split") == true) $prev.hide();
+			for (var i=1, loop=$item.length;i<loop;i++) {
+				if ($prev.is("span.split") == true && $item.eq(i).is("span.split") == true) {
+					$item.eq(i).hide();
+					continue;
+				}
+				$prev = $item.eq(i);
+			}
+		},
+		/**
+		 * 모바일 디바이스에서 좌측 폴더메뉴 토글
+		 */
+		tree:function(visible) {
+			var visible = visible === undefined ? Webhard.$sidebar.is(":visible") !== true : visible;
+			
+			Webhard.disable(visible);
+			
+			if (visible == true) {
+				Webhard.$sidebar.show();
+				Webhard.$sidebar.css("left",-Webhard.$sidebar.width());
+				Webhard.$sidebar.animate({left:0},"fast");
+			} else {
+				Webhard.$sidebar.animate({left:Webhard.$sidebar.width() * -1},"fast",function() {
+					Webhard.$sidebar.hide();
+				});
+			}
+		},
+		/**
+		 * 모바일 디바이스에서 툴바버튼
+		 */
+		menu:function(visible,mode) {
+			var $menu = $("div[data-role=menu]",Webhard.$toolbar);
+			if ($menu.css("display") == "inline-block") return;
+			
+			var visible = visible === undefined || visible === null ? $menu.is(":visible") !== true : visible;
+			var mode = mode === undefined ? "default" : "add";
+			
+			$menu.attr("data-mode",mode);
+			
+			if (visible == true) {
+				Webhard.disable(true);
+				$menu.show();
+				Webhard.ui.update();
+				var height = $menu.height();
+				$menu.css("height",0);
+				$menu.animate({height:height},"fast");
+				
+				$("div[data-role=disable]",Webhard.$container).on("click",function() {
+					Webhard.ui.menu(false,mode);
+				});
+				
+				if (mode == "add") {
+					$("button[data-action=add] > i",Webhard.$container).rotate({endDeg:45,persist:true,duration:0.3});
+				}
+			} else {
+				$("div[data-role=disable]",Webhard.$container).off("click");
+				$menu.animate({height:0},"fast",function() {
+					Webhard.disable(false);
+					$menu.height("auto");
+					$menu.hide();
+				});
+				
+				$("button[data-action=add] > i",Webhard.$container).rotate({endDeg:0,persist:true,duration:0.3});
+			}
+		},
+		/**
+		 * 정렬메뉴
+		 */
+		sort:function(visible) {
+			var $menu = $("ul",Webhard.$headerbar);
+			
+			var visible = visible === undefined || visible === null ? $menu.is(":visible") !== true : visible;
+			
+			if (visible == true) {
+				Webhard.disable(true);
+				$menu.show();
+				var height = $menu.height();
+				$menu.css("height",0);
+				$menu.animate({height:height},"fast");
+				
+				$("div[data-role=disable]",Webhard.$container).on("click",function() {
+					Webhard.ui.sort(false);
+				});
+			} else {
+				$("div[data-role=disable]",Webhard.$container).off("click");
+				$menu.animate({height:0},"fast",function() {
+					Webhard.disable(false);
+					$menu.height("auto");
+					$menu.hide();
+				});
 			}
 		},
 		/**
@@ -281,9 +660,45 @@ var Webhard = {
 				Webhard.ui.dragItem = $object;
 			}
 			
-			console.log($object.attr("data-role"));
-			Webhard.ui.dragStart = {x:e.clientX,y:e.clientY};
+			/**
+			 * 탐색기 항목 처리
+			 */
+			if ($object.attr("data-role") == "file-item") {
+				Webhard.ui.dragType = "explorer";
+				Webhard.ui.dragItem = $object;
+			}
 			
+			/**
+			 * 탐색기 파일 선택
+			 */
+			if ($object.attr("data-role") == "files") {
+				Webhard.ui.dragType = "select";
+				
+				/**
+				 * 드래그 파일선택을 위한 클릭지점 기록
+				 */
+				var x = e.clientX - Webhard.$files.offset().left;
+				var y = e.clientY - Webhard.$files.offset().top + Webhard.$files.scrollTop();
+				
+				/**
+				 * 기존의 선택레이어가 있을 경우 제거하고, 새로운 선택레이어를 생성한다.
+				 */
+				$("div[data-role=selection]",Webhard.$files).remove();
+				Webhard.$files.append($("<div>").attr("data-role","selection"));
+				
+				$("div[data-role=selection]",Webhard.$files).hide();
+				Webhard.explorer.selectStart = {x:x,y:y};
+				$("body").addClass("noSelect");
+				
+				Webhard.ui.dragItem = $("div[data-role=selection]",Webhard.$files);
+				
+				/**
+				 * 선택된 항목을 리셋한다.
+				 */
+				Webhard.explorer.unselectAll();
+			}
+			
+			Webhard.ui.dragStart = {x:e.clientX,y:e.clientY};
 		},
 		/**
 		 * 드래그 이벤트
@@ -298,14 +713,14 @@ var Webhard = {
 			 */
 			if (Webhard.ui.dragType == "resize") {
 				var left = mouse.x - Webhard.ui.dragStart.x + Webhard.$sidebar.width();
+				left = left > Webhard.$sidebar.width() + Webhard.$explorer.width() - 600 ? Webhard.$sidebar.width() + Webhard.$explorer.width() - 600 : left;
 				left = left < 200 ? 200 : left;
-				left = left > 400 ? 400 : left;
 				
-				Webhard.ui.dragItem.css("right","").css("left",left);//$("*[data-role=resizer]").css("right",null).css("left",left);
+				Webhard.ui.dragItem.css("right","").css("left",left);
 			}
 			
 			/**
-			 * 폴더트리 / 탐색기 항목 처리
+			 * 폴더트리 / 탐색기 드래그 항목 처리
 			 */
 			if (Webhard.ui.dragType == "tree" || Webhard.ui.dragType == "explorer") {
 				/**
@@ -318,22 +733,86 @@ var Webhard = {
 					/**
 					 * 드래그중인 항목 안내
 					 */
-					$("div[data-role=dragging]",Webhard.$container).remove();
-					var $dragging = $("<div>").attr("data-role","dragging");
-					var $icon = $("<i>").addClass("icon").addClass("small");
-					$icon.attr("data-type",Webhard.ui.dragItem.eq(0).attr("data-type")).attr("data-extension",Webhard.ui.dragItem.eq(0).attr("data-extension"));
-					$dragging.append($icon);
-					
-					var $label = $("<label>").html(Webhard.ui.dragItem.eq(0).data("name") + Webhard.ui.dragItem.eq(0).data("name")+Webhard.ui.dragItem.eq(0).data("name")+Webhard.ui.dragItem.eq(0).data("name")+Webhard.ui.dragItem.eq(0).data("name"));
-					$dragging.append($label);
-					var limit = Webhard.ui.dragItem.eq(0).data("name").length;
-					while ($label.height() > 40) {
-						limit = limit - 1;
-						$label.html(Webhard.substring(Webhard.ui.dragItem.eq(0).data("name"),limit));
+					if ($("div[data-role=dragging]",Webhard.$container).length == 0) {
+						var $dragging = $("<div>").attr("data-role","dragging");
+						var $icon = $("<i>").addClass("icon").addClass("small");
+						$icon.attr("data-type",Webhard.ui.dragItem.eq(0).attr("data-type")).attr("data-extension",Webhard.ui.dragItem.eq(0).attr("data-extension"));
+						var $badge = $("<b>").addClass("badge").html(Webhard.ui.dragItem.length);
+						$icon.append($badge);
+						
+						$dragging.append($icon);
+						
+						
+						
+						var $label = $("<label>");
+						var $text = $("<span>").html(Webhard.ui.dragItem.eq(0).data("name"));
+						$label.append($text);
+						$dragging.append($label);
+						Webhard.$container.append($dragging);
+						
+						var limit = Webhard.ui.dragItem.eq(0).data("name").length;
+						while ($text.height() > 40) {
+							limit = limit - 1;
+							$text.html(Webhard.substring(Webhard.ui.dragItem.eq(0).data("name"),limit));
+						}
 					}
 					
-					Webhard.$container.append($dragging);
-					$dragging.css("top",mouse.y + 5).css("left",mouse.x + 5);
+					var $dragging = $("div[data-role=dragging]",Webhard.$container);
+					$dragging.css("top",mouse.y + 5 - Webhard.$container.position().top).css("left",mouse.x + 5 - Webhard.$container.position().left);
+					
+					Webhard.explorer.lastClick = null;
+				}
+			}
+			
+			/**
+			 * 탐색기 파일 선택
+			 */
+			if (Webhard.ui.dragType == "select") {
+				var x = Math.max(0,Math.min(mouse.x - Webhard.$files.offset().left,Webhard.$files.prop("clientWidth")));
+				var y = Math.max(0,Math.min(mouse.y - Webhard.$files.offset().top + Webhard.$files.scrollTop(),Webhard.$files.prop("scrollHeight")));
+				
+				var $selection = $("div[data-role=selection]",Webhard.$files);
+				
+				if (Webhard.mode == "select") $("div[data-role=file-item][data-type=folder]").addClass("unselect");
+				
+				if (Math.abs(x - Webhard.explorer.selectStart.x) > 2 || Math.abs(y - Webhard.explorer.selectStart.y) > 2) {
+					$selection.outerWidth(Math.abs(x - Webhard.explorer.selectStart.x)).outerHeight(Math.abs(y - Webhard.explorer.selectStart.y));
+					
+					if (x > Webhard.explorer.selectStart.x) {
+						$selection.css("left",Webhard.explorer.selectStart.x);
+						xStart = Webhard.explorer.selectStart.x;
+					} else {
+						$selection.css("left",x);
+						xStart = x;
+					}
+					
+					if (y > Webhard.explorer.selectStart.y) {
+						$selection.css("top",Webhard.explorer.selectStart.y);
+					} else {
+						$selection.css("top",y);
+					}
+					
+					var selector = $selection.get(0).getBoundingClientRect();
+					$("div[data-role=file-item]",Webhard.$files).each(function() {
+						var item = this.getBoundingClientRect();
+						var collided = !(selector.right < item.left || selector.left > item.right || selector.bottom < item.top || selector.top > item.bottom);
+						
+						if (collided == true && $(this).hasClass("selected") == false) {
+							if (Webhard.mode == "webhard" || $(this).attr("data-type") == "file") Webhard.explorer.select($(this).attr("data-type"),$(this).attr("data-idx"));
+						} else if (collided == false && $(this).hasClass("selected") == true) {
+							Webhard.explorer.unselect($(this).attr("data-type"),$(this).attr("data-idx"));
+						}
+					});
+					
+					var currentScroll = Webhard.$files.scrollTop();
+					if (mouse.y > Webhard.$files.offset().top + Webhard.$files.prop("clientHeight") - 50) {
+						Webhard.$files.scrollTop(currentScroll + 3);
+					} else if (mouse.y < Webhard.$files.offset().top + 50) {
+						Webhard.$files.scrollTop(currentScroll - 3);
+					}
+					$selection.show();
+				} else {
+					$selection.hide();
 				}
 			}
 		},
@@ -346,24 +825,65 @@ var Webhard = {
 			var mouse = {x:e.clientX,y:e.clientY};
 			
 			/**
+			 * 마우스가 위치한 폴더를 자동으로 열기 위한 타이머 해제
+			 */
+			if (Webhard.ui.autoExpandTimer != null) {
+				clearTimeout(Webhard.ui.autoExpandTimer);
+				Webhard.ui.autoExpandTimer = null;
+			}
+			
+			/**
 			 * 리사이즈바 처리
 			 */
 			if (Webhard.ui.dragType == "resize") {
 				var width = mouse.x - Webhard.ui.dragStart.x + Webhard.$sidebar.width();
+				width = width > Webhard.$sidebar.width() + Webhard.$explorer.width() - 600 ? Webhard.$sidebar.width() + Webhard.$explorer.width() - 600 : width;
 				width = width < 200 ? 200 : width;
-				width = width > 400 ? 400 : width;
 				
 				Webhard.$sidebar.css("width",width);
 				Webhard.ui.dragItem.css("right","").css("left","");
 			}
 			
+			/**
+			 * 탐색기 파일 선택
+			 */
+			if (Webhard.ui.dragType == "select") {
+				Webhard.ui.dragItem.remove();
+			}
+			
+			/**
+			 * 파일이동 처리
+			 */
+			if ((Webhard.ui.dragType == "tree" || Webhard.ui.dragType == "explorer") && Webhard.ui.dropZone != null) {
+				if (Webhard.ui.dropZone.attr("data-role") == "files") {
+					var target = Webhard.explorer.getFolderIdx();
+				} else {
+					var target = Webhard.ui.dropZone.attr("data-idx");
+				}
+				
+				var items = [];
+				for (var i=0, loop=Webhard.ui.dragItem.length;i<loop;i++) {
+					var item = {};
+					item.type = Webhard.ui.dragItem.eq(i).attr("data-type");
+					item.idx = Webhard.ui.dragItem.eq(i).attr("data-idx");
+					item.name = Webhard.ui.dragItem.eq(i).data("name");
+					items.push(item);
+				}
+				
+				if (target && items.length > 0) {
+					Webhard.explorer.move(target,items,"move");
+				}
+			}
+			
 			if (Webhard.ui.dragType != null) {
 				Webhard.ui.dragItem.removeClass("dragging");
+				if (Webhard.ui.dropZone != null) Webhard.ui.dropZone.removeClass("droppable");
 				$("body").removeClass("dragging").removeClass("resizing");
 				Webhard.ui.dragType = null;
 				Webhard.ui.dragStart = null;
 				Webhard.ui.dragItem = null;
 				Webhard.ui.dropZone = null;
+				$("div[data-role=dragging]",Webhard.$container).remove();
 				
 				e.preventDefault();
 				e.stopImmediatePropagation();
@@ -372,14 +892,118 @@ var Webhard = {
 		/**
 		 * 드랍존 설정
 		 */
+		autoExpandTimer:null,
 		mouseover:function($object,e) {
+			/**
+			 * 폴더트리 루트처리
+			 */
+			if ($object.attr("data-role") == "tree-root") {
+				/**
+				 * 마우스가 위치한 폴더를 자동으로 열기 위한 타이머 해제
+				 */
+				if (Webhard.ui.autoExpandTimer != null) {
+					clearTimeout(Webhard.ui.autoExpandTimer);
+					Webhard.ui.autoExpandTimer = null;
+				}
+				
+				/**
+				 * 항목이 드래그중일 경우에만 처리
+				 */
+				if (Webhard.ui.dragType == "tree" || Webhard.ui.dragType == "explorer") {
+					/**
+					 * 항목이 이동중이라면 동작중지
+					 */
+					if ($object.hasClass("dragging") == true) return;
+					
+					/**
+					 * 드랍존 설정
+					 */
+					$object.addClass("droppable");
+					Webhard.ui.dropZone = $object;
+				}
+			}
 			
+			/**
+			 * 폴더트리 / 탐색기 드래그 항목 처리
+			 */
+			if ($object.attr("data-role") == "tree-item" || $object.attr("data-role") == "file-item") {
+				/**
+				 * 마우스가 위치한 폴더를 자동으로 열기 위한 타이머 해제
+				 */
+				if (Webhard.ui.autoExpandTimer != null) {
+					clearTimeout(Webhard.ui.autoExpandTimer);
+					Webhard.ui.autoExpandTimer = null;
+				}
+				
+				/**
+				 * 항목이 드래그중일 경우에만 처리
+				 */
+				if (Webhard.ui.dragType == "tree" || Webhard.ui.dragType == "explorer") {
+					/**
+					 * 항목이 이동중이라면 동작중지
+					 */
+					if ($object.hasClass("dragging") == true) return;
+					
+					/**
+					 * 드랍존 설정
+					 */
+					$object.addClass("droppable");
+					Webhard.ui.dropZone = $object;
+					
+					/**
+					 * 마우스가 위치한 폴더를 자동으로 열기 위한 타이머 설정
+					 */
+					if ($object.attr("data-role") == "tree-item") {
+						if ($object.parent().attr("data-children") == "TRUE" && $object.parent().hasClass("opened") == false) {
+							Webhard.ui.autoExpandTimer = setTimeout(Webhard.tree.autoExpand,1500,$object.attr("data-idx"));
+						}
+					}
+					
+					if ($object.attr("data-role") == "file-item") {
+						Webhard.ui.autoExpandTimer = setTimeout(Webhard.explorer.autoExpand,1500,$object.attr("data-idx"));
+					}
+					
+					e.stopPropagation();
+				}
+			}
+			
+			/**
+			 * 파일목록 드랍존설정
+			 */
+			if ($object.attr("data-role") == "files") {
+				/**
+				 * 마우스가 위치한 폴더를 자동으로 열기 위한 타이머 해제
+				 */
+				if (Webhard.ui.autoExpandTimer != null) {
+					clearTimeout(Webhard.ui.autoExpandTimer);
+					Webhard.ui.autoExpandTimer = null;
+				}
+				
+				/**
+				 * 드래그중인 항목이 있고, 드래그 시작폴더위치와 현재 위치가 다른경우
+				 */
+				if ((Webhard.ui.dragType == "tree" || Webhard.ui.dragType == "explorer") && Webhard.ui.dragItem.eq(0).data("folder") != Webhard.explorer.getFolderIdx()) {
+					$object.addClass("droppable");
+					Webhard.ui.dropZone = $object;
+				}
+			}
 		},
 		/**
 		 * 드랍존 설정
 		 */
 		mouseout:function(e) {
+			/**
+			 * 마우스가 위치한 폴더를 자동으로 열기 위한 타이머 해제
+			 */
+			if (Webhard.ui.autoExpandTimer != null) {
+				clearTimeout(Webhard.ui.autoExpandTimer);
+				Webhard.ui.autoExpandTimer = null;
+			}
 			
+			if (Webhard.ui.dropZone != null) {
+				Webhard.ui.dropZone.removeClass("droppable");
+				Webhard.ui.dropZone = null;
+			}
 		}
 	},
 	/**
@@ -397,17 +1021,19 @@ var Webhard = {
 			var rootIdx = Webhard.explorer.getFolderPathIdx().split("/").shift();
 			$root.attr("data-depth",0).attr("data-idx",rootIdx).attr("data-path",root);
 			
+			$("> div",$root).attr("data-role","tree-root").attr("data-idx",rootIdx);
+			
 			/**
 			 * 루트폴더 드랍존 설정
 			 */
-			$root.on("mouseover",function(e) {
+			$("> div",$root).on("mouseover",function(e) {
 				Webhard.ui.mouseover($(this),e);
 			});
 			
 			/**
 			 * 루트폴더 드랍존 해지
 			 */
-			$root.on("mouseout",function(e) {
+			$("> div",$root).on("mouseout",function(e) {
 				Webhard.ui.mouseout($(this),e);
 			});
 			
@@ -513,7 +1139,6 @@ var Webhard = {
 				}
 			} else {
 				var current = idx.shift();
-				console.log("펼쳐라!",current);
 				if ($("li[data-idx="+current+"]",Webhard.$tree).hasClass("opened") == true) {
 					Webhard.tree.expandAll(idx,callback);
 				} else {
@@ -566,6 +1191,7 @@ var Webhard = {
 				$item.attr("data-extension","");
 				$item.attr("data-permission",tree[i].permission);
 				$item.data("name",tree[i].name);
+				$item.data("folder",tree[i].parent);
 				
 				/**
 				 * 아이템에 마우스 이벤트가 일어났을 때
@@ -586,7 +1212,7 @@ var Webhard = {
 				 * 폴더 드랍존 해제
 				 */
 				$item.on("mouseout",function(e) {
-					Webhard.tree.mouseout($(this),e);
+					Webhard.ui.mouseout($(this),e);
 				});
 				
 				$item.on("contextmenu",function(e) {
@@ -620,7 +1246,6 @@ var Webhard = {
 				$title.append($name);
 				
 				$title.on("click",function() {
-					console.log("title click");
 					var $parent = $(this).parent().parent();
 					Webhard.explorer.folder($parent.attr("data-idx"),$parent.attr("data-path"));
 				});
@@ -633,85 +1258,13 @@ var Webhard = {
 			$parent.append($tree);
 		},
 		/**
-		 * 항목 드래그
-		 */
-		dragStart:null,
-		dragItem:null,
-		/**
-		 * 항목 이동중 나타날 메세지
-		 *
-		 * @param Event e 마우스이벤트
-		 * @todo 디자인 변경 / 언어셋적용
-		 */
-		dragMove:function(e) {
-			if (Math.abs(Webhard.tree.dragStart.x - e.clientX) > 5 || Math.abs(Webhard.tree.dragStart.y - e.clientY) > 5) {
-				if ($("#ModuleWebhardDragToggle").length == 0) {
-					$("body").append($("<div>").attr("id","ModuleWebhardDragToggle"));
-				}
-				
-				/**
-				 * @todo 이동가능한 항목이냐?
-				 */
-				var $toggle = $("#ModuleWebhardDragToggle");
-				Webhard.tree.dragItem.removeClass("opened").addClass("moving");
-				$("ul",Webhard.tree.dragItem.parent()).remove();
-				$toggle.html($("span",Webhard.tree.dragItem).text()+" 이동중...");
-				$toggle.css("top",e.clientY + 5).css("left",e.clientX + 5);
-			}
-		},
-		/**
-		 * 드래그가 완료되었을때
-		 *
-		 * @param Event e 마우스이벤트
-		 */
-		dragEnd:function(e) {
-			/**
-			 * 자동이동이 대기중일때 타이머를 제거한다.
-			 */
-			if (Webhard.tree.autoExpandTimer != null) {
-				clearTimeout(Webhard.tree.autoExpandTimer);
-				Webhard.tree.autoExpandTimer = null;
-				$("div[data-role=tree-item]").removeClass("droppable");
-			}
-			
-			$("body").removeClass("droppable").removeClass("noSelect").removeClass("noDrop");
-			Webhard.tree.dragItem.attr("data-droppable","true");
-			
-			if (Webhard.tree.dropZone == null || Webhard.tree.dropZone.attr("data-permission").indexOf("W") == -1) {
-				if ($("#ModuleWebhardDragToggle").length == 1) {
-					var top = Webhard.$tree.offset().top + Webhard.tree.dragItem.position().top;
-					var left = Webhard.$tree.offset().left + Webhard.tree.dragItem.position().left;
-					
-					$("#ModuleWebhardDragToggle").animate({top:top,left:left,opacity:0},"slow",function() {
-						$("#ModuleWebhardDragToggle").remove();
-					});
-				}
-				
-				Webhard.tree.dragItem.removeClass("moving");
-				Webhard.tree.dragItem = null;
-			} else {
-				if (Webhard.folder.dragItem != null) {
-					Webhard.folder.move(Webhard.tree.dropZone.attr("data-idx"),Webhard.folder.dragItem);
-				} else if (Webhard.tree.dragItem != null) {
-					Webhard.folder.move(Webhard.tree.dropZone.attr("data-idx"),Webhard.tree.dragItem);
-				}
-				$("#ModuleWebhardDragToggle").remove();
-				Webhard.tree.dragItem = null;
-				Webhard.tree.dropZone = null;
-			}
-		},
-		/**
-		 * 자동 이동 (마우스 드래그 상태에서 폴더위에 마우스를 올려두면 자동으로 해당 폴더 내부로 들어간다.
-		 */
-		autoExpandTimer:null,
-		/**
 		 * 항목 드래그 중 같은 폴더위에 마우스가 8초 이상 위치하고 있으면, 해당 폴더로 이동한다.
 		 */
 		autoExpand:function(idx,count) {
 			var count = count ? count : 0;
-			if (count == 0 && Webhard.tree.autoExpandTimer != null) {
-				clearTimeout(Webhard.tree.autoExpandTimer);
-				Webhard.tree.autoExpandTimer = null;
+			if (count == 0 && Webhard.ui.autoExpandTimer != null) {
+				clearTimeout(Webhard.ui.autoExpandTimer);
+				Webhard.ui.autoExpandTimer = null;
 				$("div[data-role=tree-item]").removeClass("droppable");
 			}
 			var $treeItem = $("div[data-role=tree-item][data-idx="+idx+"]",Webhard.$tree);
@@ -724,59 +1277,8 @@ var Webhard = {
 			if (count == 8) {
 				Webhard.tree.expand(idx);
 			} else {
-				Webhard.tree.autoExpandTimer = setTimeout(Webhard.tree.autoExpand,100,idx,++count);
+				Webhard.ui.autoExpandTimer = setTimeout(Webhard.tree.autoExpand,100,idx,++count);
 			}
-		},
-		/**
-		 * 폴더 항목에 마우스를 올렸을 경우
-		 *
-		 * @param object $item 마우스가 올라간 항목 $(DOM)객체
-		 */
-		mouseover:function($item) {
-			/**
-			 * 탐색기나 폴더트리에서 드래그중인 항목이 있다면
-			 */
-			if (Webhard.tree.dragItem != null || Webhard.explorer.dragItem != null) {
-				$item.addClass("droppable");
-				
-				/**
-				 * 해당폴더를 자동으로 열기위한 타이머 설정
-				 */
-				if (Webhard.tree.autoExpandTimer != null) {
-					clearTimeout(Webhard.tree.autoExpandTimer);
-					Webhard.tree.autoExpandTimer = null;
-				}
-				
-				if ($item.parent().attr("data-children") == "TRUE") Webhard.tree.autoExpandTimer = setTimeout(Webhard.tree.autoExpand,1500,$item.attr("data-idx"));
-				
-				/**
-				 * 마우스가 위치한 곳이 선택된 항목위가 아니고, 마우스가 올라간 폴더에 쓰기 권한이 있을 경우
-				 */
-				if ($item.hasClass("moving") == false && $item.attr("data-permission").indexOf("W") > -1) {
-					$("body").removeClass("noDrop").addClass("droppable");
-					Webhard.explorer.dropZone = $item.attr("data-idx");
-				} else {
-					$("body").removeClass("droppable").addClass("noDrop");
-					Webhard.explorer.dropZone = null;
-				}
-			}
-		},
-		/**
-		 * 폴더 항목에서 마우스가 벗어났을 경우
-		 *
-		 * @param object $item 마우스가 벗어난 항목 $(DOM)객체
-		 */
-		mouseout:function($item) {
-			/**
-			 * 해당폴더를 자동으로 열기위한 타이머 해제
-			 */
-			if (Webhard.tree.autoExpandTimer != null) {
-				clearTimeout(Webhard.tree.autoExpandTimer);
-				Webhard.tree.autoExpandTimer = null;
-			}
-			
-			$item.removeClass("droppable").removeClass("noDrop");
-			Webhard.explorer.dropZone = null;
 		},
 		contextmenu:{
 			show:function(e,$item) {
@@ -870,62 +1372,28 @@ var Webhard = {
 			/**
 			 * 탐색기 보기 설정을 지정한다.
 			 */
-			Webhard.$explorer.attr("data-mode","card").attr("data-sort","name").attr("data-dir","asc");
+			Webhard.$container.attr("data-viewmode",(iModule.isMobile == true ? "card" : "card")).attr("data-sort","name").attr("data-dir","asc");
 			
 			/**
-			 * 파일목록에 마우스가 클릭되었을 때
+			 * 파일선택
 			 */
 			Webhard.$files.on("mousedown",function(e) {
 				if (e.button != 0) return;
-				
-				/**
-				 * 드래그 파일선택을 위한 클릭지점 기록
-				 */
-				var x = e.clientX - Webhard.$files.offset().left;
-				var y = e.clientY - Webhard.$files.offset().top + Webhard.$files.scrollTop();
-				
-				/**
-				 * 기존의 선택레이어가 있을 경우 제거하고, 새로운 선택레이얼르 생성한다.
-				 */
-				$("div[data-role=selection]",Webhard.$files).remove();
-				Webhard.$files.append($("<div>").attr("data-role","selection"));
-				
-				$("div[data-role=selection]",Webhard.$files).hide();
-				Webhard.explorer.selectStart = {x:x,y:y};
-				$("body").addClass("noSelect");
-				
-				/**
-				 * 선택된 항목을 리셋한다.
-				 */
-				Webhard.explorer.unselectAll();
+				Webhard.ui.mousedown($(this),e);
 			});
 			
 			/**
-			 * 파일목록에 마우스가 위치했을 때 이벤트처리
+			 * 파일목록 드랍존 설정
 			 */
 			Webhard.$files.on("mouseover",function(e) {
-				/**
-				 * 드래그중인 항목이 있고, 드래그 시작폴더위치와 현재 위치가 다른경우
-				 */
-				if (Webhard.explorer.dragItem != null && Webhard.explorer.dragStartIdx != Webhard.explorer.getFolderIdx()) {
-					if (Webhard.explorer.autoExpandTimer != null) {
-						clearTimeout(Webhard.explorer.autoExpandTimer);
-						Webhard.explorer.autoExpandTimer = null;
-					}
-					
-					Webhard.$files.addClass("droppable");
-					
-					/**
-					 * 현재폴더에 쓰기권한이 있을 경우, 드래그중인 아이템을 드랍할 수 있다.
-					 */
-					if (Webhard.explorer.getFolderPermission().indexOf("W") > -1) {
-						$("body").removeClass("noDrop");
-						Webhard.explorer.dropZone = Webhard.explorer.getFolderIdx();
-					} else {
-						$("body").addClass("noDrop");
-						Webhard.explorer.dropZone = null;
-					}
-				}
+				Webhard.ui.mouseover($(this),e);
+			});
+			
+			/**
+			 * 파일목록 드랍존 설정 해제
+			 */
+			Webhard.$files.on("mouseout",function(e) {
+				Webhard.ui.mouseout($(this));
 			});
 			
 			/**
@@ -933,13 +1401,6 @@ var Webhard = {
 			 */
 			Webhard.$files.on("mouseup",function(e) {
 				Webhard.detail.update();
-			});
-			
-			/**
-			 * 파일목록에서 마우스가 벗어났을경우, 드랍존 설정을 초기화한다.
-			 */
-			Webhard.$files.on("mouseout",function(e) {
-				Webhard.explorer.mouseout($(this));
 			});
 			
 			/**
@@ -1100,9 +1561,19 @@ var Webhard = {
 					}
 					
 					/**
+					 * 항목정렬
+					 */
+					Webhard.explorer.sort();
+					
+					/**
 					 * UI를 업데이트한다.
 					 */
 					Webhard.ui.update();
+					
+					/**
+					 * 클립보드에 있는 항목의 스타일을 지정한다.
+					 */
+					Webhard.explorer.clipboardClass();
 					
 					Webhard.explorer.loading(false);
 					if (typeof callback == "function") callback(result);
@@ -1110,6 +1581,19 @@ var Webhard = {
 					Webhard.error();
 				}
 			});
+		},
+		/**
+		 * 상위폴더로 이동한다.
+		 */
+		up:function() {
+			if (Webhard.explorer.getView() != "folder" || parseInt(Webhard.explorer.getFolderPathIdx().split("/").shift()) == Webhard.explorer.getFolderIdx()) {
+				return;
+			}
+			
+			var idx = Webhard.explorer.getFolderPathIdx().split("/").slice(-2).shift();
+			var path = Webhard.explorer.getFolderPath().split("/").slice(0,-1).join("/");
+			console.log("up",idx,path,Webhard.explorer.getFolderPathIdx());
+			Webhard.explorer.folder(idx,path);
 		},
 		/**
 		 * 폴더내용을 가져온다.
@@ -1157,12 +1641,19 @@ var Webhard = {
 		 * @param object items
 		 */
 		print:function(item) {
+			/**
+			 * 기존항목 제거
+			 */
+			$("div[data-role=file-item][data-type="+item.type+"][data-idx="+item.idx+"]").remove();
+			
 			var $item = $("<div>").attr("data-role","file-item").attr("data-type",item.type).attr("data-idx",item.idx).attr("data-permission",item.permission);
 			
 			/**
 			 * 원본데이터 보관
 			 */
 			$item.data("data",item);
+			$item.data("name",item.name);
+			$item.data("folder",item.folder);
 			
 			/**
 			 * 정렬을 위한 데이터 정의
@@ -1183,16 +1674,17 @@ var Webhard = {
 				$item.attr("data-path",item.path);
 				
 				/**
-				 * 폴더 자동열기를 위한 mouseover, mousedown 이벤트추가
+				 * 폴더 드랍존 설정
 				 */
 				$item.on("mouseover",function(e) {
-					Webhard.explorer.mouseover($(this));
-					e.stopPropagation();
+					Webhard.ui.mouseover($(this),e);
 				});
 				
+				/**
+				 * 폴더 드랍존 해제
+				 */
 				$item.on("mouseout",function(e) {
-					Webhard.explorer.mouseout($(this));
-					e.stopPropagation();
+					Webhard.ui.mouseout(e);
 				});
 			} else {
 				$item.attr("data-extension",item.extension);
@@ -1204,59 +1696,101 @@ var Webhard = {
 			$item.on("mousedown",function(e) {
 				if (e.button != 0) return;
 				
-				// 아이템 메뉴를 제거한다.
-				Webhard.explorer.contextmenu.hide();
-				
 				/**
-				 * 아이템 다중선택모드가 아닌경우, 현재 아이템만을 선택한다.
+				 * 모바일의 경우 선택모드가 존재하며, 드래그 이벤트를 발생시키지 않는다.
 				 */
-				if (e.shiftKey == false && e.ctrlKey == false && e.metaKey == false) {
-					Webhard.explorer.unselectAll();
-					Webhard.explorer.select($(this).attr("data-type"),$(this).attr("data-idx"));
-					Webhard.explorer.lastSelect = $(this);
-				} else {
+				if (iModule.isMobile == true) {
 					/**
-					 * shift 키가 눌러졌을 경우 최초 선택아이템부터 현재아이템까지 다중선택한다.
+					 * 선택모드일 경우, 선택항목을 토글한다.
 					 */
-					if (Webhard.explorer.lastSelect == null && e.shiftKey == true) {
-						var current = $(this).index();
-						var last = Webhard.explorer.lastSelect.index();
-						var start = Math.min(current,last);
-						var end = Math.max(current,last);
-						
-						for (var i=start;i<=end;i++) {
-							var $select = $("div[data-role=file-item]",Webhard.$files).eq(i);
-							Webhard.explorer.select($select.attr("data-type"),$select.attr("data-idx"));
-						}
-					}
-					
-					if (e.ctrlKey == true || e.metaKey == true) {
-						if ($item.hasClass("selected") == true) {
+					if (Webhard.$container.attr("data-mobile-select") == "TRUE") {
+						if ($(this).hasClass("selected") == true) {
 							Webhard.explorer.unselect($(this).attr("data-type"),$(this).attr("data-idx"));
 						} else {
 							Webhard.explorer.select($(this).attr("data-type"),$(this).attr("data-idx"));
 						}
 					} else {
+						/**
+						 * 선택모드가 아닐경우, 폴더는 이동하고 파일은 미리보기 창을 연다.
+						 */
+						if ($(this).attr("data-type") == "folder") {
+							Webhard.explorer.folder($(this).attr("data-idx"),$(this).attr("data-path"));
+						} else {
+							// @todo 선택모드 일 경우 확인
+							Webhard.explorer.preview($(this).attr("data-idx"));
+						}
+					}
+					
+					/**
+					 * 상위 객체로 이벤트 전달을 취소한다.
+					 */
+					e.stopPropagation();
+					return;
+				}
+				
+				/**
+				 * 현재 항목이 선택중인 상태가 아니라면,
+				 */
+				if ($(this).hasClass("selected") == false) {
+					/**
+					 * 아이템 다중선택모드가 아닌경우, 현재 아이템만을 선택한다.
+					 */
+					if (e.shiftKey == false && e.ctrlKey == false && e.metaKey == false) {
 						Webhard.explorer.unselectAll();
 						Webhard.explorer.select($(this).attr("data-type"),$(this).attr("data-idx"));
+					} else {
+						/**
+						 * shift 키가 눌러졌을 경우 최초 선택아이템부터 현재아이템까지 다중선택한다.
+						 */
+						if (Webhard.explorer.lastSelect !== null && e.shiftKey == true) {
+							var current = $(this).index();
+							var last = Webhard.explorer.lastSelect.index();
+							var start = Math.min(current,last);
+							var end = Math.max(current,last);
+							
+							for (var i=start;i<=end;i++) {
+								var $select = $("div[data-role=file-item]",Webhard.$files).eq(i);
+								Webhard.explorer.select($select.attr("data-type"),$select.attr("data-idx"));
+							}
+						} else if (e.ctrlKey == true || e.metaKey == true) {
+							if ($item.hasClass("selected") == true) {
+								Webhard.explorer.unselect($(this).attr("data-type"),$(this).attr("data-idx"));
+							} else {
+								Webhard.explorer.select($(this).attr("data-type"),$(this).attr("data-idx"));
+							}
+						} else {
+							Webhard.explorer.unselectAll();
+							Webhard.explorer.select($(this).attr("data-type"),$(this).attr("data-idx"));
+						}
 					}
+					Webhard.explorer.lastClick = null;
+				} else {
+					Webhard.explorer.lastClick = $(this);
 				}
 				
 				/**
 				 * 현재폴더가 태그보기나 태그보기 상태가 아닌 경우, 아이템 드래그 이벤트를 시작한다.
 				 */
-				if (Webhard.explorer.getFolderIdx() != 0) {
-					$("body").addClass("noSelect");
-					
-					Webhard.explorer.dragStart = {x:e.clientX,y:e.clientY};
-					Webhard.explorer.dragStartIdx = Webhard.explorer.getFolderIdx();
-					Webhard.explorer.dragItem = Webhard.explorer.getSelected();
+				if (Webhard.explorer.getView() == "folder") {
+					Webhard.ui.mousedown($("div[data-role=file-item].selected",Webhard.$files),e);
 				}
+				
+				Webhard.explorer.lastSelect = $(this);
 				
 				/**
 				 * 상위 객체로 이벤트 전달을 취소한다.
 				 */
 				e.stopPropagation();
+			});
+			
+			/**
+			 * 선택되어 있는 항목을 클릭하였을 때, 선택취소한다.
+			 */
+			$item.on("mouseup",function() {
+				if (Webhard.explorer.lastClick !== null && Webhard.explorer.lastClick.attr("data-type") == $(this).attr("data-type") && Webhard.explorer.lastClick.attr("data-idx") == $(this).attr("data-idx")) {
+					Webhard.explorer.unselectAll();
+					Webhard.explorer.select($(this).attr("data-type"),$(this).attr("data-idx"));
+				}
 			});
 			
 			/**
@@ -1292,7 +1826,7 @@ var Webhard = {
 					Webhard.explorer.folder($(this).attr("data-idx"),$(this).attr("data-path"));
 				} else {
 					// @todo 선택모드 일 경우 확인
-					Webhard.explorer.preview();
+					Webhard.explorer.preview($(this).attr("data-idx"));
 				}
 				
 				e.stopPropagation();
@@ -1318,7 +1852,7 @@ var Webhard = {
 				 */
 				e.stopPropagation();
 			});
-			$item.append($checkbox);
+			$item.append($("<div>").addClass("checkbox").append($checkbox));
 			
 			/**
 			 * 즐겨찾기 추가
@@ -1341,7 +1875,7 @@ var Webhard = {
 				 */
 				e.stopPropagation();
 			});
-			$item.append($favorite);
+			$item.append($("<div>").addClass("favorite").append($favorite));
 			
 			// @todo 소스정리
 			if (item.is_shared == true) $item.append($("<div>").addClass("shared"));
@@ -1350,18 +1884,20 @@ var Webhard = {
 			else if (item.type == "folder" && item.is_deletable == false) $item.append($("<div>").addClass("writeonly"));
 			if (item.type == "file" && item.is_deletable == false) $item.append($("<div>").addClass("writeonly"));
 			
-			var $icon = $("<i>").addClass("icon").addClass(item.type);
-			if (item.type == "file") $icon.addClass(item.extension);
-			if (item.preview != null) {
-				$icon.append($("<div>").addClass("preview").css("backgroundImage","url("+item.preview+")"));
+			/**
+			 * 항목아이콘 출력
+			 */
+			var $icon = $("<i>").addClass("icon")
+			if (item.type == "folder") {
+				$icon.attr("data-type",item.type);
+			} else {
+				$icon.attr("data-type",item.filetype);
+				$icon.attr("data-extension",item.extension);
+				
+				if (item.preview != null) {
+					$icon.append($("<div>").addClass("preview").css("backgroundImage","url('"+item.preview+"')"));
+				}
 			}
-			
-			if (item.status == "DRAFT") {
-				$icon.append($("<div>").addClass("preview"));
-				var $progress = $("<div>").addClass("progress").append($("<div>").css("width",(item.uploaded/item.size*100)+"%"));
-				$icon.append($progress);
-			}
-			
 			$item.append($icon);
 			
 			var $name = $("<div>").addClass("name").append($("<span>").html(item.name));
@@ -1369,6 +1905,18 @@ var Webhard = {
 			
 			var $size = $("<div>").addClass("size").append($("<span>").html(item.uploaded == -1 ? "Unknwon" : iModule.getFileSize(item.uploaded)));
 			$item.append($size);
+			
+			var $date = $("<div>").addClass("date").append($("<span>").html(moment.unix(item.date).locale($("html").attr("lang")).format("LLL")));
+			$item.append($date);
+			
+			/**
+			 * 업로드중인 항목인 경우 프로그래스바 출력
+			 */
+			if (item.status == "DRAFT") {
+				var $progress = $("<div>").attr("data-role","progress").attr("data-idx",item.idx).append($("<div>").css("width",(item.uploaded/item.size*100)+"%"));
+				$icon.append($progress);
+				$size.prepend($progress.clone());
+			}
 			
 			if (item.owner != null) {
 				var $owner = $("<div>").addClass("owner");
@@ -1383,7 +1931,39 @@ var Webhard = {
 				$("div[data-role=file-item][data-type="+item.type+"][data-idx="+item.idx+"]",Webhard.$files).replaceWith($item);
 			}
 			
+			var $button = $("<button>").attr("type","button");
+			var $more = $("<div>").addClass("more").append($button);
+			
+			$item.append($more);
+			
+			Webhard.explorer.update($item);
+			
 			$(document).triggerHandler("Webhard.printItem",[item.type,$item,item]);
+		},
+		/**
+		 * 탐색기 보기형식에 따라 일부요소를 갱신한다.
+		 *
+		 * @param object $item 갱신할 객체 (없을 경우 전체객체)
+		 */
+		update:function($item) {
+			if ($item) {
+				var $name = $("div.name > span",$item);
+				var name = $item.data("name");
+				
+				if (Webhard.$container.attr("data-viewmode") == "card") {
+					var limit = name.length;
+					while ($name.height() > 40) {
+						limit = limit - 1;
+						$name.html(Webhard.substring(name,limit));
+					}
+				} else {
+					$name.html(name);
+				}
+			} else {
+				$("div[data-role=file-item]",Webhard.$files).each(function() {
+					Webhard.explorer.update($(this));
+				});
+			}
 		},
 		/**
 		 * 새로운 폴더를 생성한다.
@@ -1429,6 +2009,8 @@ var Webhard = {
 			 */
 			if ($("div[data-role=file-item]:visible",Webhard.$files).length > 0 && $("div[data-role=file-item].selected",Webhard.$files).length == $("div[data-role=file-item]:visible",Webhard.$files).length) {
 				$("button[data-action=select]",Webhard.$headerbar).addClass("selected");
+			} else {
+				$("button[data-action=select]",Webhard.$headerbar).removeClass("selected");
 			}
 		},
 		/**
@@ -1437,6 +2019,8 @@ var Webhard = {
 		 * @param string type 대상항목 종류 (folder, file)
 		 * @param int idx 대상항목 고유번호
 		 */
+		lastSelect:null,
+		lastClick:null,
 		select:function(type,idx) {
 			var $item = $("div[data-role=file-item][data-type="+type+"][data-idx="+idx+"]",Webhard.$files);
 			
@@ -1499,7 +2083,7 @@ var Webhard = {
 			var $item = $("div[data-role=file-item][data-type="+type+"][data-idx="+idx+"]");
 			var $favorite = $("button[data-action=favorite]",$item);
 			
-			$favorite.status("loading");
+			$favorite.addClass("mi-loading").disable();
 			
 			$.send(ENV.getProcessUrl("webhard","updateFavorite"),{favorite:favorite == true ? "true" : "false",type:type,idx:idx},function(result) {
 				if (result.success == true) {
@@ -1507,15 +2091,19 @@ var Webhard = {
 					else $item.removeClass("favorite");
 				}
 				
-				$favorite.status("default");
+				$favorite.removeClass("mi-loading");
 				$favorite.enable();
 			});
 		},
-		showFavorite:function(favorite) {
-			if (Webhard.$container.attr("data-current") == "#trash" || Webhard.$container.attr("data-current") == "#favorite") return;
-			
+		/**
+		 * 현 위치에서 중요 표시한 파일만 보기
+		 *
+		 * @param boolean is_visible 중요표시파일만 보기 설정
+		 */
+		toggleFavorite:function(is_visible) {
+			if (Webhard.explorer.getView() != "folder") return;
 			Webhard.explorer.unselectAll();
-			if (favorite == true) {
+			if (is_visible == true) {
 				$("button[data-action=favorite]",Webhard.$headerbar).addClass("selected");
 				$("div[data-role=file-item]",Webhard.$files).hide();
 				$("div[data-role=file-item].favorite",Webhard.$files).show();
@@ -1525,64 +2113,12 @@ var Webhard = {
 			}
 		},
 		/**
-		 * 마우스드래그 선택모드
+		 * @todo 파일 미리보기
+		 *
+		 * @param int idx 파일고유번호
 		 */
-		selectMode:false,
-		selectStart:null,
-		selectMove:function(e) {
-			$("body").addClass("noSelect");
-			
-			var mouseX = e && e.clientX ? e.clientX : Webhard.mouse.x;
-			var mouseY = e && e.clientY ? e.clientY : Webhard.mouse.y;
-			
-			var x = Math.max(0,Math.min(mouseX - Webhard.$files.offset().left,Webhard.$files.prop("clientWidth")));
-			var y = Math.max(0,Math.min(mouseY - Webhard.$files.offset().top + Webhard.$files.scrollTop(),Webhard.$files.prop("scrollHeight")));
-			
-			var $selection = $("div[data-role=selection]",Webhard.$files);
-			
-			if (Webhard.mode == "select") $("div[data-role=file-item][data-type=folder]").addClass("unselect");
-			
-			if (Math.abs(x - Webhard.explorer.selectStart.x) > 2 || Math.abs(y - Webhard.explorer.selectStart.y) > 2) {
-				$selection.outerWidth(Math.abs(x - Webhard.explorer.selectStart.x)).outerHeight(Math.abs(y - Webhard.explorer.selectStart.y));
-				
-				if (x > Webhard.explorer.selectStart.x) {
-					$selection.css("left",Webhard.explorer.selectStart.x);
-					xStart = Webhard.explorer.selectStart.x;
-				} else {
-					$selection.css("left",x);
-					xStart = x;
-				}
-				
-				if (y > Webhard.explorer.selectStart.y) {
-					$selection.css("top",Webhard.explorer.selectStart.y);
-				} else {
-					$selection.css("top",y);
-				}
-				
-				var selector = $selection.get(0).getBoundingClientRect();
-				$("div[data-role=file-item]",Webhard.$files).each(function() {
-					var item = this.getBoundingClientRect();
-					var collided = !(selector.right < item.left || selector.left > item.right || selector.bottom < item.top || selector.top > item.bottom);
-					
-					if (collided == true && $(this).hasClass("selected") == false) {
-						if (Webhard.mode == "webhard" || $(this).attr("data-type") == "file") Webhard.explorer.select($(this).attr("data-type"),$(this).attr("data-idx"));
-					} else if (collided == false && $(this).hasClass("selected") == true) {
-						Webhard.explorer.unselect($(this).attr("data-type"),$(this).attr("data-idx"));
-					}
-				});
-				
-				var currentScroll = Webhard.$files.scrollTop();
-				if (mouseY > Webhard.$files.offset().top + Webhard.$files.prop("clientHeight") - 50) {
-					Webhard.$files.scrollTop(currentScroll + 3);
-				} else if (mouseY < Webhard.$files.offset().top + 50) {
-					Webhard.$files.scrollTop(currentScroll - 3);
-				}
-				$selection.show();
-			} else {
-				$selection.hide();
-			}
-		},
-		preview:function() {
+		preview:function(idx) {
+			return;
 			var templet = $("#ModuleWebhardTemplet").val();
 			
 			if (Webhard.explorer.getSelected().length == 1) {
@@ -1606,7 +2142,11 @@ var Webhard = {
 				}
 			});
 		},
+		/**
+		 * @todo 선택된 파일 다운로드
+		 */
 		download:function() {
+			return;
 			if (Webhard.explorer.getSelected().length == 0) {
 				alert("다운로드받을 항목을 선택하여 주십시오.");
 				return;
@@ -1629,8 +2169,8 @@ var Webhard = {
 		 * @param string dir 정렬방식(asc, desc)
 		 */
 		sort:function(field,dir) {
-			var field = field ? field : Webhard.$explorer.attr("data-sort");
-			var dir = dir ? dir : Webhard.$explorer.attr("data-dir");
+			var field = field ? field : Webhard.$container.attr("data-sort");
+			var dir = dir ? dir : Webhard.$container.attr("data-dir");
 			
 			var $items = $("div[data-role=file-item][data-type=folder]",Webhard.$files);
 			[].sort.call($items,function(a,b) {
@@ -1665,104 +2205,44 @@ var Webhard = {
 			$items.each(function(){
 				Webhard.$files.append(this);
 			});
+			
+			$("button[data-action=sort]",Webhard.$headerbar).html(Webhard.getText("sort/"+field));
+			$("button[data-action=sort]",Webhard.$headerbar).append($("<i>").addClass("mi mi-"+(dir == "asc" ? "up" : "down")));
 		},
 		/**
-		 * 항목 드래그
-		 */
-		dragStart:null,
-		dragItem:null,
-		dragStartIdx:null,
-		dropZone:null,
-		/**
-		 * 이동중인 항목에 대한 스타일시트 정의
+		 * 특정 폴더나, 파일로 이동한다.
 		 *
-		 * @param boolean is_drag 드래그중인지 여부
+		 * @param string type 종류 (folder or file)
+		 * @param int idx 고유값
 		 */
-		dragClass:function(is_drag) {
-			if (Webhard.explorer.dragItem != null) {
-				for (var i=0, loop=Webhard.explorer.dragItem.length;i<loop;i++) {
-					var $item = $("div[data-role=file-item][data-type="+Webhard.explorer.dragItem[i].type+"][data-idx="+Webhard.explorer.dragItem[i].idx+"]");
-					if (is_drag == true && $item.hasClass("moving") == false) $item.addClass("moving");
-					if (is_drag == false && $item.hasClass("moving") == true) $item.removeClass("moving");
+		show:function(type,idx) {
+			Webhard.loading(true);
+			
+			$.send(ENV.getProcessUrl("webhard","getItem"),{type:type,idx:idx},function(result) {
+				Webhard.loading(false);
+				
+				if (result.success == true) {
+					var path = result.item.path.split("/");
+					var name = path.pop();
+					
+					Webhard.explorer.folder(result.item.folder,path.join("/"),function(result) {
+						var $item = $("div[data-role=file-item][data-type="+type+"][data-idx="+idx+"]",Webhard.$files);
+						Webhard.$files.animate({scrollTop:$item.position().top},"fast",function() {
+							Webhard.explorer.unselectAll();
+							Webhard.explorer.select(type,idx);
+						});
+					});
 				}
-			}
+			});
 		},
-		/**
-		 * 항목 이동중 나타날 메세지
-		 *
-		 * @param Event e 마우스이벤트
-		 * @todo 디자인 변경 / 언어셋적용
-		 */
-		dragMove:function(e) {
-			if (Math.abs(Webhard.explorer.dragStart.x - e.clientX) > 5 || Math.abs(Webhard.explorer.dragStart.y - e.clientY) > 5) {
-				if ($("#ModuleWebhardDragToggle").length == 0) {
-					$("body").append($("<div>").attr("id","ModuleWebhardDragToggle"));
-				}
-				var $toggle = $("#ModuleWebhardDragToggle");
-				Webhard.explorer.dragClass(true);
-				$toggle.html(Webhard.explorer.dragItem.length+"항목 이동중...");
-				$toggle.css("top",e.clientY + 5).css("left",e.clientX + 5);
-			}
-		},
-		/**
-		 * 드래그가 완료되었을때
-		 *
-		 * @param Event e 마우스이벤트
-		 */
-		dragEnd:function(e) {
-			/**
-			 * 자동이동이 대기중일때 타이머를 제거한다.
-			 */
-			if (Webhard.explorer.autoExpandTimer != null) {
-				clearTimeout(Webhard.explorer.autoExpandTimer);
-				Webhard.explorer.autoExpandTimer = null;
-				$("div[data-role=file-item]").removeClass("droppable");
-			}
-			
-			$("body").removeClass("noSelect").removeClass("noDrop");
-			Webhard.explorer.dragClass(false);
-			
-			/**
-			 * 드래그가 완료된 곳이 트리일 경우
-			 */
-			if (Webhard.tree.dropZone != null) {
-				/**
-				 * 해당 폴더에 쓰기 권한이 있을 경우 항목을 이동시킨다.
-				 */
-				if (Webhard.tree.dropZone.attr("data-permission").indexOf("W") > -1) {
-					Webhard.explorer.move(Webhard.tree.dropZone.attr("data-idx"),Webhard.explorer.dragItem,"move");
-				}
-			}
-			
-			/**
-			 * 드래그가 완료된 곳이 탐색기인 경우
-			 */
-			if (Webhard.explorer.dropZone != null) {
-				Webhard.explorer.move(Webhard.explorer.dropZone,Webhard.explorer.dragItem,"move");
-			}
-			
-			/**
-			 * 드래그 관련 항목 초기화
-			 */
-			Webhard.explorer.dragClass(false);
-			Webhard.explorer.dragItem = null;
-			Webhard.explorer.dropZone = null;
-			Webhard.tree.dropZone = null;
-			
-			if ($("#ModuleWebhardDragToggle").length == 1) $("#ModuleWebhardDragToggle").remove();
-		},
-		/**
-		 * 자동 이동 (마우스 드래그 상태에서 폴더위에 마우스를 올려두면 자동으로 해당 폴더 내부로 들어간다.
-		 */
-		autoExpandTimer:null,
 		/**
 		 * 항목 드래그 중 같은 폴더위에 마우스가 8초 이상 위치하고 있으면, 해당 폴더로 이동한다.
 		 */
 		autoExpand:function(idx,count) {
 			var count = count ? count : 0;
-			if (count == 0 && Webhard.explorer.autoExpandTimer != null) {
-				clearTimeout(Webhard.explorer.autoExpandTimer);
-				Webhard.explorer.autoExpandTimer = null;
+			if (count == 0 && Webhard.ui.autoExpandTimer != null) {
+				clearTimeout(Webhard.ui.autoExpandTimer);
+				Webhard.ui.autoExpandTimer = null;
 				$("div[data-role=file-item]").removeClass("droppable");
 			}
 			var $item = $("div[data-role=file-item][data-idx="+idx+"]",Webhard.$files);
@@ -1773,116 +2253,75 @@ var Webhard = {
 			if (count == 8) {
 				Webhard.explorer.folder($item.attr("data-idx"),$item.attr("data-path"),null,true);
 			} else {
-				Webhard.explorer.autoExpandTimer = setTimeout(Webhard.explorer.autoExpand,100,idx,++count);
+				Webhard.ui.autoExpandTimer = setTimeout(Webhard.explorer.autoExpand,100,idx,++count);
 			}
 		},
-		/**
-		 * 폴더 항목에 마우스를 올렸을 경우
-		 *
-		 * @param object $item 마우스가 올라간 항목 $(DOM)객체
-		 */
-		mouseover:function($item) {
-			/**
-			 * 드래그중인 항목이 있을 경우
-			 */
-			if (Webhard.explorer.dragItem != null) {
-				$item.addClass("droppable");
-				
-				/**
-				 * 해당폴더를 자동으로 열기위한 타이머 설정
-				 */
-				if (Webhard.explorer.autoExpandTimer != null) {
-					clearTimeout(Webhard.explorer.autoExpandTimer);
-					Webhard.explorer.autoExpandTimer = null;
-				}
-				
-				Webhard.explorer.autoExpandTimer = setTimeout(Webhard.explorer.autoExpand,1500,$item.attr("data-idx"));
-				
-				/**
-				 * 마우스가 위치한 곳이 선택된 항목위가 아니고, 마우스가 올라간 폴더에 쓰기 권한이 있을 경우
-				 */
-				if ($item.hasClass("selected") == false && $item.attr("data-permission").indexOf("W") > -1) {
-					$("body").removeClass("noDrop");
-					Webhard.explorer.dropZone = $item.attr("data-idx");
-				} else {
-					$("body").addClass("noDrop");
-					Webhard.explorer.dropZone = null;
-				}
-			}
-		},
-		/**
-		 * 폴더 항목에서 마우스가 벗어났을 경우
-		 *
-		 * @param object $item 마우스가 벗어난 항목 $(DOM)객체
-		 */
-		mouseout:function($item) {
-			/**
-			 * 해당폴더를 자동으로 열기위한 타이머 해제
-			 */
-			if (Webhard.explorer.autoExpandTimer != null) {
-				clearTimeout(Webhard.explorer.autoExpandTimer);
-				Webhard.explorer.autoExpandTimer = null;
-			}
-			
-			$item.removeClass("droppable");
-			$("body").removeClass("noDrop");
-			Webhard.explorer.dropZone = null;
-		},
-		duplicated:function() {
-			var $form = $("#ModuleWebhardDuplicatedOptionForm");
-			$("button[data-action]",$form).on("click",function() {
-				$("input[name=option]",$form).val($(this).attr("data-action"));
-				$form.submit();
-			});
-			
-			if (Webhard.explorer.moveItem.length == 1) $("label",$form).hide();
-			$form.formInit(Webhard.explorer.move);
-		},
-		copyItem:null,
 		copy:function() {
 			if (Webhard.explorer.getSelected().length == 0) {
-				iModule.alertMessage.show("error","복사할 항목을 선택하여 주십시오.",5);
-			} else {
-				Webhard.explorer.cropItem = null;
-				Webhard.explorer.copyItem = Webhard.explorer.getSelected();
-				iModule.alertMessage.show("success",Webhard.explorer.copyItem.length+"개의 항목을 복사하였습니다. 붙여넣기를 이용하여 원하는 위치에 복사할 수 있습니다.",5);
-				Webhard.explorer.cropClass();
+				Webhard.message.show("error",Webhard.getErrorText("NOT_SELECTED_ITEM"),5);
+				return;
+			}
+			
+			try {
+				window.sessionStorage.setItem("clipboard",JSON.stringify({items:Webhard.explorer.getSelected(),mode:"copy"}));
+				Webhard.message.show("info",Webhard.getText("text/copy").replace("{COUNT}",Webhard.explorer.getSelected().length),5);
+				Webhard.explorer.clipboardClass();
+			} catch (e) {
+				Webhard.message.show("error",Webhard.getErrorText("DISABLED_SESSION_STORAGE"),5);
 			}
 		},
-		cropItem:null,
+		/**
+		 * 아이템을 잘라내기한다.
+		 */
 		crop:function() {
 			if (Webhard.explorer.getSelected().length == 0) {
-				iModule.alertMessage.show("error","잘라낼 항목을 선택하여 주십시오.",5);
-			} else {
-				Webhard.explorer.copyItem = null;
-				Webhard.explorer.cropItem = Webhard.explorer.getSelected();
-				iModule.alertMessage.show("success",Webhard.explorer.cropItem.length+"개의 항목을 잘라내었습니다. 붙여넣기를 이용하여 원하는 위치에 이동할 수 있습니다.",5);
-				Webhard.explorer.cropClass();
+				Webhard.message.show("error",Webhard.getErrorText("NOT_SELECTED_ITEM"),5);
+				return;
 			}
-		},
-		paste:function() {
-			if (Webhard.explorer.cropItem != null) {
-				Webhard.explorer.move(Webhard.explorer.getFolderIdx(),Webhard.explorer.cropItem,"move");
-				Webhard.explorer.cropItem = null;
-			} else if (Webhard.explorer.copyItem != null) {
-				Webhard.explorer.move(Webhard.explorer.getFolderIdx(),Webhard.explorer.copyItem,"copy");
-				Webhard.explorer.copyItem = null;
-			} else {
-				iModule.alertMessage.show("error","붙여넣기할 항목이 없습니다.",5);
-			}
-		},
-		cropClass:function() {
-			$("div[data-role=file-item]",Webhard.$files).removeClass("moving");
 			
-			if (Webhard.explorer.cropItem != null) {
-				var items = [];
-				for (var i=0, loop=Webhard.explorer.cropItem.length;i<loop;i++) {
-					var type = Webhard.explorer.cropItem[i].indexOf("/") == 0 ? "folder" : "file";
-					var idx = type == "folder" ? Webhard.explorer.cropItem[i].substr(1) : Webhard.explorer.cropItem[i];
-					
-					var $item = $("div[data-role=file-item][data-type="+type+"][data-idx="+idx+"]");
-					if ($item.hasClass("moving") == false) $item.addClass("moving");
+			try {
+				window.sessionStorage.setItem("clipboard",JSON.stringify({items:Webhard.explorer.getSelected(),mode:"move"}));
+				Webhard.message.show("info",Webhard.getText("text/crop").replace("{COUNT}",Webhard.explorer.getSelected().length),5);
+				Webhard.explorer.clipboardClass();
+			} catch (e) {
+				Webhard.message.show("error",Webhard.getErrorText("DISABLED_SESSION_STORAGE"),5);
+			}
+		},
+		/**
+		 * 잘라내기 / 복사한 항목의 스타일을 지정한다.
+		 */
+		clipboardClass:function() {
+			$("div[data-role=file-item]",Webhard.$files).removeClass("clipboard");
+			
+			try {
+				var clipboardItem = JSON.parse(window.sessionStorage.getItem("clipboard"));
+			} catch (e) {
+				var clipboardItem = null;
+			}
+			
+			if (clipboardItem != null) {
+				for (var i=0, loop=clipboardItem.items.length;i<loop;i++) {
+					var $item = $("div[data-role=file-item][data-type="+clipboardItem.items[i].type+"][data-idx="+clipboardItem.items[i].idx+"]");
+					if ($item.hasClass("clipboard") == false) $item.addClass("clipboard");
 				}
+			}
+		},
+		/**
+		 * 잘라내기 / 복사한 항목을 붙여넣기 한다.
+		 */
+		paste:function() {
+			try {
+				var clipboardItem = JSON.parse(window.sessionStorage.getItem("clipboard"));
+			} catch (e) {
+				var clipboardItem = null;
+			}
+			
+			if (clipboardItem != null) {
+				Webhard.explorer.move(Webhard.explorer.getFolderIdx(),clipboardItem.items,clipboardItem.mode);
+				window.sessionStorage.removeItem("clipboard");
+				Webhard.explorer.clipboardClass();
+			} else {
+				Webhard.message.show("error",Webhard.getErrorText("NOT_FOUND_CLIPBOARD"),5);
 			}
 		},
 		/**
@@ -1930,6 +2369,8 @@ var Webhard = {
 			Webhard.loading(true);
 			$.send(ENV.getProcessUrl("webhard","move"),{target:Webhard.explorer.moveTarget,select:JSON.stringify(Webhard.explorer.moveItem)},function(result) {
 				if (result.success == true) {
+					Webhard.explorer.moveItem = result.select;
+					
 					if (result.modalHtml) {
 						iModule.modal.showHtml(result.modalHtml,function($modal,$form) {
 							$("button[data-action]",$form).on("click",function() {
@@ -1965,11 +2406,15 @@ var Webhard = {
 							 */
 							Webhard.explorer.folder(Webhard.explorer.getFolderIdx(),Webhard.explorer.getFolderPath());
 						});
+						
+						Webhard.loading(false);
 					}
-					
-					Webhard.explorer.moveItem = result.select;
+				} else {
+					if (result.message) {
+						Webhard.message.show("error",result.message,5);
+						return false;
+					}
 				}
-				Webhard.loading(false);
 			});
 			
 			/*
@@ -2445,6 +2890,580 @@ var Webhard = {
 			});
 			
 			Webhard.detail.loading = true;
+		}
+	},
+	/**
+	 * 업로드
+	 */
+	upload:{
+		isUploadable:true,
+		isUploading:false,
+		prepareFiles:[],
+		checkFiles:[],
+		uploadFiles:[],
+		currentIdx:null,
+		xhr:null,
+		hideListTimer:null,
+		/**
+		 * 업로드할 파일을 선택한다. (drop 이벤트 또는 input 의 change 이벤트 발생시)
+		 *
+		 * @param FileList files 이벤트 발생에 따른 파일목록
+		 */
+		select:function(files) {
+			if (Webhard.upload.isUploadable == false) {
+				Webhard.message.show("error",Webhard.getErrorText("UPLOAD_NOT_AVAILABLE"),5);
+				return;
+			}
+			
+			Webhard.upload.isUploadable = false;
+			Webhard.upload.prepareFiles = files;
+			
+			if (Webhard.upload.prepareFiles.length > 0) {
+				Webhard.upload.check();
+			}
+		},
+		/**
+		 * 업로드할 대상의 중복체크 및 DB데이터 생성을 위한 과정
+		 */
+		check:function($form) {
+			if (typeof $form == "object" && $form.is("form") == true) {
+				
+			} else {
+				Webhard.upload.checkFiles = [];
+				
+				for (var i=0, loop=Webhard.upload.prepareFiles.length;i<loop;i++) {
+					var file = {};
+					file.idx = 0;
+					file.code = null;
+					file.name = Webhard.upload.prepareFiles[i].name;
+					file.type = Webhard.upload.prepareFiles[i].type;
+					file.size = Webhard.upload.prepareFiles[i].size;
+					file.is_share = false;
+					file.chunkStart = 0;
+					file.duplicatedOption = null;
+					file.duplicatedContinue = null;
+					file.success = null;
+					
+					Webhard.upload.checkFiles[i] = file;
+				}
+			}
+			
+			Webhard.loading(true);
+			$.send(ENV.getProcessUrl("webhard","checkFile"),{target:Webhard.explorer.getFolderIdx(),files:JSON.stringify(Webhard.upload.checkFiles)},function(result) {
+				if (result.success == true) {
+					Webhard.upload.checkFiles = result.files;
+					
+					if (result.modalHtml) {
+						iModule.modal.showHtml(result.modalHtml,function($modal,$form) {
+							$("button[data-action]",$form).on("click",function() {
+								var idx = parseInt($("input[name=idx]",$form).val());
+								
+								if ($(this).attr("data-action") == "copy") {
+									Webhard.upload.checkFiles[idx].mode = "copy";
+								} else {
+									Webhard.upload.checkFiles[idx].duplicatedOption = $(this).attr("data-action");
+									Webhard.upload.checkFiles[idx].duplicatedContinue = $("input[name=continue]",$form).is(":checked");
+								}
+								
+								$(this).status("loading");
+								$("button",$form).disable();
+								$form.submit();
+							});
+							$form.inits(Webhard.upload.check);
+							
+							return false;
+						});
+					} else {
+						for (var i=0, loop=Webhard.upload.checkFiles.length;i<loop;i++) {
+							if (Webhard.upload.checkFiles[i].success == true) {
+								var file = Webhard.upload.prepareFiles[i];
+								console.log("pre",i,file);
+								file.idx = Webhard.upload.checkFiles[i].idx;
+								file.code = Webhard.upload.checkFiles[i].code;
+								file.chunkStart = Webhard.upload.checkFiles[i].chunkStart;
+								file.failCount = 0;
+								file.file = Webhard.upload.checkFiles[i].file;
+								file.status = "WAIT";
+								
+								/**
+								 * 파일을 업로드하는 대상폴더와 현재폴더가 동일할 경우 탐색기에 항목을 추가한다.
+								 */
+								if (Webhard.explorer.getView() == "folder" && Webhard.explorer.getFolderIdx() == Webhard.upload.checkFiles[i].file.folder) {
+									Webhard.explorer.print(Webhard.upload.checkFiles[i].file);
+								}
+								Webhard.upload.uploadFiles.push(file);
+							}
+						}
+						
+						Webhard.explorer.sort();
+						
+						Webhard.upload.isUploadable = true;
+						if (Webhard.upload.uploadFiles.length > 0) Webhard.upload.start();
+						
+						iModule.modal.close();
+						Webhard.loading(false);
+					}
+				} else {
+					iModule.modal.close();
+					Webhard.loading(false);
+					if (result.message) {
+						Webhard.message.show("error",result.message,5);
+						return false;
+					}
+				}
+			});
+		},
+		/**
+		 * 업로드 목록을 업데이트한다.
+		 *
+		 * @param boolean is_reset 기존 목록을 리셋할지 여부 (기본값 : false)
+		 * @todo 언어셋 적용
+		 */
+		update:function(is_reset) {
+			var $upload = $("div[data-role=upload]",Webhard.$container);
+			var $list = $("ul",$upload);
+			if (is_reset === true) {
+				
+			}
+			
+			for (var i=0, loop=Webhard.upload.uploadFiles.length;i<loop;i++) {
+				if ($("li[data-idx="+Webhard.upload.uploadFiles[i].idx+"]",$list).length == 0) {
+					var $item = $("<li>").attr("data-idx",Webhard.upload.uploadFiles[i].idx);
+					
+					var $icon = $("<i>").addClass("icon").attr("data-type",Webhard.upload.uploadFiles[i].file.filetype).attr("data-extension",Webhard.upload.uploadFiles[i].file.extension);
+					
+					var $cancel = $("<button>").attr("type","button").attr("data-action","cancel").html('<i class="mi mi-close"></i><div>업로드취소</div>');
+					$cancel.on("click",function() {
+						Webhard.upload.cancel($(this).parents("li").attr("data-idx"));
+					});
+					$icon.append($cancel);
+					
+					var $restart = $("<button>").attr("type","button").attr("data-action","restart").html('<i class="mi mi-refresh"></i><div>업로드재개</div>');
+					$restart.on("click",function() {
+						Webhard.upload.restart($(this).parents("li").attr("data-idx"));
+					});
+					$icon.append($restart);
+					
+					var $search = $("<button>").attr("type","button").attr("data-action","search").html('<i class="mi mi-search"></i><div>파일로 이동</div>');
+					$search.on("click",function() {
+						Webhard.explorer.show("file",$(this).parents("li").attr("data-idx"));
+					});
+					$icon.append($search);
+					
+					$item.append($icon);
+					
+					var $info = $("<div>");
+					
+					var $meta = $("<div>").attr("data-role","meta");
+					var $size = $("<span>").attr("data-role","size").html(iModule.getFileSize(Webhard.upload.uploadFiles[i].chunkStart)+"/"+iModule.getFileSize(Webhard.upload.uploadFiles[i].size));
+					$meta.append($size);
+					
+					var $name = $("<span>").attr("data-role","name").html(Webhard.upload.uploadFiles[i].file.name);
+					$meta.append($name);
+					
+					$info.append($meta);
+					
+					var $progress = $("<div>").attr("data-role","progress").attr("data-idx",Webhard.upload.uploadFiles[i].idx).append($("<div>").width((Webhard.upload.uploadFiles[i].chunkStart/Webhard.upload.uploadFiles[i].size*100)+"%"));
+					$info.append($progress);
+					
+					$item.append($info);
+					$list.append($item);
+				} else {
+					var $item = $("li[data-idx="+Webhard.upload.uploadFiles[i].idx+"]",$list);
+				}
+				
+				$item.attr("data-complete",Webhard.upload.uploadFiles[i].status == "COMPLETE" ? "TRUE" : "FALSE");
+				$item.attr("data-cancel",Webhard.upload.uploadFiles[i].status == "CANCEL" ? "TRUE" : "FALSE");
+				
+				if (Webhard.upload.uploadFiles[i].status == "COMPLETE") {
+					$("span[data-role=size]",$item).html(iModule.getFileSize(Webhard.upload.uploadFiles[i].size)+"/"+iModule.getFileSize(Webhard.upload.uploadFiles[i].size));
+					$("div[data-role=progress] > div",$item).width("100%");
+				}
+			}
+			
+			if (Webhard.upload.uploadFiles.length > 0) {
+				if ($("div[data-role=upload]",Webhard.$container).is(":visible") == false) {
+					$("div[data-role=upload]",Webhard.$container).show();
+					$("div[data-role=upload]",Webhard.$container).css("bottom",$("div[data-role=upload]",Webhard.$container).height() * -1);
+					$("div[data-role=upload]",Webhard.$container).animate({bottom:0},"fast");
+				}
+			}
+		},
+		/**
+		 * 업로드 준비가 끝난 파일목록을 업로드큐로 옮기고, 업로드목록을 구성한다.
+		 */
+		start:function() {
+			/**
+			 * 업로드 목록 만들기
+			 */
+			Webhard.upload.update();
+			
+			/**
+			 * 현재 업로드중이 아니라면, 업로드를 시작한다.
+			 */
+			if (Webhard.upload.isUploading === false) {
+				Webhard.upload.currentIdx = null;
+				Webhard.upload.upload();
+			}
+		},
+		/**
+		 * 파일을 업로드한다.
+		 */
+		upload:function() {
+			/**
+			 * 업로드가 진행중이라면 무시한다.
+			 */
+			if (Webhard.upload.isUploading === true) return;
+			
+			/**
+			 * 현재 업로드 대상이 없으면 다음 업로드 대상을 찾는다.
+			 */
+			if (Webhard.upload.currentIdx === null || Webhard.upload.uploadFiles[Webhard.upload.currentIdx].status !== "WAIT") {
+				Webhard.upload.currentIdx = null;
+				
+				for (var i=0, loop=Webhard.upload.uploadFiles.length;i<loop;i++) {
+					if (Webhard.upload.uploadFiles[i].status === "WAIT") {
+						Webhard.upload.currentIdx = i;
+						break;
+					}
+				}
+				
+				/**
+				 * 업로드할 대상이 없다면, 업로드를 완료한다.
+				 */
+				if (Webhard.upload.currentIdx === null) {
+					Webhard.upload.complete();
+					return;
+				}
+			}
+			
+			Webhard.upload.isUploading = true;
+			var file = Webhard.upload.uploadFiles[Webhard.upload.currentIdx];
+			file.chunkEnd = Math.min(file.size,file.chunkStart + 2 * 1024 * 1024);
+			file.status = "UPLOADING";
+			
+			$.ajax({
+				url:ENV.getProcessUrl("webhard","uploadFile")+"?code="+file.code,
+				method:"POST",
+				contentType:file.type,
+				headers:{
+					"Content-Range":"bytes " + file.chunkStart + "-" + (file.chunkEnd - 1) + "/" + file.size
+				},
+				xhr:function() {
+					var xhr = $.ajaxSettings.xhr();
+					Webhard.upload.xhr = xhr;
+					
+					if (xhr.upload) {
+						xhr.upload.addEventListener("progress",function(e) {
+							if (Webhard.upload.currentIdx === null) return;
+							
+							var currentFile = Webhard.upload.uploadFiles[Webhard.upload.currentIdx];
+							if (e.lengthComputable) {
+								var percent = (currentFile.chunkStart + e.loaded) / currentFile.size * 100;
+								var $progress = $("div[data-role=progress][data-idx="+currentFile.idx+"] > div",Webhard.$container);
+								$progress.css("width",percent+"%");
+								
+								var $item = $("li[data-idx="+currentFile.idx+"]",Webhard.$upload);
+								$("span[data-role=size]",$item).html(iModule.getFileSize(currentFile.chunkStart + e.loaded)+"/"+iModule.getFileSize(currentFile.size));
+							}
+						},false);
+						
+						xhr.upload.addEventListener("abort",function(e) {
+							if (Webhard.upload.currentIdx !== null) {
+								var currentFile = Webhard.upload.uploadFiles[Webhard.upload.currentIdx];
+								currentFile.status = "CANCEL";
+							}
+							Webhard.message.show("error",Webhard.getText("text/upload_canceled"),5);
+						});
+					}
+	
+					return xhr;
+				},
+				processData:false,
+				data:file.slice(file.chunkStart,file.chunkEnd)
+			}).done(function(result) {
+				Webhard.upload.isUploading = false;
+				Webhard.upload.xhr = null;
+				
+				if (Webhard.upload.currentIdx !== null) {
+					var currentFile = Webhard.upload.uploadFiles[Webhard.upload.currentIdx];
+					currentFile.status = "WAIT";
+					if (result.success == true) {
+						currentFile.failCount = 0;
+						currentFile.loaded = currentFile.chunkEnd;
+						
+						if (currentFile.chunkEnd == currentFile.size) {
+							currentFile.file = result.file;
+							Webhard.upload.done();
+						} else {
+							currentFile.chunkStart = currentFile.chunkEnd;
+							Webhard.upload.upload();
+						}
+					} else {
+						if (currentFile.failCount < 3) {
+							currentFile.failCount++;
+							Webhard.upload.upload();
+						} else {
+							currentFile.status = "CANCEL";
+						}
+					}
+				}
+			}).fail(function() {
+				Webhard.upload.isUploading = false;
+				Webhard.upload.xhr = null;
+				var currentFile = Webhard.upload.uploadFiles[Webhard.upload.currentIdx];
+				currentFile.status = "WAIT";
+				if (currentFile.failCount < 3) {
+					currentFile.failCount++;
+					Webhard.upload.upload();
+				}
+			});
+		},
+		/**
+		 * 현재파일 업로드 완료
+		 */
+		done:function() {
+			var currentFile = Webhard.upload.uploadFiles[Webhard.upload.currentIdx];
+			currentFile.status = "COMPLETE";
+			
+			Webhard.upload.currentIdx = null;
+			if (Webhard.explorer.getFolderIdx() == currentFile.file.folder) {
+				Webhard.explorer.print(currentFile.file);
+			}
+			Webhard.explorer.sort();
+			Webhard.upload.update();
+			Webhard.upload.upload();
+		},
+		/**
+		 * 전체파일 업로드 완료
+		 */
+		complete:function() {
+			var remains = [];
+			var completes = [];
+			for (var i=0, loop=Webhard.upload.uploadFiles.length;i<loop;i++) {
+				if (Webhard.upload.uploadFiles[i].status == "COMPLETE") {
+					completes.push(Webhard.upload.uploadFiles[i].file);
+				} else {
+					remains.push(Webhard.upload.uploadFiles[i]);
+				}
+			}
+			
+			Webhard.upload.uploadFiles = remains;
+			
+			if (Webhard.upload.uploadFiles.length == 0) {
+				$("#ModuleWebhardUploadInput").reset();
+			}
+		},
+		/**
+		 * 업로드 실패/취소된 파일의 업로드를 재개한다.
+		 *
+		 * @param int idx 파일 고유번호
+		 */
+		restart:function(idx) {
+			$.send(ENV.getProcessUrl("webhard","restartFile"),{idx:idx},function(result) {
+				if (result.success == true) {
+					/**
+					 * 취소된 파일이었다면, 다시 파일목록에 추가한다.
+					 */
+					if (result.file.folder == Webhard.explorer.getFolderIdx()) {
+						Webhard.explorer.print(result.file);
+						Webhard.explorer.sort();
+					}
+					
+					/**
+					 * 업로드 대기목록에서 취소하려는 파일의 상태를 변경한다.
+					 */
+					var is_restart = false;
+					for (var i=0, loop=Webhard.upload.uploadFiles.length;i<loop;i++) {
+						if (Webhard.upload.uploadFiles[i].idx == idx) {
+							Webhard.upload.uploadFiles[i].status = "WAIT";
+							Webhard.upload.uploadFiles[i].chunkStart = result.chunkStart;
+							is_restart = true;
+							break;
+						}
+					}
+					
+					if (is_restart == true) {
+						Webhard.upload.upload();
+					} else {
+						Webhard.message.show("error",Webhard.getErrorText("UPLOAD_RESTART_FAILED"),5);
+					}
+				} else {
+					Webhard.message.show("error",result.message,5);
+				}
+				return false;
+			});
+		},
+		/**
+		 * 특정 파일의 업로드를 취소한다.
+		 *
+		 * @param int idx 파일 고유번호
+		 */
+		cancel:function(idx) {
+			if (typeof idx == "object" && idx.is("form") == true) {
+				var $form = idx;
+				var idx = $("input[name=idx]",$form).val();
+				
+				/**
+				 * 현재 업로드중인 파일인지 파악한다.
+				 */
+				if (Webhard.upload.currentIdx !== null) {
+					var currentFile = Webhard.upload.uploadFiles[Webhard.upload.currentIdx];
+					if (currentFile.idx == idx) {
+						if (Webhard.upload.xhr !== null) {
+							Webhard.upload.xhr.abort();
+						}
+						Webhard.upload.currentIdx = null;
+					}
+				}
+				
+				/**
+				 * 업로드 대기목록에서 취소하려는 파일의 상태를 변경한다.
+				 */
+				for (var i=0, loop=Webhard.upload.uploadFiles.length;i<loop;i++) {
+					if (Webhard.upload.uploadFiles[i].idx == idx) {
+						Webhard.upload.uploadFiles[i].status = "CANCEL";
+						break;
+					}
+				}
+				
+				/**
+				 * 업로드목록에서 해당파일의 상태를 변경한다.
+				 */
+				$("li[data-idx="+idx+"]",Webhard.$upload).attr("data-cancel","TRUE");
+				
+				$form.send(ENV.getProcessUrl("webhard","cancelFile"),function(result) {
+					if (result.success == true) {
+						$("div[data-role=file-item][data-type=file][data-idx="+idx+"]",Webhard.$files).remove();
+					}
+					iModule.modal.close();
+				});
+			} else {
+				iModule.modal.get(ENV.getProcessUrl("webhard","getModal"),{modal:"cancel",type:"upload",idx:idx},function($modal,$form) {
+					$form.inits(Webhard.upload.cancel);
+					return false;
+				});
+			}
+		},
+		/**
+		 * 업로드중인 모든 파일을 취소한다.
+		 */
+		cancelAll:function($form) {
+			/**
+			 * 현재 업로드중인 XHR 객체가 있다면 중단한다.
+			 */
+			if (Webhard.upload.xhr !== null) {
+				Webhard.upload.xhr.abort();
+			}
+			
+			Webhard.upload.xhr = null;
+			Webhard.upload.currentIdx = null;
+			
+			/**
+			 * 업로드가 완료되지 않은 파일을 휴지통으로 이동한다.
+			 */
+			var deleteFiles = [];
+			for (var i=0, loop=Webhard.upload.uploadFiles.length;i<loop;i++) {
+				if (Webhard.upload.uploadFiles[i].status != "COMPLETE" && Webhard.upload.uploadFiles[i].status != "CANCEL") {
+					deleteFiles.push(Webhard.upload.uploadFiles[i].idx);
+				}
+			}
+			
+			Webhard.upload.uploadFiles = [];
+			
+			$.send(ENV.getProcessUrl("webhard","cancelFile"),{files:JSON.stringify(deleteFiles)},function(result) {
+				if (result.success == true) {
+					for (var i=0, loop=result.files.length;i<loop;i++) {
+						$("div[data-role=file-item][data-type=file][data-idx="+result.files[i]+"]",Webhard.$files).remove();
+					}
+				}
+			});
+			
+			if ($form !== undefined && typeof $form == "object" && $form.is("form") == true) {
+				iModule.modal.close();
+			}
+			
+			Webhard.upload.close();
+		},
+		/**
+		 * 업로드 목록을 최소화/복원한다.
+		 */
+		toggle:function() {
+			var $list = $("ul",Webhard.$upload);
+			
+			if ($list.is(":visible") == true) {
+				$list.animate({height:0},"fast",function() {
+					$list.height("");
+					$list.hide();
+					Webhard.$upload.addClass("minimum");
+				});
+			} else {
+				$list.show();
+				var height = $list.height();
+				$list.height(0);
+				
+				$list.animate({height:height},"fast",function() {
+					$list.height("");
+					Webhard.$upload.removeClass("minimum");
+				});
+			}
+		},
+		/**
+		 * 업로드 목록을 닫는다.
+		 */
+		close:function() {
+			var is_complete = true;
+			for (var i=0, loop=Webhard.upload.uploadFiles.length;i<loop;i++) {
+				if (Webhard.upload.uploadFiles[i].status != "COMPLETE" && Webhard.upload.uploadFiles[i].status != "CANCEL") {
+					is_complete = false;
+				}
+			}
+			
+			if (is_complete == true) {
+				Webhard.upload.uploadFiles = [];
+				Webhard.$upload.animate({bottom:Webhard.$upload.height() * -1},"fast",function() {
+					$("ul",Webhard.$upload).empty();
+					Webhard.$upload.hide();
+					Webhard.$upload.css("bottom",0);
+				});
+			} else {
+				iModule.modal.get(ENV.getProcessUrl("webhard","getModal"),{modal:"cancel",type:"upload"},function($modal,$form) {
+					$form.inits(Webhard.upload.cancelAll);
+				});
+			}
+		}
+	},
+	/**
+	 * 메세지
+	 */
+	message:{
+		/**
+		 * 메세지를 출력한다.
+		 *
+		 * @param string type 메세지 종류 (info, warning, error)
+		 * @param string message 메세지 내용
+		 * @param int timeout 메세지가 보일 시간 (0 일 경우 명시적으로 메세지를 지울때까지 유지)
+		 * @param boolean animated 에니메이션 여부
+		 */
+		show:function(type,message,timeout,animated) {
+			Webhard.$message.empty();
+			var animated = animated === false ? false : true;
+			var $message = $("<div>").addClass(type).attr("data-idx",Webhard.message.idx).html(message).hide();
+			Webhard.$message.append($message);
+			
+			if (animated == true) $message.fadeIn();
+			else $message.show();
+			if (timeout > 0) setTimeout(Webhard.message.hide,timeout * 1000);
+		},
+		/**
+		 * 메세지를 숨긴다.
+		 *
+		 * @param boolean animated 에니메이션 여부
+		 */
+		hide:function(animated) {
+			var animated = animated === false ? false : true;
+			var $message = $("div",Webhard.$message);
+			$message.fadeOut();
 		}
 	},
 	substring:function(str,length) {
