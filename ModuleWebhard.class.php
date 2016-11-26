@@ -82,6 +82,7 @@ class ModuleWebhard {
 		$this->table->compress = 'webhard_compress_table';
 		$this->table->file = 'webhard_file_table';
 		$this->table->favorite = 'webhard_favorite_table';
+		$this->table->link = 'webhard_link_table';
 		$this->table->share = 'webhard_share_table';
 		$this->table->share_log = 'webhard_share_log_table';
 	}
@@ -580,7 +581,7 @@ class ModuleWebhard {
 	}
 	
 	/**
-	 * 이름변경 생성 모달 컨텍스트를 가져온다.
+	 * 이름변경 모달 컨텍스트를 가져온다.
 	 *
 	 * @param object $target 이름을 변경할 대상객체
 	 * @return string $html 모달컨텍스트 HTML
@@ -606,6 +607,84 @@ class ModuleWebhard {
 		$content.= '<div data-role="input"><input type="text" name="name" value="'.$target->name.'"></div>';
 		
 		return $this->getTemplet()->getModal($title,$content);
+	}
+	
+	/**
+	 * 삭제 모달 컨텍스트를 가져온다.
+	 *
+	 * @param object $target 삭제할 객체
+	 * @todo 언어셋
+	 */
+	function getDeleteModal($target) {
+		$title = '휴지통으로 이동';
+		
+		$content = '<div data-role="message">'.str_replace('{COUNT}',count($target),'{COUNT}개의 파일/폴더를 휴지통으로 이동하시겠습니까?').'</div>';
+		
+		return $this->getTemplet()->getModal($title,$content);
+	}
+	
+	/**
+	 * 항목 이동/복사 에러 모달 컨텍스트를 가져온다.
+	 *
+	 * @param int $idx 에러가 발생한 객체순서
+	 * @param string $error 에러코드
+	 * @param object $item 에러가 발생한 항목
+	 */
+	function getDeleteErrorModal($idx,$error,$item) {
+		$title = $this->getErrorText('DELETE_FAILED');
+		
+		$content = PHP_EOL;
+		$content.= '<input type="hidden" name="idx" value="'.$idx.'">'.PHP_EOL;
+		$content.= '<input type="hidden" name="option" value="cancel">'.PHP_EOL;
+		
+		$content.= '<div data-role="message">';
+		if ($item != null) $content.= $this->getText('text/error_item').' : <b>'.($item->type == 'folder' ? '/' : '').$item->name.'</b><br><br>';
+		
+		$content.= $this->getErrorText($error);
+		
+		$buttons = array();
+		
+		if ($error == 'SHARED_ITEM' || $error == 'SHARED_FOLDER') {
+			$content.= '<br>'.$this->getText('text/confirm_shared_delete');
+			
+			$button = new stdClass();
+			$button->type = 'cancel';
+			$button->text = $this->getText('button/cancel');
+			$buttons[] = $button;
+			
+			$button = new stdClass();
+			$button->type = 'delete';
+			$button->class = 'danger';
+			$button->text = $this->getText('button/delete');
+			$buttons[] = $button;
+		} elseif ($error == 'LINKED_ITEM' || $error == 'LINKED_FOLDER') {
+			$content.= '<br>'.$this->getText('text/confirm_linked_delete');
+			
+			$button = new stdClass();
+			$button->type = 'cancel';
+			$button->text = $this->getText('button/cancel');
+			$buttons[] = $button;
+			
+			$button = new stdClass();
+			$button->type = 'delete';
+			$button->class = 'danger';
+			$button->text = $this->getText('button/delete');
+			$buttons[] = $button;
+		} else {
+			$button = new stdClass();
+			$button->type = 'cancel';
+			$button->class = 'submit';
+			$button->text = $this->getText('button/confirm');
+			$buttons[] = $button;
+		}
+		
+		if ($error == 'NOT_ALLOWED_MOVE_FOR_LOCK_ITEM' || $error == 'NOT_ALLOWED_DELETE_IN_TARGET') {
+			
+		} 
+		
+		$content.= '</div>';
+		
+		return $this->getTemplet()->getModal($title,$content,false,false,$buttons);
 	}
 	
 	/**
@@ -640,6 +719,7 @@ class ModuleWebhard {
 	 * 항목 이동/복사 에러 모달 컨텍스트를 가져온다.
 	 *
 	 * @param int $idx 에러가 발생한 객체순서
+	 * @param string $mode 이동/복사 여부
 	 * @param string $error 에러코드
 	 * @param object $item 에러가 발생한 항목
 	 * @return string $html 모달컨텍스트 HTML
@@ -651,7 +731,7 @@ class ModuleWebhard {
 		$content.= '<input type="hidden" name="idx" value="'.$idx.'">'.PHP_EOL;
 		$content.= '<input type="hidden" name="option" value="cancel">'.PHP_EOL;
 		
-		$content.= '<div class="text">';
+		$content.= '<div data-role="message">';
 		if ($item != null) $content.= $this->getText('text/error_item').' : <b>'.($item->type == 'folder' ? '/' : '').$item->name.'</b><br><br>';
 		
 		$content.= $this->getErrorText($error);
@@ -699,7 +779,7 @@ class ModuleWebhard {
 		$content.= '<input type="hidden" name="idx" value="'.$idx.'">'.PHP_EOL;
 		$content.= '<input type="hidden" name="option" value="cancel">'.PHP_EOL;
 		
-		$content.= '<div class="text">';
+		$content.= '<div data-role="message">';
 		$content.= $this->getText('text/confirm_duplicated');
 		
 		$detail = array(
@@ -754,7 +834,7 @@ class ModuleWebhard {
 		$content.= '<input type="hidden" name="idx" value="'.$idx.'">'.PHP_EOL;
 		$content.= '<input type="hidden" name="option" value="cancel">'.PHP_EOL;
 		
-		$content.= '<div class="text">';
+		$content.= '<div data-role="message">';
 		$content.= $this->getText('text/confirm_duplicated');
 		
 		if ($duplicated->status == 'DRAFT') {
@@ -913,6 +993,10 @@ class ModuleWebhard {
 			$folder->is_shared = $folder->is_shared == 'TRUE';
 			$folder->is_delete = $folder->is_delete == 'TRUE';
 			$folder->is_lock = $folder->is_lock == 'TRUE';
+			$folder->is_linked = $folder->linked != 0;
+			$folder->is_shared_file = $folder->is_shared_file == 'TRUE';
+			$folder->is_shared_child = $folder->is_shared_child == 'TRUE';
+			$folder->is_linked_child = $folder->is_linked_child == 'TRUE';
 			
 			$this->folders[$idx] = $folder;
 		}
@@ -1310,7 +1394,7 @@ class ModuleWebhard {
 	}
 	
 	/**
-	 * 폴더가 공유중인 폴더인지 확인한다.
+	 * 폴더 내부에 공유중인 항목이 있는지 확인한다.
 	 *
 	 * @param int $idx 폴더 고유번호
 	 * @param boolean $isShared
@@ -1322,10 +1406,92 @@ class ModuleWebhard {
 		if ($folder->parent == 0) {
 			$this->shareds[$idx] = false;
 		} else {
-			$this->shareds[$idx] = $folder->linked > 0 || $folder->is_shared == true || $this->checkFolderShared($folder->parent);
+			$this->shareds[$idx] = $folder->is_shared == true || $folder->is_shared_file == true || $folder->is_shared_child == true;
+			
 		}
 		
 		return $this->shareds[$idx];
+	}
+	
+	/**
+	 * 폴더공유상태를 업데이트한다.
+	 *
+	 * @param int $idx 폴더고유번호
+	 */
+	function updateFolderShared($idx) {
+		$folder = $this->getFolder($idx);
+		
+		if ($folder == null) return;
+		
+		$is_parent = false;
+		if ($this->db()->select($this->table->folder)->where('linked',$folder->idx)->has() == true) {
+			if ($folder->is_shared == false) {
+				$this->db()->update($this->table->folder,array('is_shared'=>'TRUE'))->where('idx',$folder->idx)->execute();
+				$is_parent = true;
+			}
+		} else {
+			if ($folder->is_shared == true) {
+				$this->db()->update($this->table->folder,array('is_shared'=>'FALSE'))->where('idx',$folder->idx)->execute();
+				$is_parent = true;
+			}
+		}
+		
+		if ($this->db()->select($this->table->folder)->where('is_shared_file','TRUE')->where('parent',$folder->idx)->has() == true || $this->db()->select($this->table->file)->where('is_shared','TRUE')->where('folder',$folder->idx)->has() == true) {
+			if ($folder->is_shared_file == false) {
+				$this->db()->update($this->table->folder,array('is_shared_file'=>'TRUE'))->where('idx',$folder->idx)->execute();
+				$is_parent = true;
+			}
+		} else {
+			if ($folder->is_shared_file == true) {
+				$this->db()->update($this->table->folder,array('is_shared_file'=>'FALSE'))->where('idx',$folder->idx)->execute();
+				$is_parent = true;
+			}
+		}
+		
+		if ($this->db()->select($this->table->folder)->where('is_shared_child','TRUE')->where('parent',$folder->idx)->has() == true || $this->db()->select($this->table->folder)->where('is_shared','TRUE')->where('parent',$folder->idx)->has() == true) {
+			if ($folder->is_shared_child == false) {
+				$this->db()->update($this->table->folder,array('is_shared_child'=>'TRUE'))->where('idx',$folder->idx)->execute();
+				$is_parent = true;
+			}
+		} else {
+			if ($folder->is_shared_child == true) {
+				$this->db()->update($this->table->folder,array('is_shared_child'=>'FALSE'))->where('idx',$folder->idx)->execute();
+				$is_parent = true;
+			}
+		}
+		
+		if ($is_parent == true || $folder->parent != 0) $this->updateFolderShared($folder->parent);
+	}
+	
+	/**
+	 * 공유받은 폴더상태를 업데이트한다.
+	 *
+	 * @param int $idx 폴더고유번호
+	 */
+	function updateFolderLinked($idx) {
+		$folder = $this->getFolder($idx);
+		
+		if ($folder == null) return;
+		
+		$is_parent = false;
+		if ($this->db()->select($this->table->folder)->where('is_linked_child','TRUE')->where('parent',$folder->idx)->has() == true || $this->db()->select($this->table->folder)->where('linked',0,'!=')->where('parent',$folder->idx)->has() == true) {
+			if ($folder->is_linked_child == false) {
+				$this->db()->update($this->table->folder,array('is_linked_child'=>'TRUE'))->where('idx',$folder->idx)->execute();
+				$is_parent = true;
+			}
+		} else {
+			if ($folder->is_linked_child == true) {
+				$this->db()->update($this->table->folder,array('is_linked_child'=>'FALSE'))->where('idx',$folder->idx)->execute();
+				$is_parent = true;
+			}
+		}
+		
+		if ($folder->parent != 0) {
+			$parent = $this->getFolder($folder->parent);
+			if ($parent->is_linked_child != $folder->is_linked) $is_parent = true;
+		}
+		
+		if ($is_parent == true || $folder->parent != 0) $this->updateFolderLinked($folder->parent);
 	}
 	
 	/**
@@ -1359,6 +1525,130 @@ class ModuleWebhard {
 	}
 	
 	/**
+	 * 폴더를 휴지통으로 보낸다.
+	 * 폴더를 휴지통으로 보낼때, 폴더내부의 모든 공유를 삭제하고, 폴더내부의 모든 파일의 즐겨찾기를 제거한다.
+	 *
+	 * @param int $idx 폴더고유번호
+	 * @return boolean $isDelete
+	 */
+	function deleteFolder($idx,$owner=null) {
+		$folder = $this->getFolder($idx);
+		
+		/**
+		 * 공유받은 폴더의 경우
+		 */
+		if ($folder->is_linked == true) {
+			$this->db()->delete($this->table->folder)->where('idx',$folder->idx)->execute();
+			$this->addActivity('UNLINK',$folder[$i]->parent,$folder,time());
+			
+			/**
+			 * 공유받은 폴더중 내가 즐겨찾기 한 파일이 있을 경우 삭제한다.
+			 */
+			$files = $this->db()->select($this->table->file)->where('folder',$folder->linked)->get();
+			for ($i=0, $loop=count($files);$i<$loop;$i++) {
+				$this->db()->delete($this->table->favorite)->where('midx',$folder->owner)->where('type','FILE')->where('fidx',$files[$i]->idx)->execute();
+			}
+			
+			/**
+			 * 공유받은 폴더중 내가 즐겨찾기 한 폴더가 있으면 삭제한다.
+			 */
+			$folders = $this->db()->select($this->table->folder)->where('parent',$folder->linked)->get();
+			for ($i=0, $loop=count($folders);$i<$loop;$i++) {
+				$this->db()->delete($this->table->favorite)->where('midx',$folder->owner)->where('type','FOLDER')->where('fidx',$folders[$i]->idx)->execute();
+				
+				/**
+				 * 현 폴더내부의 즐겨찾기 제거
+				 */
+				$this->deleteFolder($folders[$i]->idx,$folder->owner);
+			}
+			
+			return;
+		}
+		
+		
+		if ($owner !== null) {
+			/**
+			 * 공유받은 폴더중 내가 즐겨찾기 한 파일이 있을 경우 삭제한다.
+			 */
+			$files = $this->db()->select($this->table->file)->where('folder',$folder->idx)->get();
+			for ($i=0, $loop=count($files);$i<$loop;$i++) {
+				$this->db()->delete($this->table->favorite)->where('midx',$owner)->where('type','FILE')->where('fidx',$files[$i]->idx)->execute();
+			}
+			
+			/**
+			 * 공유받은 폴더중 내가 즐겨찾기 한 폴더가 있으면 삭제한다.
+			 */
+			$folders = $this->db()->select($this->table->folder)->where('parent',$folder->idx)->get();
+			for ($i=0, $loop=count($folders);$i<$loop;$i++) {
+				$this->db()->delete($this->table->favorite)->where('midx',$owner)->where('type','FOLDER')->where('fidx',$folders[$i]->idx)->execute();
+				
+				/**
+				 * 현 폴더내부의 즐겨찾기 제거
+				 */
+				$this->deleteFolder($folders[$i]->idx,$owner);
+			}
+			
+			return;
+		}
+		
+		/**
+		 * 공유해준 폴더를 모두 삭제한다.
+		 */
+		$shared = $this->db()->select($this->table->folder)->where('linked',$folder->idx)->get();
+		for ($i=0, $loop=count($shared);$i<$loop;$i++) {
+			$this->db()->delete($this->table->folder)->where('idx',$shared[$i]->idx)->execute();
+			$this->db()->delete($this->table->favorite)->where('type','FOLDER')->where('fidx',$shared[$i]->idx)->execute();
+			$this->addActivity('UNLINKED',$shared[$i]->parent,$shared[$i],time());
+			$this->updateFolderLinked($shared[$i]->parent);
+		}
+		
+		/**
+		 * 공유요청을 모두 삭제한다.
+		 */
+		$this->db()->delete($this->table->link)->where('fidx',$folder->idx)->execute();
+		
+		/**
+		 * 공유받은 폴더를 모두 삭제한다.
+		 */
+		$linked = $this->db()->select($this->table->folder)->where('linked',0,'!=')->where('parent',$folder->idx)->get();
+		for ($i=0, $loop=count($linked);$i<$loop;$i++) {
+			$this->db()->delete($this->table->folder)->where('idx',$linked[$i]->idx)->execute();
+			$this->db()->delete($this->table->favorite)->where('type','FOLDER')->where('fidx',$linked[$i]->idx)->execute();
+			$this->addActivity('UNLINK',$linked[$i]->linked,$linked[$i],time());
+			$this->updateFolderShared($linked[$i]->linked);
+		}
+		
+		/**
+		 * 즐겨찾기에서 해당 폴더를 제거한다.
+		 */
+		$this->db()->delete($this->table->favorite)->where('type','FOLDER')->where('fidx',$folder->idx)->execute();
+		
+		/**
+		 * 폴더내부 파일에 대한 처리
+		 */
+		$files = $this->db()->select($this->table->file)->where('folder',$folder->idx)->get();
+		for ($i=0, $loop=count($files);$i<$loop;$i++) {
+			$this->db()->delete($this->table->share)->where('fidx',$files[$i]->idx)->execute();
+			if ($files[$i]->is_shared == 'TRUE') {
+				$this->db()->update($this->table->file,array('is_shared'=>'FALSE'))->where('idx',$files[$i]->idx)->execute();
+				$this->addActivity('UNSHARE_FILE',$files[$i]->idx,$files[$i],time());
+			}
+			
+			$this->db()->delete($this->table->favorite)->where('type','FILE')->where('fidx',$files[$i]->idx)->execute();
+		}
+		
+		$this->db()->update($this->table->folder,array('is_shared'=>'FALSE','is_shared_file'=>'FALSE','is_shared_child'=>'FALSE','is_linked_child'=>'FALSE'))->where('idx',$folder->idx)->execute();
+		
+		/**
+		 * 자식폴더에 대한 처리
+		 */
+		$children = $this->db()->select($this->table->folder)->where('parent',$folder->idx)->get();
+		for ($i=0, $loop=count($children);$i<$loop;$i++) {
+			$this->deleteFolder($children[$i]->idx);
+		}
+	}
+	
+	/**
 	 * 활동내역을 기록한다.
 	 *
 	 * @param string $type 활동분류
@@ -1379,8 +1669,8 @@ class ModuleWebhard {
 			for ($i=0, $loop=count($datas);$i<$loop;$i++) {
 				if ($datas[$i]->idx > 0) {
 					$file = $this->db()->select($this->table->file,'idx,name,type,size,update_date')->where('idx',$datas[$i]->idx)->getOne();
-					if ($datas[$i]->duplicatedOption == 'replace') $this->recordActivity('REPLACE_FILE',$file->idx,$file);
-					elseif ($datas[$i]->duplicatedOption == null) $this->recordActivity('CREATE_FILE',$file->idx,$file);
+					if ($datas[$i]->duplicatedOption == 'replace') $this->addActivity('REPLACE_FILE',$file->idx,$file);
+					elseif ($datas[$i]->duplicatedOption == null) $this->addActivity('CREATE_FILE',$file->idx,$file);
 					
 					if ($datas[$i]->duplicatedOption == null || $datas[$i]->duplicatedOption == 'replace') {
 						$data->files[] = $file;
@@ -1408,10 +1698,10 @@ class ModuleWebhard {
 			
 			$data->items = array();
 			for ($i=0, $loop=count($datas);$i<$loop;$i++) {
-				if ($datas[$i]->deleted == true) {
+				if ($datas[$i]->success == true) {
 					if ($datas[$i]->type == 'folder') {
 						$folder = $this->db()->select($this->table->folder)->where('idx',$datas[$i]->idx)->getOne();
-						$this->recordActivity('DELETE_FOLDER',$folder->idx,$folder);
+						$this->addActivity('DELETE_FOLDER',$folder->idx,$folder);
 						
 						$item = new stdClass();
 						$item->type = 'folder';
@@ -1420,7 +1710,7 @@ class ModuleWebhard {
 						$item->size = $folder->size;
 					} else {
 						$file = $this->db()->select($this->table->file)->where('idx',$datas[$i]->idx)->getOne();
-						$this->recordActivity('DELETE_FILE',$file->idx,$file);
+						$this->addActivity('DELETE_FILE',$file->idx,$file);
 						
 						$item = new stdClass();
 						$item->type = $file->type;

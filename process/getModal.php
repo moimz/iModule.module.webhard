@@ -37,7 +37,7 @@ if ($modal == 'create') {
 }
 
 /**
- * 이름변경
+ * 이름변경 모달
  */
 if ($modal == 'rename') {
 	$type = Request('type');
@@ -74,6 +74,15 @@ if ($modal == 'rename') {
 			$results->modalHtml = $this->getRenameModal($file);
 		}
 	}
+}
+
+/**
+ * 삭제 모달
+ */
+if ($modal == 'delete') {
+	$select = json_decode(Request('select'));
+	$results->success = true;
+	$results->modalHtml = $this->getDeleteModal($select);
 }
 
 /**

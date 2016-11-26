@@ -186,6 +186,16 @@
 					"length":"'TRUE','FALSE'",
 					"default":"FALSE"
 				},
+				"is_shared_child":{
+					"type":"enum",
+					"length":"'TRUE','FALSE'",
+					"default":"FALSE"
+				},
+				"is_linked_child":{
+					"type":"enum",
+					"length":"'TRUE','FALSE'",
+					"default":"FALSE"
+				},
 				"is_lock":{
 					"type":"enum",
 					"length":"'TRUE','FALSE'",
@@ -343,11 +353,40 @@
 			},
 			"auto_increment":"idx"
 		},
+		"webhard_link_table":{
+			"columns":{
+				"hash":{
+					"type":"char",
+					"length":32
+				},
+				"fidx":{
+					"type":"int",
+					"length":11
+				},
+				"email":{
+					"type":"varchar",
+					"length":100,
+					"is_null":true
+				},
+				"reg_date":{
+					"type":"int",
+					"length":11
+				}
+			},
+			"indexes":{
+				"hash":"primary_key",
+				"fidx":"index"
+			}
+		},
 		"webhard_share_table":{
 			"columns":{
 				"hash":{
 					"type":"char",
 					"length":32
+				},
+				"midx":{
+					"type":"int",
+					"length":11
 				},
 				"type":{
 					"type":"enum",

@@ -24,7 +24,7 @@ if ($this->checkFolderDeleted($idx) == true) {
 	$results->message = $this->getErrorText('NOT_FOUND_FOLDER');
 	$results->path = $path;
 } else {
-	$tree = $this->db()->select($this->table->folder)->where('parent',$idx);
+	$tree = $this->db()->select($this->table->folder)->where('parent',$idx)->where('is_delete','FALSE');
 	if ($this->checkFolderPermission($idx,'R') == false) $tree->where('creator',$this->IM->getModule('member')->getLogged());
 	$tree = $tree->orderBy('name','asc')->get();
 
@@ -42,7 +42,7 @@ if ($this->checkFolderDeleted($idx) == true) {
 		$tree[$i]->is_lock = $tree[$i]->is_lock == 'TRUE';
 		$tree[$i]->is_writable = $this->checkFolderPermission($tree[$i]->idx,'W');
 		$tree[$i]->is_deletable = $this->checkFolderPermission($tree[$i]->idx,'D');
-		$tree[$i]->is_shared = $this->checkFolderShared($tree[$i]->idx);
+		$tree[$i]->is_shared = $tree[$i]->is_shared == true || $tree[$i]->is_linked == true; 
 	}
 	
 	$results->success = true;

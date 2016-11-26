@@ -46,7 +46,7 @@ if ($folder == null || $this->checkFolderDeleted($target) == true) {
 				}
 				
 				if (in_array($folder->idx,$parents) == true) {
-					$results->modalHtml = $this->getMoveErrorModal($i,$select[$i]->mode,'NOT_FOUND',$select[$i]);
+					$results->modalHtml = $this->getMoveErrorModal($i,$select[$i]->mode,'NOT_ALLOWED_MOVE_TO_PARENT_TO_CHILD',$select[$i]);
 					break;
 				}
 				

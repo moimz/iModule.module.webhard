@@ -124,7 +124,7 @@ var Webhard = {
 			if (e.originalEvent.state != null && e.originalEvent.state.view && e.originalEvent.state.path) {
 				var view = e.originalEvent.state.view;
 				var idx = e.originalEvent.state.idx;
-				var path = e.originalEvent.state.idx;
+				var path = e.originalEvent.state.path;
 				
 				if (view == "folder") {
 					Webhard.explorer.folder(idx,path,null,true);
@@ -1542,7 +1542,7 @@ var Webhard = {
 		 * @param boolean pushState 사용여부
 		 */
 		folder:function(idx,path,callback,isPushState) {
-			if (location.pathname == ENV.getUrl(null,null,"folder",path.split("/").slice(1).join("/"))) {
+			if (idx == Webhard.explorer.getFolderIdx()) {
 				Webhard.explorer.reload(callback);
 				return;
 			}
@@ -2400,6 +2400,74 @@ var Webhard = {
 					}
 				}
 			});
+		},
+		/**
+		 * 선택항목 삭제하기
+		 */
+		deleteItem:null,
+		delete:function($form) {
+			if (typeof $form == "object" && $form.is("form") == true) {
+				$form.status("loading");
+				
+				$.send(ENV.getProcessUrl("webhard","delete"),{select:JSON.stringify(Webhard.explorer.deleteItem)},function(result) {
+					if (result.success == true) {
+						Webhard.explorer.deleteItem = result.select;
+						
+						if (result.modalHtml) {
+							iModule.modal.showHtml(result.modalHtml,function($modal,$form) {
+								$("button[data-action]",$form).on("click",function() {
+									var idx = parseInt($("input[name=idx]",$form).val());
+									
+									Webhard.explorer.deleteItem[idx].deleteOption = $(this).attr("data-action");
+									
+									$(this).status("loading");
+									$("button",$form).disable();
+									$form.submit();
+								});
+								$form.inits(Webhard.explorer.delete);
+								
+								return false;
+							});
+						} else {
+							for (var i=0, loop=result.select.length;i<loop;i++) {
+								if (result.select[i].success == true) {
+									$("div[data-role=file-item][data-type="+result.select[i].type+"][data-idx="+result.select[i].idx+"]",Webhard.$files).remove();
+									
+									if (result.select[i].type == "folder") {
+										$("li[data-idx="+result.select[i].idx+"]",Webhard.$tree).remove();
+									}
+								}
+							}
+							
+							iModule.modal.close();
+						}
+					}
+				});
+			} else {
+				var items = Webhard.explorer.getSelected();
+				
+				if (items.length == 0) {
+					Webhard.message.show("error",Webhard.getText("NOT_SELECTED_ITEM"),5);
+					return;
+				}
+				
+				Webhard.explorer.deleteItem = [];
+				for (var i=0, loop=items.length;i<loop;i++) {
+					var item = {};
+					item.type = items[i].type;
+					item.idx = items[i].idx;
+					item.name = items[i].name;
+					item.deleteOption = null;
+					item.success = null;
+					
+					Webhard.explorer.deleteItem.push(item);
+				}
+				
+				iModule.modal.get(ENV.getProcessUrl("webhard","getModal"),{modal:"delete",select:JSON.stringify(Webhard.explorer.deleteItem)},function($modal,$form) {
+					$form.inits(Webhard.explorer.delete);
+					return false;
+				});
+			}
 		},
 		link:function($form) {
 			if ($form && typeof $form == "string") {
