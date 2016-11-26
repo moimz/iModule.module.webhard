@@ -202,7 +202,8 @@ div[data-module=webhard] ul[data-role=contextmenu] > li.divide {width:calc(100% 
 div[data-module=webhard] ul[data-role=contextmenu] > li > button[data-action=create] > i:before {content:"\ec14";}
 div[data-module=webhard] ul[data-role=contextmenu] > li > button[data-action=show_favorite] > i:before {content:"\ec05"; color:#008be9;}
 div[data-module=webhard] ul[data-role=contextmenu] > li > button[data-action=show_all] > i:before {content:"\ec07";}
-
+div[data-module=webhard] ul[data-role=contextmenu] > li > button[data-action=delete] > i:before {content:"\ec16";}
+div[data-module=webhard] ul[data-role=contextmenu] > li > button[data-action=download] > i:before {content:"\ec11";}
 
 
 /**

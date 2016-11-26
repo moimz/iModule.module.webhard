@@ -33,7 +33,8 @@
 		"show_all":"전체 파일보기",
 		"rename":"이름 변경하기",
 		"delete":"휴지동으로 이동",
-		"remove":"완전삭제"
+		"remove":"완전삭제",
+		"download":"항목 다운로드"
 	},
 	"sort":{
 		"name":"이름",
@@ -79,7 +80,9 @@
 		"SHARED_ITEM":"다른사용자와 공유중인 항목입니다.",
 		"SHARED_FOLDER":"폴더 내부에 다른사용자와 공유중인 항목이 있습니다.",
 		"LINKED_ITEM":"다른사용자로부터 공유받은 항목입니다.",
-		"LINKED_FOLDER":"폴더 내부에 다른사용자로부터 공유받은 항목이 있습니다."
+		"LINKED_FOLDER":"폴더 내부에 다른사용자로부터 공유받은 항목이 있습니다.",
+		"DRAFT_FILE":"업로드중인 항목입니다.",
+		"COMPRESS_FAILED":"파일압축에 실패하였습니다. 잠시 후 다시 시도하여 주십시오."
 	},
 	"admin":{
 		"contexts":{

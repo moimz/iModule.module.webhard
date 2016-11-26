@@ -1350,15 +1350,6 @@ var Webhard = {
 			});
 			
 			/**
-			 * 파일목록창에서 스크롤 되었을 경우 드래그선택레이어를 업데이트한다.
-			 */
-			Webhard.$files.on("scroll",function(e) {
-				if (Webhard.explorer.selectStart != null) {
-					Webhard.explorer.selectMove();
-				}
-			});
-			
-			/**
 			 * 현재폴더 항목을 불러온다.
 			 */
 			if (Webhard.explorer.getView() == "folder") {
@@ -2127,21 +2118,16 @@ var Webhard = {
 			});
 		},
 		/**
-		 * @todo 선택된 파일 다운로드
+		 * 선택된 파일 다운로드
 		 */
 		download:function() {
-			return;
 			if (Webhard.explorer.getSelected().length == 0) {
-				alert("다운로드받을 항목을 선택하여 주십시오.");
+				Webhard.message.show("error",Webhard.getErrorText("NOT_SELECTED_ITEM"),5);
 				return;
 			}
 			
-			if (Webhard.explorer.getSelected().length == 1 && Webhard.explorer.getSelected()[0].indexOf("/") == -1) {
-				if (Webhard.explorer.getSelected(true)[0].status == "DRAFT") {
-					alert("업로드가 완료되지 않은 파일은 다운로드 받으실 수 없습니다.");
-				} else {
-					window.location = ENV.getProcessUrl("webhard","download")+"?idx="+Webhard.explorer.getSelected()[0];
-				}
+			if (Webhard.explorer.getSelected().length == 1 && Webhard.explorer.getSelected()[0].type == "file") {
+				Webhard.download.download(Webhard.explorer.getSelected()[0].idx);
 			} else {
 				Webhard.download.compress(Webhard.explorer.getSelected());
 			}
@@ -2439,6 +2425,7 @@ var Webhard = {
 								}
 							}
 							
+							Webhard.explorer.deleteItem = null;
 							iModule.modal.close();
 						}
 					}
@@ -3593,6 +3580,78 @@ var Webhard = {
 					$form.inits(Webhard.upload.cancelAll);
 				});
 			}
+		}
+	},
+	/**
+	 * 항목을 다운로드한다.
+	 */
+	download:{
+		/**
+		 * 특정 파일 한개를 다운로드한다.
+		 *
+		 * @param int idx 다운로드받을 항목고유번호
+		 */
+		download:function(idx) {
+			$.send(ENV.getProcessUrl("webhard","getItem"),{type:"file",idx:idx},function(result) {
+				if (result.item.permission.indexOf("R") == -1) {
+					Webhard.message.show("error",Webhard.getErrorText("FORBIDDEN"));
+				} else if (result.item.status == "DRAFT") {
+					Webhard.message.show("error",Webhard.getErrorText("DRAFT_FILE"));
+				} else {
+					window.open(result.item.download);
+				}
+			});
+		},
+		/**
+		 * 다중파일 또는 폴더를 압축한다.
+		 *
+		 * @param object[] files 압축할 대상
+		 */
+		compress:function(files) {
+			iModule.disable(true);
+			
+			$.send(ENV.getProcessUrl("webhard","compress"),{mode:"start",files:JSON.stringify(files)},function(result) {
+				if (result.success == true) {
+					Webhard.download.compressing(result.hash);
+				} else {
+					if (result.message) Webhard.message.show("error",result.message,5);
+					iModule.enable();
+				}
+			});
+		},
+		/**
+		 * 압축 진행률 출력한다.
+		 *
+		 * @param string hash 압축해시
+		 */
+		compressing:function(hash) {
+			$.ajax({
+				url:ENV.getProcessUrl("webhard","compress"),
+				method:"POST",
+				data:{mode:"compress",hash:hash},
+				xhr:function() {
+					var xhr = $.ajaxSettings.xhr();
+					
+					xhr.addEventListener("progress",function(e) {
+						console.log(e);
+						if (e.lengthComputable) {
+							iModule.alert.progress("ModuleWebhardDownload",e.loaded,e.total);
+						}
+					});
+	
+					return xhr;
+				},
+				success:function() {
+					setTimeout(function() {
+						window.open(ENV.getProcessUrl("webhard","compress")+"?mode=download&hash="+hash);
+						iModule.enable();
+					},1000);
+				},
+				error:function() {
+					Webhard.message.show("error",Webhard.getErrorText('COMPRESS_FAILED'),5);
+					iModule.enable();
+				}
+			});
 		}
 	},
 	/**

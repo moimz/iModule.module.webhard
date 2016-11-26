@@ -1014,7 +1014,7 @@ class ModuleWebhard {
 		if (is_object($idx) == true) {
 			$folder = $idx;
 		} else {
-			$folder = $this->getFolder();
+			$folder = $this->getFolder($idx);
 		}
 		
 		$meta = new stdClass();
@@ -1028,6 +1028,7 @@ class ModuleWebhard {
 		$meta->size = $folder->size;
 		$meta->date = $folder->update_date;
 		$meta->status = 'PUBLISHED';
+		$meta->download = $this->IM->getModuleUrl('webhard','compress',$folder->idx.'/'.$folder->name,true);
 		
 		return $meta;
 	}
@@ -1235,6 +1236,8 @@ class ModuleWebhard {
 			$meta->preview = $this->getFileUrl($file,'thumbnail');
 		}
 		
+		$meta->download = $this->getFileUrl($file,'download');
+		
 		return $meta;
 	}
 	
@@ -1262,7 +1265,7 @@ class ModuleWebhard {
 //			$code = Encoder(json_encode($code));
 
 			$idx = $file->idx.'/'.$file->name;
-			return $this->IM->getModuleUrl('webhard','thumbnail',$idx,$isFullUrl);
+			return $this->IM->getModuleUrl('webhard',$view,$idx,$isFullUrl);
 		}
 	}
 	
@@ -1932,6 +1935,41 @@ class ModuleWebhard {
 	 * @param int $idx 폴더고유번호
 	 */
 	function updateFolder($idx) {
+	}
+	
+	/**
+	 * 폴더 내부의 모든 파일을 압축한다.
+	 *
+	 * @param int $folder 폴더 고유번호
+	 * @param string $base 압축파일내 기본폴더
+	 */
+	function compressFolder($folder,$base=null) {
+		$folder = $this->db()->select($this->table->folder)->where('idx',$folder)->getOne();
+		if ($folder == null) return array();
+		
+		$path = $base == null ? $folder->name : $base.'/'.$folder->name;
+		
+		$folders = $this->db()->select($this->table->folder)->where('parent',$folder->linked == 0 ? $folder->idx : $folder->linked);
+		$files = $this->db()->select($this->table->file)->where('folder',$folder->linked == 0 ? $folder->idx : $folder->linked);
+		if ($this->checkFolderPermission($folder->idx,'R') == false) {
+			$folders->where('creator',$this->IM->getModule('member')->getLogged());
+			$files->where('creator',$this->IM->getModule('member')->getLogged());
+		}
+		$folders = $folders->where('is_delete','FALSE')->get();
+		$files = $files->where('is_delete','FALSE')->get();
+		
+		$children = array();
+		for ($i=0, $loop=count($folders);$i<$loop;$i++) {
+			$children = array_merge($children,$this->compressFolder($folders[$i]->idx,$path));
+		}
+		
+		$children[] = $path.'/0';
+		for ($i=0, $loop=count($files);$i<$loop;$i++) {
+			if ($files[$i]->status == 'DRAFT') continue;
+			$children[] = $path.'/'.$files[$i]->idx;
+		}
+		
+		return $children;
 	}
 	
 	/**
