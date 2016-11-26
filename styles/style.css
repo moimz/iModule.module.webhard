@@ -70,6 +70,7 @@ div[data-module=webhard] div[data-role=headerbar] button[data-action=select].sel
 div[data-module=webhard] div[data-role=headerbar] button[data-action=favorite] {display:inline-block; padding:0px; width:16px; height:16px; background:transparent; vertical-align:middle; cursor:pointer; font-family:moimz; speak:none; font-style:normal; font-weight:400; font-variant:normal; text-transform:none; line-height:1; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-align:center; font-size:14px; color:#999; border:0px;}
 div[data-module=webhard] div[data-role=headerbar] button[data-action=favorite]:before {content:"\ec05";}
 div[data-module=webhard] div[data-role=headerbar] button[data-action=favorite].selected {color:#008be9;}
+
 /**
  * 탐색기 > 파일목록
  */
@@ -190,6 +191,21 @@ div[data-module=webhard] div[data-role=dragging] > label {display:block; max-hei
 div[data-module=webhard] div[data-role=dragging] > label > span {display:inline-block; line-height:16px; text-align:center; color:#fff; background:#0089f0; border-radius:3px; padding:4px;}
 
 /**
+ * 컨텍스트메뉴
+ */
+div[data-module=webhard] ul[data-role=contextmenu] {position:absolute; top:0; left:0; z-index:1000; border:1px solid #cacbcc; box-shadow:1px 1px 3px rgba(0,0,0,0.2); background:#fff; max-width:340px; list-style:none; font-size:10px;}
+div[data-module=webhard] ul[data-role=contextmenu] > li > button {width:100%; height:30px; font-size:12px; border:0px; background:transparent; text-align:left; font-size:0; color:#333; cursor:pointer;}
+div[data-module=webhard] ul[data-role=contextmenu] > li > button > i {width:30px; height:30px; display:inline-block; vertical-align:middle; line-height:30px; font-size:12px; font-family:moimz; speak:none; font-style:normal; font-weight:400; font-variant:normal; text-transform:none; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-align:center; color:#666;}
+div[data-module=webhard] ul[data-role=contextmenu] > li > button > span {width:calc(100% - 30px); height:30px; display:inline-block; line-height:30px; font-size:12px; padding-right:10px; box-sizing:border-box; vertical-align:middle; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;}
+div[data-module=webhard] ul[data-role=contextmenu] > li > button:hover {background:#f4f4f4;}
+div[data-module=webhard] ul[data-role=contextmenu] > li.divide {width:calc(100% - 4px); height:1px; margin:0px 2px; background:#cacbcc;}
+div[data-module=webhard] ul[data-role=contextmenu] > li > button[data-action=create] > i:before {content:"\ec14";}
+div[data-module=webhard] ul[data-role=contextmenu] > li > button[data-action=show_favorite] > i:before {content:"\ec05"; color:#008be9;}
+div[data-module=webhard] ul[data-role=contextmenu] > li > button[data-action=show_all] > i:before {content:"\ec07";}
+
+
+
+/**
  * 상세정보
  */
 div[data-module=webhard] aside[data-role=detail] {display:none;}
@@ -279,7 +295,7 @@ div[data-module=webhard] i.icon[data-extension^=pdf] {background-image:url(../im
 /**
  * 모바일 > 컨테이너
  */
-div[data-module=webhard][data-mobile=TRUE] button[data-action=add] {display:block; background:#2196f3; color:#fff; width:50px; height:50px; border-radius:50%; border:0px; box-shadow:1px 1px 2px rgba(0,0,0,0.3); position:absolute; right:20px; bottom:20px; z-index:10;}
+div[data-module=webhard][data-mobile=TRUE] button[data-action=add] {display:block; background:#2196f3; color:#fff; width:50px; height:50px; border-radius:50%; border:0px; box-shadow:1px 1px 2px rgba(0,0,0,0.3); position:absolute; right:20px; bottom:20px; z-index:100;}
 div[data-module=webhard][data-mobile=TRUE] button[data-action=add] > i {display:block; width:50px; height:50px; line-height:50px; font-family:moimz; speak:none; font-style:normal; font-weight:400; font-variant:normal; text-transform:none; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-align:center; font-size:24px;}
 div[data-module=webhard][data-mobile=TRUE] button[data-action=add] > i:before {content:"\eb00";}
 
@@ -321,6 +337,7 @@ div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-rol
 /**
  * 모바일 > 탐색기 > 파일목록(공통) > 항목
  */
+div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] {overflow:visible;}
 div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.checkbox {display:none;}
 
 div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.checkbox > button {width:100%; height:100%; background:rgba(0,0,0,0.3); border-radius:50%; border:0;}
@@ -329,6 +346,7 @@ div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.favori
 div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.more {display:block;}
 div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.more > button {font-family:moimz; speak:none; font-style:normal; font-weight:400; font-variant:normal; text-transform:none; line-height:1; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-align:center; color:#666; font-size:20px; text-align:center; width:100%; height:100%;}
 div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.more > button:before {content:"\eb11";}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.more > ul[data-role=contextmenu] + button {background:black;}
 div[data-module=webhard][data-mobile=TRUE][data-mobile-select=TRUE] div[data-role=file-item] > div.checkbox {display:block;}
 div[data-module=webhard][data-mobile=TRUE][data-mobile-select=TRUE] div[data-role=file-item].selected > div.checkbox > button {background:rgba(27, 180, 238,0.8);}
 
@@ -350,6 +368,7 @@ div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=fil
 div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] > div.size {display:none;}
 div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] > div.more {width:38px; height:38px; position:absolute; right:7px; bottom:10px; z-index:20;}
 div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item].selected > div.name {background:#0089f0; border-color:#0089f0;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item].selected > div.more > button {color:#fff;}
 
 /**
  * 모바일 > 탐색기 > 파일목록(목록보기) > 항목
@@ -373,6 +392,14 @@ div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=fil
 div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item] > div.more > button {line-height:60px;}
 div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=file-item].selected {background:#e5e5e5; color:#222;}
 
+/**
+ * 모바일 > 컨텍스트메뉴
+ */
+div[data-module=webhard][data-mobile=TRUE] ul[data-role=contextmenu] > li > button {height:46px; font-size:12px; padding:8px 0px;}
+div[data-module=webhard][data-mobile=TRUE] ul[data-role=contextmenu] > li > button > i {font-size:13px; width:40px;}
+div[data-module=webhard][data-mobile=TRUE] ul[data-role=contextmenu] > li > button > span {font-size:13px; width:calc(100% - 40px);}
+div[data-module=webhard][data-mobile=TRUE] ul[data-role=contextmenu] > li.divide {width:calc(100% - 20px); margin:0px 10px;}
+
 @media (max-width:991px) {
 	div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] {width:25%;}
 }
@@ -383,4 +410,13 @@ div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=fil
 
 @media (max-width:400px) {
 	div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] {width:50%;}
+	
+	/**
+	 * 모바일 > 컨텍스트메뉴
+	 */
+	div[data-module=webhard][data-mobile=TRUE] ul[data-role=contextmenu] {position:fixed; top:auto; left:auto; bottom:0; right:auto; border:0px; border-top:1px solid #cacbcc; box-shadow:0px 0px 5px rgba(0,0,0,0.3); max-width:100%; width:100%;}
+	div[data-module=webhard] ul[data-role=contextmenu] > li > button {height:50px; font-size:12px; padding:10px 0px;}
+	div[data-module=webhard] ul[data-role=contextmenu] > li > button > i {font-size:13px; width:50px;}
+	div[data-module=webhard] ul[data-role=contextmenu] > li > button > span {font-size:13px; width:calc(100% - 50px);}
+	div[data-module=webhard] ul[data-role=contextmenu] > li.divide {width:calc(100% - 20px); margin:0px 10px;}
 }

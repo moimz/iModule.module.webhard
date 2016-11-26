@@ -24,7 +24,7 @@ $folder = $this->db()->select($this->table->folder)->where('idx',$parent)->getOn
 if ($this->IM->getModule('member')->isLogged() == false) {
 	$results->success = false;
 	$results->message = $this->getErrorText('REQUIRED_LOGIN');
-} elseif ($folder == null) {
+} elseif ($folder == null || $this->checkFolderDeleted($folder->idx)) {
 	$results->success = false;
 	$results->message = $this->getErrorText('NOT_FOUND_FOLDER');
 } elseif ($this->checkFolderPermission($folder->idx,'W') == false) {

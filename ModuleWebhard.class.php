@@ -580,6 +580,35 @@ class ModuleWebhard {
 	}
 	
 	/**
+	 * 이름변경 생성 모달 컨텍스트를 가져온다.
+	 *
+	 * @param object $target 이름을 변경할 대상객체
+	 * @return string $html 모달컨텍스트 HTML
+	 * @todo 언어셋
+	 */
+	function getRenameModal($target) {
+		$title = '이름 바꾸기';
+		
+		$content = PHP_EOL;
+		$content.= '<input type="hidden" name="type" value="'.($target->type == 'folder' ? 'folder' : 'file').'">'.PHP_EOL;
+		$content.= '<input type="hidden" name="idx" value="'.$target->idx.'">'.PHP_EOL;
+		
+		/**
+		 * 폴더가 아닐경우 확장자를 제거한다.
+		 */
+		if ($target->type != 'folder') {
+			$temp = explode('.',$target->name);
+			if (count($temp) > 1 && $temp[0] != '') {
+				array_pop($temp);
+				$target->name = implode('.',$temp);
+			}
+		}
+		$content.= '<div data-role="input"><input type="text" name="name" value="'.$target->name.'"></div>';
+		
+		return $this->getTemplet()->getModal($title,$content);
+	}
+	
+	/**
 	 * 특정 액션 취소 모달 컨텍스트를 가져온다.
 	 *
 	 * @param string $type 취소타입
@@ -1238,6 +1267,20 @@ class ModuleWebhard {
 		if (preg_match('/(\/|#|\?|"|%|<|>|\'|\||\\\)+/',$name) == true) return $this->getErrorText('INVALID_FOLDER_NAME');
 		if (preg_match('/^(\.)+$/',$name) == true) return $this->getErrorText('NOT_ALLOWED_CHARACTER_IN_FORDER_NAME');
 		if (strlen($name) == 0 || strlen($name) > 200) return $this->getErrorText('INVALID_FOLDER_NAME_LENGTH');
+		
+		return true;
+	}
+	
+	/**
+	 * 파일명이 유효한지 확인한다.
+	 *
+	 * @param int $name 파일명
+	 * @return string/boolean 유효한 파일명일 경우 true, 그렇지 않을 경우 에러메세지
+	 */
+	function checkFileName($name) {
+		if (preg_match('/(\/|\\\)+/',$name) == true) return $this->getErrorText('INVALID_FILE_NAME');
+		if (preg_match('/^(\.)+$/',$name) == true) return $this->getErrorText('INVALID_FILE_NAME');
+		if (strlen($name) == 0 || strlen($name) > 200) return $this->getErrorText('INVALID_FILE_NAME_LENGTH');
 		
 		return true;
 	}

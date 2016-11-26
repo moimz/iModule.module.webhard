@@ -25,6 +25,12 @@
 		"select_off":"선택해제",
 		"detail":"상세정보"
 	},
+	"contextmenu":{
+		"create":"새폴더 만들기",
+		"show_favorite":"중요 표시한 파일/폴더만 보기",
+		"show_all":"전체 파일보기",
+		"rename":"이름 변경하기"
+	},
 	"sort":{
 		"name":"이름",
 		"size":"크기",
@@ -39,15 +45,20 @@
 	},
 	"error":{
 		"NOT_FOUND_FOLDER":"폴더를 찾을 수 없습니다.",
+		"NOT_FOUND_FILE":"파일을 찾을 수 없습니다.",
 		"NOT_ALLOWED_CHARACTER_IN_FORDER_NAME":"폴더명에 특수문자(',\",?,<,>,%,#,/,|,\\)를 사용할 수 없습니다.",
 		"INVALID_FOLDER_NAME":"폴더명이 부적절합니다.",
 		"INVALID_FOLDER_NAME_LENGTH":"폴더명이 너무 짧거나, 너무 깁니다.",
+		"INVALID_FILE_NAME":"파일명이 부적절합니다.",
+		"INVALID_FILE_NAME_LENGTH":"파일명이 너무 짧거나, 너무 깁니다.",
 		"DUPLICATED_FOLDER_NAME":"이미 존재하는 폴더명입니다.",
+		"DUPLICATED_FILE_NAME":"이미 존재하는 파일명입니다.",
 		"NOT_ALLOWED_FOR_DELETED_ITEM":"삭제된 항목에는 할 수 없습니다.",
 		"NOT_ALLOWED_MOVE_TO_PARENT_TO_CHILD":"상위폴더를 하위폴더로 이동할 수 없습니다.",
 		"NOT_ALLOWED_MOVE_TO_SAME_PARENT":"이동하려는 위치와 폴더의 현재 위치가 동일합니다.",
 		"NOT_ALLOWED_MOVE_FOR_LOCK_ITEM":"이동하려는 항목이 이동/삭제가 불가능하도록 잠겨있습니다.",
 		"NOT_ALLOWED_DELETE_IN_TARGET":"항목이 위치한 폴더에 삭제할 수 있는 권한이 없습니다.",
+		"NOT_ALLOWED_EDIT_FOR_LOCK_ITEM":"해당 항목은 수정이 불가능하도록 잠겨있습니다.",
 		"MOVE_FAILED":"항목이동중 에러가 발생하였습니다.",
 		"CHECKED_DUPLICATED_ITEM":"중복된 이름 확인",
 		"UPLOAD_NOT_AVAILABLE":"이전 업로드작업을 처리중입니다. 잠시 후 다시 시도하여 주십시오.",

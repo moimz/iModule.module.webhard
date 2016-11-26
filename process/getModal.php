@@ -22,13 +22,57 @@ $modal = Request('modal');
  */
 if ($modal == 'create') {
 	$parent = Request('parent');
+	$folder = $this->getFolder($parent);
 	
-	if ($this->checkFolderPermission($parent,'W') == true) {
-		$results->success = true;
-		$results->modalHtml = $this->getCreateModal($parent);
-	} else {
+	if ($folder == null || $this->checkFolderDeleted($folder->idx) == true) {
+		$results->success = false;
+		$results->message = $this->getErrorText('NOT_FOUND_FOLDER');
+	} elseif ($this->checkFolderPermission($parent,'W') == false) {
 		$results->success = false;
 		$results->message = $this->getErrorText('FORBIDDEN').$this->checkFolderPermission($parent);
+	} else {
+		$results->success = true;
+		$results->modalHtml = $this->getCreateModal($parent);
+	}
+}
+
+/**
+ * 이름변경
+ */
+if ($modal == 'rename') {
+	$type = Request('type');
+	$idx = Request('idx');
+	
+	if ($type == 'folder') {
+		$folder = $this->getFolder($idx);
+		if ($folder == null || $this->checkFolderDeleted($folder->idx) == true) {
+			$results->success = false;
+			$results->message = $this->getErrorText('NOT_FOUND_FOLDER');
+		} elseif ($folder->is_lock == true) {
+			$results->success = false;
+			$results->message = $this->getErrorText('NOT_ALLOWED_EDIT_FOR_LOCK_ITEM');
+		} elseif ($this->checkFolderPermission($folder->parent,'W') == false || $this->checkFolderPermission($folder->idx,'W') == false) {
+			$results->success = false;
+			$results->message = $this->getErrorText('FORBIDDEN');
+		} else {
+			$results->success = true;
+			$results->modalHtml = $this->getRenameModal($folder);
+		}
+	} else {
+		$file = $this->getFile($idx);
+		if ($file == null || $this->checkFileDeleted($file->idx) == true) {
+			$results->success = false;
+			$results->message = $this->getErrorText('NOT_FOUND_FILE');
+		} elseif ($file->is_lock == true) {
+			$results->success = false;
+			$results->message = $this->getErrorText('NOT_ALLOWED_EDIT_FOR_LOCK_ITEM');
+		} elseif ($this->checkFolderPermission($file->folder,'W') == false || $this->checkFilePermission($file->idx,'W') == false) {
+			$results->success = false;
+			$results->message = $this->getErrorText('FORBIDDEN');
+		} else {
+			$results->success = true;
+			$results->modalHtml = $this->getRenameModal($file);
+		}
 	}
 }
 
