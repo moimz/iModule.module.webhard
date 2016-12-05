@@ -274,6 +274,20 @@ var Webhard = {
 				$("#ModuleWebhardUploadInput").trigger("click");
 			});
 			
+			/**
+			 * 다운로드
+			 */
+			$("button[data-action=download]",Webhard.$container).on("click",function(e) {
+				Webhard.explorer.download();
+			});
+			
+			/**
+			 * 삭제
+			 */
+			$("button[data-action=delete]",Webhard.$container).on("click",function(e) {
+				Webhard.explorer.delete();
+			});
+			
 			$("#ModuleWebhardUploadInput").on("change",function(e) {
 				console.log("change",e.target.files.length);
 				if (e.target.files.length > 0) {
@@ -1886,9 +1900,10 @@ var Webhard = {
 				
 				if (Webhard.$container.attr("data-viewmode") == "card") {
 					var limit = name.length;
+					$name.html(name.replace(/\(([0-9]+)\)$/,"<i>($1)</i>").replace(/\(([0-9]+)\)\.([a-z0-9]+)$/i,"<i>($1)</i>.$2"));
 					while ($name.height() > 40) {
 						limit = limit - 1;
-						$name.html(Webhard.substring(name,limit));
+						$name.html(Webhard.substring(name,limit).replace(/\(([0-9]+)\)$/,"<i>($1)</i>").replace(/\(([0-9]+)\)\.([a-z0-9]+)$/i,"<i>($1)</i>.$2"));
 					}
 				} else {
 					$name.html(name);
@@ -2434,7 +2449,7 @@ var Webhard = {
 				var items = Webhard.explorer.getSelected();
 				
 				if (items.length == 0) {
-					Webhard.message.show("error",Webhard.getText("NOT_SELECTED_ITEM"),5);
+					Webhard.message.show("error",Webhard.getErrorText("NOT_SELECTED_ITEM"),5);
 					return;
 				}
 				

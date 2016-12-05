@@ -94,6 +94,7 @@ div[data-module=webhard] div[data-role=file-item].favorite > div > button[data-a
 div[data-module=webhard] div[data-role=file-item].favorite > div > button[data-action=favorite][disabled] {color:#999; background:transparent;}
 div[data-module=webhard] div[data-role=file-item] > i.icon {width:100%; height:0px; padding-bottom:calc(100% - 2px); background-position:50% 50%; background-repeat:no-repeat; box-sizing:border-box; position:relative;}
 div[data-module=webhard] div[data-role=file-item] > i.icon > div.preview {display:inline-block; background-repeat:no-repeat; background-size:cover; background-position:50% 50%; width:100%; height:100%; box-sizing:border-box; background-color:#fff; position:absolute; top:0; left:0; z-index:10;}
+div[data-module=webhard] div[data-role=file-item] > div.name > span > i {word-break:break-word; font-style:normal;}
 div[data-module=webhard] div[data-role=file-item].dragging {opacity:0.5;}
 div[data-module=webhard] div[data-role=file-item].clipboard {opacity:0.5;}
 
@@ -193,7 +194,7 @@ div[data-module=webhard] div[data-role=dragging] > label > span {display:inline-
 /**
  * 컨텍스트메뉴
  */
-div[data-module=webhard] ul[data-role=contextmenu] {position:absolute; top:0; left:0; z-index:1000; border:1px solid #cacbcc; box-shadow:1px 1px 3px rgba(0,0,0,0.2); background:#fff; max-width:340px; list-style:none; font-size:10px;}
+div[data-module=webhard] ul[data-role=contextmenu] {position:absolute; top:0; left:0; z-index:1000; border:1px solid #cacbcc; box-shadow:1px 1px 3px rgba(0,0,0,0.2); background:#fff;  list-style:none; font-size:10px; width:200px; display:block;}
 div[data-module=webhard] ul[data-role=contextmenu] > li > button {width:100%; height:30px; font-size:12px; border:0px; background:transparent; text-align:left; font-size:0; color:#333; cursor:pointer;}
 div[data-module=webhard] ul[data-role=contextmenu] > li > button > i {width:30px; height:30px; display:inline-block; vertical-align:middle; line-height:30px; font-size:12px; font-family:moimz; speak:none; font-style:normal; font-weight:400; font-variant:normal; text-transform:none; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-align:center; color:#666;}
 div[data-module=webhard] ul[data-role=contextmenu] > li > button > span {width:calc(100% - 30px); height:30px; display:inline-block; line-height:30px; font-size:12px; padding-right:10px; box-sizing:border-box; vertical-align:middle; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;}

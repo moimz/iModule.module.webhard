@@ -145,11 +145,11 @@ if ($folder == null || $this->checkFolderDeleted($target) == true) {
 			}
 		}
 		
-		if (empty($results->modalHtml) == true) {
-//			$this->recordActivity('UPLOAD',$uploadFolderIdx,$files);
+		if (isset($results->modalHtml) == false) {
+			$this->addActivity('UPLOAD',$uploadFolderIdx,$files);
 		}
 		
-//		$this->updateFolder($uploadFolderIdx);
+		$this->updateFolder($uploadFolderIdx);
 	}
 }
 
