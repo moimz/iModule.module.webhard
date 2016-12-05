@@ -19,8 +19,10 @@ class ModuleWebhard {
 	/**
 	 * DB 관련 변수정의
 	 *
+	 * @private object $DB DB접속객체
 	 * @private string[] $table DB 테이블 별칭 및 원 테이블명을 정의하기 위한 변수
 	 */
+	private $DB;
 	private $table;
 	
 	/**
@@ -103,7 +105,8 @@ class ModuleWebhard {
 	 * @return DB $DB
 	 */
 	function db() {
-		return $this->IM->db($this->getModule()->getInstalled()->database);
+		if ($this->DB == null || $this->DB->ping() === false) $this->DB = $this->IM->db($this->getModule()->getInstalled()->database);
+		return $this->DB;
 	}
 	
 	/**
@@ -958,15 +961,17 @@ class ModuleWebhard {
 	/**
 	 * 회원의 웹하드 프로필을 가져온다.
 	 *
+	 * @param int $midx 회원고유번호 (없을 경우 현재 로그인한 사용자)
 	 * @return object $profile
 	 */
-	function getProfile() {
-		if ($this->IM->getModule('member')->isLogged() == null) return null;
+	function getProfile($midx=null) {
+		$midx = $midx == null ? $this->IM->getModule('member')->getLogged() : $midx;
+		if ($midx == 0) return null;
 		
-		$profile = $this->db()->select($this->table->profile)->where('midx',$this->IM->getModule('member')->getLogged())->getOne();
+		$profile = $this->db()->select($this->table->profile)->where('midx',$midx)->getOne();
 		if ($profile == null) {
-			$this->db()->insert($this->table->profile,array('midx'=>$this->IM->getModule('member')->getLogged(),'disk_limit'=>$this->getModule()->getConfig('root_size')))->execute();
-			return $this->getProfile();
+			$this->db()->insert($this->table->profile,array('midx'=>$midx,'disk_limit'=>$this->getModule()->getConfig('root_size')))->execute();
+			return $this->getProfile($midx);
 		}
 		
 		$values = new stdClass();
@@ -1002,6 +1007,18 @@ class ModuleWebhard {
 		}
 		
 		return $this->folders[$idx];
+	}
+	
+	/**
+	 * 폴더코드로 폴더정보를 가져온다.
+	 *
+	 * @param string $code 폴더코드
+	 * @param int $midx 회원고유번호
+	 * @return object $folder 폴더정보
+	 */
+	function getFolderFromCode($midx,$code) {
+		$folder = $this->db()->select($this->table->folder,'idx')->where('owner',$midx)->where('code',$code)->getOne();
+		return $folder !== null ? $this->getFolder($folder->idx) : null;
 	}
 	
 	/**
@@ -1815,6 +1832,35 @@ class ModuleWebhard {
 			}
 		}
 	}
+	
+	/**
+	 * 폴더를 생성한다.
+	 *
+	 * @param string $name 폴더명
+	 * @param int $owner 폴더주인 회원고유번호
+	 * @param string $code 코드
+	 * @param string $permission 퍼미션코드 (기본값 : RWD)
+	 * @param boolean $is_lock 잠금폴더여부 (기본값 : false)
+	 * @return object $folder 생성된 폴더정보
+	 */
+	function createFolder($name,$parent,$code=null,$permission='RWD',$is_lock=false) {
+		$parent = $this->getFolder($parent);
+		if ($parent == null) return false;
+		
+		$insert = array();
+		if ($code != null) $insert['code'] = $code;
+		$insert['owner'] = $insert['creator'] = $insert['editor'] = $parent->owner;
+		$insert['parent'] = $parent->idx;
+		$insert['name'] = $this->getEscapeDuplicatedFolderName($parent->idx,$name);
+		$insert['permission'] = $permission;
+		$insert['reg_date'] = $insert['update_date'] = time();
+		if ($is_lock == true) $insert['is_lock'] = 'TRUE';
+		else $insert['is_lock'] = 'FALSE';
+		
+		$idx = $this->db()->insert($this->table->folder,$insert)->execute();
+		return $this->getFolder($idx);
+	}
+	
 	/**
 	 * 대상파일을 다른폴더로 복사한다.
 	 *
@@ -1935,6 +1981,42 @@ class ModuleWebhard {
 	 * @param int $idx 폴더고유번호
 	 */
 	function updateFolder($idx) {
+		$folder = $this->getFolder($idx);
+		if ($folder == null) return;
+		
+		if ($folder->is_linked == true) {
+			$children = $this->db()->select($this->table->folder,'sum(size) as size')->where('parent',$folder->linked)->where('is_delete','FALSE')->getOne();
+			$children = isset($children->size) == true ? $children->size : 0;
+			
+			$files = $this->db()->select($this->table->file,'sum(size) as size')->where('folder',$folder->linked)->where('is_delete','FALSE')->getOne();
+			$files = isset($files->size) == true ? $files->size : 0;
+			
+			$size = $children + $files;
+		} else {
+			$children = $this->db()->select($this->table->folder,'sum(size) as size')->where('parent',$folder->idx)->where('is_delete','FALSE')->getOne();
+			$children = isset($children->size) == true ? $children->size : 0;
+			
+			$files = $this->db()->select($this->table->file,'sum(size) as size')->where('folder',$folder->idx)->where('is_delete','FALSE')->getOne();
+			$files = isset($files->size) == true ? $files->size : 0;
+			
+			$size = $children + $files;
+			
+			$linked = $this->db()->select($this->table->folder)->where('linked',$folder->idx)->get();
+			for ($i=0, $loop=count($linked);$i<$loop;$i++) {
+				$this->db()->update($this->table->folder,array('size'=>$size,'update_date'=>time()))->where('idx',$linked[$i]->idx)->execute();
+				$this->updateFolder($linked[$i]->parent);
+			}
+		}
+		
+		$this->db()->update($this->table->folder,array('size'=>$size,'update_date'=>time()))->where('idx',$folder->idx)->execute();
+		if ($folder->parent == 0) {
+			$total = $this->db()->select($this->table->file,'sum(size) as size')->where('owner',$folder->owner)->getOne();
+			$total = isset($total->size) == true ? $total->size : 0;
+			
+			$this->db()->update($this->table->profile,array('disk_usage'=>$total))->where('midx',$folder->owner)->execute();
+		} else {
+			$this->updateFolder($folder->parent);
+		}
 	}
 	
 	/**
