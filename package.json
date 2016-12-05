@@ -218,7 +218,8 @@
 				"owner,parent,is_delete":"index",
 				"parent,is_delete":"index",
 				"creator,parent,is_delete":"index",
-				"owner,creator,editor,is_delete":"index"
+				"editor,owner,is_delete":"index",
+				"linked":"index"
 			},
 			"auto_increment":"idx"
 		},
