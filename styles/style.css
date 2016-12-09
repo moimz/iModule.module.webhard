@@ -275,7 +275,19 @@ div[data-module=webhard] i.icon[data-extension^=pdf] {background-image:url(../im
 	div[data-module=webhard][data-viewmode=card] div[data-role=file-item] {padding:5px 5px 5px 0px; margin:0px; width:33.3333%; height:auto; box-sizing:border-box;}
 }
 
-@media (max-width:400px) {
+@media (max-width:991px) {
+	div[data-module=webhard][data-viewmode=card] div[data-role=file-item] {width:20%;}
+}
+
+@media (max-width:650px) {
+	div[data-module=webhard][data-viewmode=card] div[data-role=file-item] {width:25%;}
+}
+
+@media (max-width:500px) {
+	div[data-module=webhard][data-viewmode=card] div[data-role=file-item] {width:33.3333%;}
+}
+
+@media (max-width:350px) {
 	div[data-module=webhard][data-viewmode=card] div[data-role=file-item] {width:50%;}
 }
 

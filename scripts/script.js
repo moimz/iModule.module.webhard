@@ -465,6 +465,7 @@ var Webhard = {
 				}
 				
 				Webhard.ui.initSize();
+				Webhard.ui.nbreadcrumb();
 			});
 			
 			
@@ -502,7 +503,7 @@ var Webhard = {
 			$root.on("click",function() {
 				Webhard.explorer.folder(pathIdx[0],path[0]);
 			});
-			$path.append($root);
+			$("span[data-role=root]",$nbreadcrumb).empty().append($root);
 			
 			if (Webhard.explorer.getView() == "folder") {
 				for (var i=1, loop=path.length;i<loop;i++) {
@@ -553,6 +554,28 @@ var Webhard = {
 					continue;
 				}
 				$prev = $item.eq(i);
+			}
+			
+			Webhard.ui.nbreadcrumb();
+		},
+		/**
+		 * 경로탐색바를 업데이트한다.
+		 */
+		nbreadcrumb:function() {
+			if ($("section[data-role=nbreadcrumb]",Webhard.$container).height() + 10 < $("section[data-role=nbreadcrumb] > div",Webhard.$container).height()) {
+				$("section[data-role=nbreadcrumb] > div > span.ellipsis",Webhard.$container).show();
+				while ($("section[data-role=nbreadcrumb] > div",Webhard.$container).height() - 10 > $("section[data-role=nbreadcrumb]",Webhard.$container).height()) {
+					if ($("section[data-role=nbreadcrumb] > div > span[data-role=path]",Webhard.$container).children(":visible").length == 0) break;
+					$("section[data-role=nbreadcrumb] > div > span[data-role=path]",Webhard.$container).children(":visible").eq(0).hide();
+					$("section[data-role=nbreadcrumb] > div > span[data-role=path]",Webhard.$container).children(":visible").eq(0).hide();
+				}
+			} else {
+				$("section[data-role=nbreadcrumb] > div > span.ellipsis",Webhard.$container).hide();
+				$("section[data-role=nbreadcrumb] > div > span[data-role=path]",Webhard.$container).children().show();
+				
+				if ($("section[data-role=nbreadcrumb] > div",Webhard.$container).height() - 10 > $("section[data-role=nbreadcrumb]",Webhard.$container).height()) {
+					Webhard.ui.nbreadcrumb();
+				}
 			}
 		},
 		/**
