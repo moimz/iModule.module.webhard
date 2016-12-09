@@ -387,7 +387,7 @@ class ModuleWebhard {
 		/**
 		 * 컨텍스트 컨테이너를 설정한다.
 		 */
-		$html = PHP_EOL.'<!-- WEBHARD MODULE -->'.PHP_EOL.'<div data-role="context" data-type="module" data-module="'.$this->getModule()->getName().'">'.PHP_EOL;
+		$html = PHP_EOL.'<!-- WEBHARD MODULE -->'.PHP_EOL.'<div data-role="context" data-type="module" data-module="'.$this->getModule()->getName().'" data-container="'.($configs != null && isset($configs->container) == true ? 'TRUE' : 'FALSE').'">'.PHP_EOL;
 		
 		$this->IM->addHeadResource('style',$this->getModule()->getDir().'/styles/style.css');
 		$this->IM->addHeadResource('script',$this->getModule()->getDir().'/scripts/script.js');
@@ -402,7 +402,7 @@ class ModuleWebhard {
 		 */
 		switch ($context) {
 			case 'explorer' :
-				$html.= $this->getExplorerContext($configs);
+				$html.= $this->getExplorerContext($configs,$configs != null && isset($configs->select) == true ? $configs->select : null);
 				break;
 		}
 		
@@ -423,10 +423,9 @@ class ModuleWebhard {
 	 * 모듈 외부컨테이너를 가져온다.
 	 *
 	 * @param string $container 컨테이너명
-	 * @param object $idx 고유값
 	 * @return string $html 컨텍스트 HTML / FileBytes 파일 바이너리
 	 */
-	function getContainer($container,$idx=null) {
+	function getContainer($container) {
 		/**
 		 * 파일에 직접 접근하는 컨테이너의 경우
 		 */
@@ -440,26 +439,24 @@ class ModuleWebhard {
 			return $this->fileRead($idx,$container,$share);
 		}
 		
+		$configs = new stdClass();
+		$configs->container = true;
 		switch ($container) {
-			case 'origin' :
-				
-			break;
+			case 'file' :
+				$configs->select = 'file';
+				$html = $this->getContext('explorer',$configs);
+				break;
 		}
-		
-		
-		//	return $this->readFile();
-		$header = $this->getHeader($container);
-		$footer = $this->getFooter($container);
 		
 		/**
 		 * 모듈 헤더/푸터와 iModule 코어 헤더/푸터를 합친다.
 		 * 사이트템플릿은 제거한다.
 		 */
 		$this->IM->removeTemplet();
-		$footer = $footer.PHP_EOL.$this->IM->getFooter();
-		$header = $this->IM->getHeader().PHP_EOL.$header;
+		$footer = $this->IM->getFooter();
+		$header = $this->IM->getHeader();
 		
-		return $header.PHP_EOL.$footer;
+		return $header.$html.$footer;
 	}
 	
 	/**
@@ -509,9 +506,10 @@ class ModuleWebhard {
 	 * 웹하드 탐색기 컨텍스트를 가져온다.
 	 *
 	 * @param object $configs 사이트맵 관리를 통해 설정된 페이지 컨텍스트 설정
+	 * @param string $select 선택모드
 	 * @return string $html 컨텍스트 HTML
 	 */
-	function getExplorerContext($configs) {
+	function getExplorerContext($configs,$select=null) {
 		/**
 		 * 로그인이 되어 있지 않다면, 에러메세지를 출력한다.
 		 */
@@ -687,7 +685,7 @@ class ModuleWebhard {
 		
 		$content.= '</div>';
 		
-		return $this->getTemplet()->getModal($title,$content,false,false,$buttons);
+		return $this->getTemplet()->getModal($title,$content,false,null,$buttons);
 	}
 	
 	/**
@@ -764,7 +762,7 @@ class ModuleWebhard {
 		
 		$content.= '</div>';
 		
-		return $this->getTemplet()->getModal($title,$content,false,false,$buttons);
+		return $this->getTemplet()->getModal($title,$content,false,null,$buttons);
 	}
 	
 	/**
@@ -819,7 +817,7 @@ class ModuleWebhard {
 		
 		$content.= '<div data-role="input"><label><input type="checkbox" name="continue">'.$this->getText('text/option_continue').'</label></div>';
 		
-		return $this->getTemplet()->getModal($title,$content,false,false,$buttons);
+		return $this->getTemplet()->getModal($title,$content,false,null,$buttons);
 	}
 	
 	/**
@@ -890,7 +888,7 @@ class ModuleWebhard {
 		
 		$content.= '<div data-role="input"><label><input type="checkbox" name="continue">'.$this->getText('text/option_continue').'</label></div>';
 		
-		return $this->getTemplet()->getModal($title,$content,false,false,$buttons);
+		return $this->getTemplet()->getModal($title,$content,false,null,$buttons);
 	}
 	
 	/**
