@@ -442,6 +442,10 @@ class ModuleWebhard {
 		$configs = new stdClass();
 		$configs->container = true;
 		switch ($container) {
+			case 'explorer' :
+				$html = $this->getContext('explorer',$configs);
+				break;
+				
 			case 'file' :
 				$configs->select = 'file';
 				$html = $this->getContext('explorer',$configs);
@@ -546,6 +550,7 @@ class ModuleWebhard {
 		$header.= '<input type="hidden" name="idx" value="'.$idx.'">'.PHP_EOL;
 		$header.= '<input type="hidden" name="path" value="'.$path.'">'.PHP_EOL;
 		$header.= '<input type="hidden" name="pathIdx" value="'.$pathIdx.'">'.PHP_EOL;
+		$header.= '<input type="hidden" name="mode" value="'.($select == null ? 'webhard' : $select).'">'.PHP_EOL;
 		$header.= '<input type="hidden" name="templet" value="'.$this->getTemplet($configs)->getName().'">'.PHP_EOL;
 		$footer = PHP_EOL.'</form>'.PHP_EOL.'<script>Webhard.init();</script>'.PHP_EOL;
 		
@@ -980,6 +985,31 @@ class ModuleWebhard {
 	}
 	
 	/**
+	 * 항목 아이콘을 가져온다.
+	 *
+	 * @param string $type 항목종류
+	 * @param string $extension 파일확장자
+	 */
+	function getIcon($type,$extension='') {
+		$icon = 'icon_large_etc.png';
+		
+		if ($type == 'folder') $icon = 'icon_large_folder.png';
+		if ($type == 'document') $icon = 'icon_large_document.png';
+		if ($type == 'archive') $icon = 'icon_large_archive.png';
+		if ($type == 'video') $icon = 'icon_large_video.png';
+		if ($type == 'audio') $icon = 'icon_large_audio.png';
+		if ($type == 'image') $icon = 'icon_large_image.png';
+		
+		if ($extension == 'hwp') $icon = 'icon_large_hwp.png';
+		if ($extension == 'pdf') $icon = 'icon_large_pdf.png';
+		if ($extension == 'xls' || $extension == 'xlsx') $icon = 'icon_large_xls.png';
+		if ($extension == 'doc' || $extension == 'docx') $icon = 'icon_large_doc.png';
+		if ($extension == 'ppt' || $extension == 'pptx') $icon = 'icon_large_ppt.png';
+		
+		return $this->IM->getHost().$this->getModule()->getDir().'/images/'.$icon;
+	}
+	
+	/**
 	 * 폴더정보를 가져온다.
 	 *
 	 * @param int $idx 폴더 고유정보
@@ -1036,12 +1066,17 @@ class ModuleWebhard {
 		$meta->type = 'folder';
 		$meta->idx = $folder->idx;
 		$meta->folder = $folder->parent;
+		$meta->owner = $folder->owner;
+		$meta->creator = $folder->creator;
+		$meta->editor = $folder->editor;
+		$meta->code = $folder->code;
 		$meta->path = $this->getFolderPath($folder->idx);
 		$meta->permission = $this->getFolderPermission($folder->idx);
 		$meta->name = $folder->name;
 		$meta->uploaded = $folder->size;
 		$meta->size = $folder->size;
 		$meta->date = $folder->update_date;
+		$meta->icon = $this->getIcon('folder');
 		$meta->status = 'PUBLISHED';
 		$meta->download = $this->IM->getModuleUrl('webhard','compress',$folder->idx.'/'.$folder->name,true);
 		
@@ -1230,6 +1265,10 @@ class ModuleWebhard {
 		$meta->type = 'file';
 		$meta->idx = $file->idx;
 		$meta->folder = $file->folder;
+		$meta->owner = $file->owner;
+		$meta->creator = $file->creator;
+		$meta->editor = $file->editor;
+		$meta->code = $file->code;
 		$meta->path = $this->getFolderPath($file->folder).'/'.$file->name;
 		$meta->permission = $this->getFilePermission($file->idx);
 		$meta->name = $file->name;
@@ -1241,6 +1280,7 @@ class ModuleWebhard {
 		$meta->filetype = $file->type;
 		$meta->mime = $file->mime;
 		$meta->extension = strtolower(pathinfo($file->name,PATHINFO_EXTENSION));
+		$meta->icon = $this->getIcon($meta->filetype,$meta->extension);
 		
 		if ($meta->filetype == 'image') {
 			$meta->width = $file->width;
@@ -1412,6 +1452,53 @@ class ModuleWebhard {
 	}
 	
 	/**
+	 * 파일을 공유한다.
+	 *
+	 * @param int $idx 파일고유번호
+	 * @param array/string $type 공유타입
+	 * @param int $expire 공유기간 (0 입력시 무제한, 숫자는 만료일(UNIX_TIMESTAMP))
+	 * @param string $hash 공유파일해쉬 (공유실패시 false 반환)
+	 */
+	function shareFile($idx,$type,$expire=0) {
+		if ($this->checkFilePermission($idx,'R') == true) {
+			$file = $this->getFile($idx);
+			
+			$hash = md5($idx.$_SERVER['REMOTE_ADDR'].time().rand(1000,9999));
+			if ($this->db()->select($this->table->share)->where('hash',$hash)->has() == true) return $this->shareFile($idx,$type,$expire);
+			
+			$insert = array();
+			$insert['hash'] = $hash;
+			$insert['midx'] = $this->IM->getModule('member')->getLogged();
+			$insert['fidx'] = $idx;
+			$insert['reg_date'] = time();
+			$insert['expire_date'] = $expire;
+			
+			/**
+			 * $type 이 배열일 경우 모듈에서 공유 시도한다는 의미
+			 */
+			if (is_array($type) == true) {
+				$insert['type'] = 'MODULE';
+				$insert['target'] = json_encode($type,JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+			}
+			
+			$check = $this->db()->select($this->table->share)->where('midx',$insert['midx'])->where('type',$insert['type'])->where('fidx',$insert['fidx'])->where('target',$insert['target'])->getOne();
+			if ($check != null) return $check->hash;
+			
+			$this->db()->insert($this->table->share,$insert)->execute();
+			$this->addActivity('SAHRE_FILE',$idx,$type);
+			
+			if ($file->is_shared == false) {
+				$this->db()->update($this->table->file,array('is_shared'=>'TRUE'))->where('idx',$idx)->execute();
+				$this->updateFolderShared($file->folder);
+			}
+			
+			return $hash;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
 	 * 폴더 내부에 공유중인 항목이 있는지 확인한다.
 	 *
 	 * @param int $idx 폴더 고유번호
@@ -1441,6 +1528,9 @@ class ModuleWebhard {
 		
 		if ($folder == null) return;
 		
+		/**
+		 * 링크된 폴더가 있는지 확인한다.
+		 */
 		$is_parent = false;
 		if ($this->db()->select($this->table->folder)->where('linked',$folder->idx)->has() == true) {
 			if ($folder->is_shared == false) {
@@ -1454,6 +1544,9 @@ class ModuleWebhard {
 			}
 		}
 		
+		/**
+		 * 폴더내부에 공유중인 파일이 있는지, 또는 폴더내부에 공유중인 폴더가 있는지 확인한다.
+		 */
 		if ($this->db()->select($this->table->folder)->where('is_shared_file','TRUE')->where('parent',$folder->idx)->has() == true || $this->db()->select($this->table->file)->where('is_shared','TRUE')->where('folder',$folder->idx)->has() == true) {
 			if ($folder->is_shared_file == false) {
 				$this->db()->update($this->table->folder,array('is_shared_file'=>'TRUE'))->where('idx',$folder->idx)->execute();
@@ -1466,6 +1559,9 @@ class ModuleWebhard {
 			}
 		}
 		
+		/**
+		 * 폴더내부에 공유중인 자식이 있는 폴더가 있는지 확인한다.
+		 */
 		if ($this->db()->select($this->table->folder)->where('is_shared_child','TRUE')->where('parent',$folder->idx)->has() == true || $this->db()->select($this->table->folder)->where('is_shared','TRUE')->where('parent',$folder->idx)->has() == true) {
 			if ($folder->is_shared_child == false) {
 				$this->db()->update($this->table->folder,array('is_shared_child'=>'TRUE'))->where('idx',$folder->idx)->execute();
@@ -1674,7 +1770,7 @@ class ModuleWebhard {
 	 * @param object $datas 활동데이터
 	 * @param int $reg_date 활동이 일어난 시각
 	 */
-	function addActivity($type,$target,$datas,$reg_date=null) {
+	function addActivity($type,$target,$datas=null,$reg_date=null) {
 		$is_record = false;
 		$data = new stdClass();
 		
@@ -1749,6 +1845,12 @@ class ModuleWebhard {
 			$data = $datas;
 			$reg_date = $datas->update_date;
 			$target = $type == 'DELETE_FOLDER' ? '/'.$target : $target;
+			$is_record = true;
+		}
+		
+		if ($type == 'SAHRE_FILE' || $type == 'SHARE_FOLDER') {
+			$data = $datas;
+			$target = $type == 'SHARE_FOLDER' ? '/'.$target : $target;
 			$is_record = true;
 		}
 		

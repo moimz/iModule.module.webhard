@@ -47,7 +47,10 @@
 		"merge":"폴더합치기",
 		"rename":"이름바꾸기",
 		"continue":"이어올리기",
-		"delete":"삭제하기"
+		"delete":"삭제하기",
+		"open_folder":"폴더열기",
+		"select_file":"파일선택",
+		"select_folder":"폴더선택"
 	},
 	"error":{
 		"NOT_FOUND_FOLDER":"폴더를 찾을 수 없습니다.",

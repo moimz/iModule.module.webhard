@@ -23,9 +23,9 @@ div[data-module=webhard] > * {-webkit-tap-highlight-color:transparent;}
  * 컨테이너
  */
 div[data-module=webhard] {padding:0px; margin:0px; width:100%; height:100%; -webkit-touch-callout:none; -webkit-user-select:none; -khtml-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none; cursor:default; overflow:auto; position:relative;}
-div[data-module=webhard] div[data-role=loading] {width:100%; height:100%; display:table; position:absolute; top:0; left:0; z-index:1000; background:rgba(0,0,0,0.3);}
-div[data-module=webhard] div[data-role=loading] > div {display:table-cell; vertical-align:middle; text-align:center; color:#fff; font-size:20px;}
-div[data-module=webhard] div[data-role=disable] {width:100%; height:100%; position:absolute; top:0; left:0; z-index:1000; background:rgba(0,0,0,0.3); display:none;}
+div[data-module=webhard] div[data-role=loading] {width:100%; height:100%; display:table; position:absolute; top:0; left:0; z-index:1000; background:rgba(255,255,255,0.5);}
+div[data-module=webhard] div[data-role=loading] > div {display:table-cell; vertical-align:middle; text-align:center; color:#666; font-size:20px;}
+div[data-module=webhard] div[data-role=disable] {width:100%; height:100%; position:absolute; top:0; left:0; z-index:1000; background:rgba(255,255,255,0.5); display:none;}
 div[data-module=webhard] button[data-action=add] {display:none;}
 
 /**
@@ -75,6 +75,7 @@ div[data-module=webhard] div[data-role=headerbar] button[data-action=favorite].s
  * 탐색기 > 파일목록
  */
 div[data-module=webhard] div[data-role=files] {width:100%; height:100%; box-sizing:border-box; position:relative; overflow-y:scroll; -webkit-overflow-scrolling:touch;}
+div[data-module=webhard] div[data-role=files][data-select-mode=file] > div[data-type=folder] {opacity:0.5;}
 div[data-module=webhard] div[data-role=selection] {width:10px; height:10px; position:absolute; z-index:1000; box-sizing:border-box; border:1px solid #4993de; background:rgba(73,147,222,0.3);}
 
 /**
@@ -82,9 +83,12 @@ div[data-module=webhard] div[data-role=selection] {width:10px; height:10px; posi
  */
 div[data-module=webhard] div[data-role=file-item] {cursor:pointer; position:relative; overflow:hidden;}
 div[data-module=webhard] div[data-role=file-item] > div > button {display:inline-block; border:0px; padding:0px; margin:0px; width:16px; height:16px; background:transparent; vertical-align:middle; cursor:pointer; font-family:moimz; speak:none; font-style:normal; font-weight:400; font-variant:normal; text-transform:none; line-height:1; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-align:center;}
-div[data-module=webhard] div[data-role=file-item] > div > button[data-action=select] {border:1px solid #d9dadb; font-size:12px;}
+div[data-module=webhard] div[data-role=file-item] > div > button[data-action=select] {border:1px solid #d9dadb; background:#fff; font-size:12px;}
+div[data-module=webhard] div[data-role=file-item] > div > button[data-action=select][disabled] {background:#e5e5e5; opacity:0.5; cursor:not-allowed;}
 div[data-module=webhard] div[data-role=file-item].selected > div > button[data-action=select] {border:1px solid #4993de; background:#1bb4ee; color:#fff;}
 div[data-module=webhard] div[data-role=file-item].selected > div > button[data-action=select]:before {content:"\eb10";}
+div[data-module=webhard] div[data-role=file-item].selected > div > button[data-action=select][disabled] {border:1px solid #d9dadb; background:#e5e5e5; font-size:12px;}
+div[data-module=webhard] div[data-role=file-item].selected > div > button[data-action=select][disabled]:before {content:" ";}
 div[data-module=webhard] div[data-role=file-item].unselect {opacity:0.5; cursor:not-allowed;}
 div[data-module=webhard] div[data-role=file-item] > div > button[data-action=favorite] {font-size:16px; color:#ccc;}
 div[data-module=webhard] div[data-role=file-item] > div > button[data-action=favorite]:before {content:"\ec05";}
@@ -150,7 +154,6 @@ div[data-module=webhard][data-viewmode=card] div[data-role=file-item].droppable 
 div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] {display:table; width:100%; height:30px; table-layout:fixed; padding:3px;}
 div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > * {display:table-cell; vertical-align:middle;}
 div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > div.checkbox {width:30px; text-align:center; vertical-align:middle;}
-div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > div.checkbox > button {background-color:#fff;}
 div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > div.favorite {width:20px; vertical-align:middle;}
 div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > i.icon {width:30px; height:30px; background-size:20px auto; font-size:0; padding-bottom:0px;}
 div[data-module=webhard][data-viewmode=grid] div[data-role=file-item] > i.icon > div.preview {width:26px; height:26px; margin:2px;}
@@ -363,6 +366,9 @@ div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.more >
 div[data-module=webhard][data-mobile=TRUE] div[data-role=file-item] > div.more > ul[data-role=contextmenu] + button {background:black;}
 div[data-module=webhard][data-mobile=TRUE][data-mobile-select=TRUE] div[data-role=file-item] > div.checkbox {display:block;}
 div[data-module=webhard][data-mobile=TRUE][data-mobile-select=TRUE] div[data-role=file-item].selected > div.checkbox > button {background:rgba(27, 180, 238,0.8);}
+div[data-module=webhard][data-mobile=TRUE][data-select-mode=file] div[data-role=file-item][data-type=folder] > div.checkbox {display:none !important;}
+div[data-module=webhard][data-mobile=TRUE][data-select-mode=folder] div[data-role=file-item] > div.checkbox {display:none !important;}
+
 
 /**
  * 모바일 > 탐색기 > 파일목록(미리보기)
@@ -373,7 +379,7 @@ div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=fil
  * 모바일 > 탐색기 > 파일목록(미리보기) > 항목
  */
 div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] {padding:5px 5px 5px 0px; margin:0px; width:20%; height:auto; box-sizing:border-box;}
-div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] > div.checkbox {position:absolute; width:60px; height:60px; top:calc(50% - 55px); left:calc(50% - 32.5px); z-index:10;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] > div.checkbox {position:absolute; width:60px; height:60px; top:calc(50% - 55px); left:calc(50% - 32.5px); z-index:100;}
 div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] {padding-top:0px; padding-bottom:5px;}
 div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] > i.icon {margin:0px; background-position-y:calc(50% - 20px);}
 div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=file-item] > i.icon > div[data-role=progress] {width:calc(100% - 20px); position:absolute; left:9px; bottom:50px; z-index:20;}

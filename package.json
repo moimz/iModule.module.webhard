@@ -397,9 +397,8 @@
 					"type":"int",
 					"length":11
 				},
-				"module":{
-					"type":"varchar",
-					"length":20,
+				"target":{
+					"type":"text",
 					"is_null":true
 				},
 				"reg_date":{
@@ -414,7 +413,8 @@
 			"indexes":{
 				"hash":"primary_key",
 				"fidx":"index",
-				"type,fidx":"index"
+				"type,fidx":"index",
+				"midx,type,fidx":"index"
 			}
 		},
 		"webhard_share_log_table":{
