@@ -430,13 +430,14 @@ class ModuleWebhard {
 		 * 파일에 직접 접근하는 컨테이너의 경우
 		 */
 		if (in_array($container,array('origin','thumbnail','view','download')) == true) {
-			$idx = explode('/',$idx);
+			$fidx = $this->IM->view;
+			$idx = explode('/',Request('idx'));
 			$share = null;
-			if (count($idx) == 3) list($idx,$share,$name) = $idx;
-			elseif (count($idx) == 2) list($idx,$name) = $idx;
+			if (count($idx) == 2) list($share,$name) = $idx;
+			elseif (count($idx) == 1) list($name) = $idx;
 			else $this->IM->printError('NOT_FOUND_FILE');
 			
-			return $this->fileRead($idx,$container,$share);
+			return $this->fileRead($fidx,$container,$share);
 		}
 		
 		$configs = new stdClass();
@@ -1315,12 +1316,8 @@ class ModuleWebhard {
 		if ($file == null) {
 			return null;
 		} else {
-//			$code = array('idx'=>$file->idx);
-//			if ($share != null) $code['share'] = $share;
-//			$code = Encoder(json_encode($code));
-
-			$idx = $file->idx.'/'.$file->name;
-			return $this->IM->getModuleUrl('webhard',$view,$idx,$isFullUrl);
+			$idx = $share == null ? $file->name : $share.'/'.$file->name;
+			return $this->IM->getModuleUrl('webhard',$view,$file->idx,$idx,$isFullUrl);
 		}
 	}
 	
@@ -1328,13 +1325,49 @@ class ModuleWebhard {
 	 * 파일의 권한을 가져온다.
 	 *
 	 * @param int $idx 파일 고유번호
+	 * @param string $share 공유코드
 	 * @param string $permission 폴더권한
 	 */
-	function getFilePermission($idx) {
+	function getFilePermission($idx,$share=null) {
 		$file = $this->getFile($idx);
 		
 		if ($file == null) return '';
 		if ($file->owner == $this->IM->getModule('member')->getLogged()) return 'RWD';
+		
+		/**
+		 * 공유코드가 있을 경우 공유에 대한 권한 확인
+		 */
+		if ($share != null) {
+			$share = $this->db()->select($this->table->share)->where('hash',$share)->getOne();
+			if ($share == null || $share->fidx != $idx) return '';
+			
+			/**
+			 * URL 공유일 경우, 모든 사람에게 일기권한 부여
+			 */
+			if ($share->type == 'LINK') return 'R';
+			
+			/**
+			 * 공유가 iModule 모듈에 의해 설정된 경우, 해당모듈에 접근하여 파일권한을 가져온다.
+			 */
+			if ($share->type == 'MODULE') {
+				$target = json_decode($share->target);
+				$mModule = $this->IM->getModule($target->module);
+				
+				/**
+				 * 해당모듈에 웹하드모듈을 위한 함수가 없을 경우, 접근권한이 있다고 판단한다.
+				 */
+				if (method_exists($mModule,'doWebhard') == false) {
+					return '';
+				} else {
+					if ($mModule->doWebhard('checkPermission',$target->data) == true) {
+						return 'R';
+					} else {
+						return '';
+					}
+				}
+			}
+		}
+		
 		if ($this->IM->getModule('member')->isLogged() == false) return '';
 		return $this->getFolderPermission($file->folder);
 	}
@@ -1444,10 +1477,11 @@ class ModuleWebhard {
 	 *
 	 * @param int $idx 파일 고유번호
 	 * @param string $check 확인할 권한
+	 * @param string $share 공유코드
 	 * @param boolean $hasPermission
 	 */
-	function checkFilePermission($idx,$check) {
-		$permission = $this->getFilePermission($idx);
+	function checkFilePermission($idx,$check,$share=null) {
+		$permission = $this->getFilePermission($idx,$share=null);
 		return strpos($permission,$check) !== false;
 	}
 	
@@ -1496,6 +1530,30 @@ class ModuleWebhard {
 		} else {
 			return false;
 		}
+	}
+	
+	/**
+	 * 파일을 공유해제한다.
+	 *
+	 * @param string $hash 파일공유해시
+	 * @return boolean $success
+	 */
+	function unshareFile($hash) {
+		$share = $this->db()->select($this->table->share)->where('hash',$hash)->getOne();
+		if ($share == null) return false;
+		if ($share->midx != $this->IM->getModule('member')->getLogged()) return false;
+		
+		$this->db()->delete($this->table->share)->where('hash',$hash)->execute();
+		
+		$this->addActivity('UNSAHRE_FILE',$share->fidx,json_decode($share->target));
+		
+		if ($this->db()->select($this->table->share)->where('fidx',$share->fidx)->has() == false) {
+			$file = $this->getFile($share->fidx);
+			$this->db()->update($this->table->file,array('is_shared'=>'FALSE'))->where('idx',$file->idx)->execute();
+			$this->updateFolderShared($file->folder);
+		}
+		
+		return true;
 	}
 	
 	/**
@@ -1570,6 +1628,21 @@ class ModuleWebhard {
 		} else {
 			if ($folder->is_shared_child == true) {
 				$this->db()->update($this->table->folder,array('is_shared_child'=>'FALSE'))->where('idx',$folder->idx)->execute();
+				$is_parent = true;
+			}
+		}
+		
+		/**
+		 * 폴더내부에 공유받은 폴더가 있는지 확인한다.
+		 */
+		if ($this->db()->select($this->table->folder)->where('linked',0,'!=')->where('parent',$folder->idx)->has() == true || $this->db()->select($this->table->folder)->where('is_linked_child','TRUE')->where('parent',$folder->idx)->has() == true) {
+			if ($folder->is_linked_child == false) {
+				$this->db()->update($this->table->folder,array('is_linked_child'=>'TRUE'))->where('idx',$folder->idx)->execute();
+				$is_parent = true;
+			}
+		} else {
+			if ($folder->is_linked_child == true) {
+				$this->db()->update($this->table->folder,array('is_linked_child'=>'FALSE'))->where('idx',$folder->idx)->execute();
 				$is_parent = true;
 			}
 		}
@@ -1848,9 +1921,9 @@ class ModuleWebhard {
 			$is_record = true;
 		}
 		
-		if ($type == 'SAHRE_FILE' || $type == 'SHARE_FOLDER') {
+		if ($type == 'SAHRE_FILE' || $type == 'SHARE_FOLDER' || $type == 'UNSAHRE_FILE' || $type == 'UNSAHRE_FOLDER') {
 			$data = $datas;
-			$target = $type == 'SHARE_FOLDER' ? '/'.$target : $target;
+			$target = $type == 'SHARE_FOLDER' || $type == 'UNSAHRE_FOLDER' ? '/'.$target : $target;
 			$is_record = true;
 		}
 		
@@ -1901,35 +1974,36 @@ class ModuleWebhard {
 	 */
 	function fileRead($idx,$type,$share=null) {
 		$file = $this->getFile($idx);
-		if ($file == null || $file->status == 'DRAFT') {
-			$this->printError('NOT_FOUND_FILE');
-		}
+		if ($file == null || $file->status == 'DRAFT') return $this->IM->printError('NOT_FOUND_FILE');
 		
 		/**
 		 * 공유코드가 없을경우, 현재 로그인한 유저의 파일의 접근권한을 확인한다.
 		 */
-		if ($share == null) {
-			if ($this->checkFilePermission($idx,'R') == true) {
-				header('Content-Type:'.$file->mime);
-				header('Content-Length:'.$file->size);
-				
-				/**
-				 * 파일을 바로 다운로드 받기 위한 헤더 설정
-				 */
-				if ($type == 'download') {
-					header("Pragma: no-cache");
-					header("Expires: 0");
-					header('Content-Disposition: attachment; filename="'.$file->name.'"; filename*=UTF-8\'\''.rawurlencode($file->name));
-					header("Content-Transfer-Encoding: binary");
-					header("Connection: Keep-Alive");
-				}
-				
-				//http://portfolio.moimz.link/ko/module/webhard/thumbnail/8/2.jpg
-				readfile($this->getFilePath($file->path));
-				exit;
-			} else {
-				$this->IM->printError('FORBIDDEN');
+		if ($this->checkFilePermission($idx,'R',$share) == true) {
+			header('Content-Type: '.($file->mime == 'Unknown' ? 'application/x-unknown' : $file->mime));
+			header('Content-Length: '.$file->size);
+			
+			if (ob_get_level()) ob_end_clean();
+			
+			/**
+			 * 파일을 바로 다운로드 받기 위한 헤더 설정
+			 */
+			if ($type == 'download') {
+				header("Pragma: public");
+				header("Expires: 0");
+				header("Cache-Control: must-revalidate, post-check=0, pre-check=0"); 
+				header("Cache-Control: private",false);
+				header('Content-Disposition: attachment; filename="'.$file->name.'"; filename*=UTF-8\'\''.rawurlencode($file->name));
+				header("Content-Transfer-Encoding: binary");
+				header('Content-Type: '.($file->mime == 'Unknown' ? 'application/x-unknown' : $file->mime));
+				header('Content-Length: '.$file->size);
 			}
+			
+			//http://portfolio.moimz.link/ko/module/webhard/thumbnail/8/2.jpg
+			readfile($this->getFilePath($file->path));
+//			exit;
+		} else {
+			return $this->IM->printError('FORBIDDEN');
 		}
 	}
 	
