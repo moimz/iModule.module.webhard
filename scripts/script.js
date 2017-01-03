@@ -3830,3 +3830,7 @@ $(window).on("message",function(e) {
 		}
 	}
 });
+
+$(document).ready(function() {
+	setTimeout(Webhard.ui.initSize,100);
+});

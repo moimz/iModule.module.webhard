@@ -1,0 +1,359 @@
+/**
+ * 웹하드 경로
+ */
+div[data-module=webhard] section[data-role=nbreadcrumb] {height:38px; border-bottom:1px solid #d8dee5; padding:0px 15px; font-size:0; overflow:hidden;}
+div[data-module=webhard] section[data-role=nbreadcrumb] i {display:inline-block; height:38px; line-height:39px; color:#909499; font-size:14px; margin-right:10px; vertical-align:middle;}
+div[data-module=webhard] section[data-role=nbreadcrumb] a, div[data-module=webhard] section[data-role=nbreadcrumb] button {display:inline-block; height:38px; line-height:39px; color:#222; font-size:12px; text-decoration:none; vertical-align:middle; border:0; background:transparent; cursor:pointer;}
+div[data-module=webhard] section[data-role=nbreadcrumb] button {margin-right:10px;}
+div[data-module=webhard] section[data-role=nbreadcrumb] a:hover, div[data-module=webhard] section[data-role=nbreadcrumb] button:hover {color:#0370a6;}
+div[data-module=webhard] section[data-role=nbreadcrumb] span.ellipsis {display:none;}
+div[data-module=webhard][data-container=TRUE] section[data-role=nbreadcrumb] {background:#f4f4f4; border-top:1px solid #d8dee5; height:37px;}
+
+/**
+ * 컨테이너
+ */
+div[data-module=webhard] section[data-role=container] {display:table; table-layout:fixed; width:100%; height:calc(100% - 39px);}
+
+/**
+ * 네비바
+ */
+div[data-module=webhard] nav[data-role=sidebar] {display:table-cell; vertical-align:top; position:relative; background:#fff; width:220px; border-right:1px solid #d9dadb;}
+div[data-module=webhard] nav[data-role=sidebar] div[data-role=slide_title] {height:58px; background:#2196f3; color:#fff;}
+div[data-module=webhard] nav[data-role=sidebar] div[data-role=slide_title] > h4 {width:calc(100% - 55px); height:58px; line-height:58px; font-size:15px; padding-left:10px; display:inline-block; vertical-align:middle;}
+div[data-module=webhard] nav[data-role=sidebar] div[data-role=slide_title] > button {width:40px; height:58px; vertical-align:middle; border:0; background:transparent;}
+div[data-module=webhard] nav[data-role=sidebar] div[data-role=slide_title] > button > i {width:40px; height:58px; font-size:20px; color:#fff; line-height:58px;}
+div[data-module=webhard] nav[data-role=sidebar] div[data-role=folder_title] > button {width:100%; height:59px; line-height:58px; padding:0px 10px; font-size:15px; background:#fff; color:#343434; cursor:pointer; border:0; border-bottom:1px solid #d9dadb; text-align:left; box-sizing:border-box;}
+div[data-module=webhard] nav[data-role=sidebar] div[data-role=folder_title] > button > i.fa {color:#9c9ea6; float:right; height:58px; line-height:58px; font-size:20px;}
+div[data-module=webhard] nav[data-role=sidebar] div[data-role=folder_title] > button.opened > i.fa:before {content:"\f106";}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu {list-style:none; width:100%; height:calc(100% - 59px);}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu > li.type {width:100%; height:70px; padding:0px; line-height:1; font-size:0; border-bottom:1px solid #d9dadb;}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu > li.type > ul {display:table; width:100%; height:70px; table-layout:fixed; border-collapse:collapse; border:0;}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu > li.type > ul > li {display:table-cell; width:100%; height:70px; margin:0px; padding:0px; vertical-align:top;}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu > li.type > ul > li > button {background:transparent; border:0px; border-right:1px solid #d9dadb; width:100%; height:70px; cursor:pointer; color:#343434; font-size:12px;}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu > li.type > ul > li > button > i {display:block; width:100%; height:35px; line-height:30px; text-align:center; font-size:20px; color:#666;}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu > li.type > ul > li > button.selected {background-color:#f2f4f5; color:#000;}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu > li.type > ul > li > button.selected > i {color:#0370a6;}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu > li.type > ul > li:last-child > button {border-right:0px;}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu > li.tags {height:auto; padding:10px; line-height:1; border-bottom:1px solid #d9dadb; font-size:0;}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu > li.tags > button {margin:3px 0px; display:block; width:100%; height:28px; color:#343434; font-size:13px; text-align:left; border:0px; background-color:transparent; background-repeat:no-repeat; background-position:0 50%; cursor:pointer; line-height:28px;}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu > li.tags > button > i {width:28px; height:28px; text-align:center; float:left; vertical-align:middle;}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu > li.tags > button[data-tag=favorite] > i {color:#168ee6;}
+div[data-module=webhard] nav[data-role=sidebar] ul.menu > li.tags > button.selected {background-color:#f1f4f4; margin:3px -10px; padding:0px 10px; background-position-x:10px; width:calc(100% + 20px); padding-left:35px; color:#222;}
+
+/**
+ * 네비바 > 폴더트리
+ */
+div[data-module=webhard] ul[data-role=tree] {list-style:none; border-bottom:1px solid #d9dadb;}
+div[data-module=webhard] ul[data-role=tree] > li {margin:0px;}
+div[data-module=webhard] ul[data-role=tree] > li > div {height:34px; line-height:34px; padding-left:3px; cursor:pointer;}
+div[data-module=webhard] ul[data-role=tree] > li > div > i {width:34px; height:34px; background:url(../images/icon_root.png) no-repeat 50% 50%; display:inline-block; vertical-align:middle;}
+div[data-module=webhard] ul[data-role=tree] > li > div > span {width:calc(100% - 40px); height:34px; font-weight:bold; display:inline-block; vertical-align:middle; text-overflow:ellipsis; white-space:nowrap; overflow:hidden;}
+div[data-module=webhard] ul[data-role=tree] > li > div.droppable {background-color:#0089f0 !important; color:#fff !important;}
+div[data-module=webhard] ul[data-role=tree] > li.selected > div {background:#f1f4f4;}
+div[data-module=webhard] ul[data-role=tree-child] {list-style:none;}
+div[data-module=webhard] ul[data-role=tree-child] > li {list-style:none;}
+div[data-module=webhard] ul[data-role=tree-child] > li > div {width:100%; height:30px; line-height:30px; box-sizing:border-box; font-size:0; display:inline-block; vertical-align:middle;}
+div[data-module=webhard] ul[data-role=tree-child] > li > div > button {font-family:FontAwesome; font-size:12px; color:#9c9ea6; background:transparent; border:0; width:30px; height:30px; line-height:30px; text-align:center; cursor:pointer; display:inline-block; vertical-align:middle;}
+div[data-module=webhard] ul[data-role=tree-child] > li > div > button:before {content:"\f0da";}
+div[data-module=webhard] ul[data-role=tree-child] > li > div > button:hover {color:#333;}
+div[data-module=webhard] ul[data-role=tree-child] > li > div > div {width:calc(100% - 30px); height:30px; display:inline-block; vertical-align:middle; cursor:pointer;}
+div[data-module=webhard] ul[data-role=tree-child] > li > div > div > i {width:24px; height:30px; display:inline-block; vertical-align:middle; background-image:url(../images/icon_tree_closed.png); background-repeat:no-repeat; background-position:50% 45%; margin-left:-4px;}
+div[data-module=webhard] ul[data-role=tree-child] > li > div > div > span {width:calc(100% - 20px); padding:0px 3px; height:30px; text-overflow:ellipsis; white-space:nowrap; overflow:hidden; font-size:12px; display:inline-block; vertical-align:middle; box-sizing:border-box;}
+div[data-module=webhard] ul[data-role=tree-child] > li.loading > div > button {color:#9c9ea6 !important; opacity:1 !important;}
+div[data-module=webhard] ul[data-role=tree-child] > li.loading > div > button:before {content:"";}
+div[data-module=webhard] ul[data-role=tree-child] > li.opened > div > button:before {content:"\f0d7";}
+div[data-module=webhard] ul[data-role=tree-child] > li.selected > div {background:#f1f4f4; color:#222;}
+div[data-module=webhard] ul[data-role=tree-child] > li.selected > div > div > span {font-weight:bold;}
+div[data-module=webhard] ul[data-role=tree-child] > li[data-children=FALSE] > div > button {opacity:0; cursor:default;}
+div[data-module=webhard] ul[data-role=tree-child] > li > div.selected {background-color:#0089f0 !important; color:#fff !important;}
+div[data-module=webhard] ul[data-role=tree-child] > li > div.droppable {background-color:#0089f0 !important; color:#fff !important;}
+div[data-module=webhard] ul[data-role=tree-child] > li > div.dragging {background-color:#f1f4f4 !important; opacity:0.5;}
+
+/**
+ * 탐색기
+ */
+div[data-module=webhard] section[data-role=explorer] {display:table-cell; width:100%; vertical-align:top;}
+
+/**
+ * 탐색기 > 툴바
+ */
+div[data-module=webhard] div[data-role=toolbar] {height:30px; border-bottom:1px solid #d9dadb; font-size:0px; padding-right:5px; padding:14px 10px; overflow:hidden;}
+div[data-module=webhard] div[data-role=toolbar] > button[data-action=tree] {width:30px; height:30px; color:#333; border:1px solid #cacbcc; cursor:pointer; background:#fff; box-sizing:border-box; vertical-align:middle; margin-right:10px; line-height:28px;}
+div[data-module=webhard] div[data-role=toolbar] > h4[data-role=title] {width:calc(100% - 100px); height:30px; font-size:15px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; vertical-align:middle; line-height:30px; vertical-align:middle;}
+div[data-module=webhard] div[data-role=toolbar] > button[data-action=menu] {font-size:20px; width:30px; height:30px; color:#333; vertical-align:middle; border:0; background:transparent;}
+div[data-module=webhard] div[data-role=toolbar] > button[data-action=menu] > i {width:30px; height:30px; line-height:30px;}
+
+/**
+ * 탐색기 > 툴바 > 메뉴버튼
+ */
+div[data-module=webhard] div[data-role=toolbar] > div[data-role=menu] {width:calc(100% - 70px); height:80px; text-align:left; overflow-x:scroll; -webkit-overflow-scrolling:touch; white-space:nowrap; overflow-y:hidden; vertical-align:middle;}
+div[data-module=webhard] div[data-role=toolbar] > div[data-role=menu] > button {font-size:12px; height:30px; color:#333; border:1px solid #cacbcc; cursor:pointer; background:#fff; box-sizing:border-box; vertical-align:top; margin-right:5px; text-align:left; line-height:1;}
+div[data-module=webhard] div[data-role=toolbar] > div[data-role=menu] > button > i {width:20px; height:28px; line-height:28px; text-align:center; vertical-align:middle; padding-left:4px;}
+div[data-module=webhard] div[data-role=toolbar] > div[data-role=menu] > button > i.xi-upload {color:#ff753c;}
+div[data-module=webhard] div[data-role=toolbar] > div[data-role=menu] > button > i.xi-download {color:#00a0e1;}
+div[data-module=webhard] div[data-role=toolbar] > div[data-role=menu] > button > span {display:inline-block; height:28px; line-height:28px; padding:0px 12px;}
+div[data-module=webhard] div[data-role=toolbar] > div[data-role=menu] > button > i + span {padding-left:0px;}
+div[data-module=webhard] div[data-role=toolbar] > div[data-role=menu] > button:last-child {margin-right:0px;}
+div[data-module=webhard] div[data-role=toolbar] > div[data-role=menu] > span.split {display:inline-block; vertical-align:middle; width:5px; height:16px; margin:7px 5px; border-left:1px solid #ccc;}
+
+/**
+ * 탐색기 > 툴바 > 모드변경버튼
+ */
+div[data-module=webhard] div[data-role=toolbar] > div[data-role=mode] {float:right; width:60px; height:30px;}
+div[data-module=webhard] div[data-role=toolbar] > div[data-role=mode] > button {width:30px; height:30px; margin-right:0px; line-height:1; border:1px solid #cacbcc; cursor:pointer; background:#fff; font-size:18px; color:#333;}
+div[data-module=webhard] div[data-role=toolbar] > div[data-role=mode] > button > i {height:30px; line-height:29px; text-align:center;}
+div[data-module=webhard] div[data-role=toolbar] > div[data-role=mode] > button[data-mode=card] {border-right:0px;}
+div[data-module=webhard][data-viewmode=card] div[data-role=toolbar] > div[data-role=mode] > button[data-mode=card] {color:#059be6;}
+div[data-module=webhard][data-viewmode=grid] div[data-role=toolbar] > div[data-role=mode] > button[data-mode=grid] {color:#059be6;}
+
+/**
+ * 탐색기 > 헤더바
+ */
+div[data-module=webhard] div[data-role=headerbar] {background:#f2f4f5; height:33px; border-bottom:1px solid #d9dadb;}
+div[data-module=webhard] div[data-role=headerbar] > button[data-action=select] {float:left; margin:8px 6px 8px 10px;}
+div[data-module=webhard] div[data-role=headerbar] > button[data-action=favorite] {float:left; margin:8px 8px 8px 0px;}
+div[data-module=webhard] div[data-role=headerbar] > button[data-action=sort] {float:right; height:32px; line-height:32px; font-size:12px; border:0; background:transparent; padding:0px 10px; color:#12b27d;}
+div[data-module=webhard] div[data-role=headerbar] > button[data-action=sort] > i {margin-left:5px;}
+
+div[data-module=webhard] div[data-role=headerbar] > ul {display:table; width:calc(100% - 56px); height:33px; list-style:none; table-layout:fixed;}
+div[data-module=webhard] div[data-role=headerbar] > ul > li {display:table-cell; vertical-align:middle; border-left:1px solid #d9dadb;}
+div[data-module=webhard] div[data-role=headerbar] > ul > li.select {width:30px; text-align:center; border-left:0px; padding-left:3px;}
+div[data-module=webhard] div[data-role=headerbar] > ul > li.favorite {width:25px; border-left:0px;}
+div[data-module=webhard] div[data-role=headerbar] > ul > li.name {width:100%;}
+div[data-module=webhard] div[data-role=headerbar] > ul > li.size {width:100px;}
+div[data-module=webhard] div[data-role=headerbar] > ul > li.date {width:180px;}
+div[data-module=webhard] div[data-role=headerbar] > ul > li > button {width:100%; border:0px; background:transparent; height:33px; padding:0px 12px 0px 10px; cursor:pointer; vertical-align:top; text-align:left; color:#333;}
+div[data-module=webhard] div[data-role=headerbar] > ul > li > button[data-sort] > i.fa {display:none; margin-left:8px;}
+div[data-module=webhard][data-dir=asc] div[data-role=headerbar] > ul > li > button[data-sort] > i.fa:before {content:"\f0d8";}
+div[data-module=webhard][data-dir=desc] div[data-role=headerbar] > ul > li > button[data-sort] > i.fa:before {content:"\f0d7";}
+div[data-module=webhard][data-sort=name] div[data-role=headerbar] > ul > li > button[data-sort=name] {color:#12b27d;}
+div[data-module=webhard][data-sort=name] div[data-role=headerbar] > ul > li > button[data-sort=name] > i.fa {display:inline-block;}
+div[data-module=webhard][data-sort=size] div[data-role=headerbar] > ul > li > button[data-sort=size] {color:#12b27d;}
+div[data-module=webhard][data-sort=size] div[data-role=headerbar] > ul > li > button[data-sort=size] > i.fa {display:inline-block;}
+div[data-module=webhard][data-sort=date] div[data-role=headerbar] > ul > li > button[data-sort=date] {color:#12b27d;}
+div[data-module=webhard][data-sort=date] div[data-role=headerbar] > ul > li > button[data-sort=date] > i.fa {display:inline-block;}
+
+/**
+ * 탐색기 > 파일목록
+ */
+div[data-module=webhard] div[data-role=files] {height:calc(100% - 93px);}
+div[data-module=webhard] div[data-role=files].droppable {box-shadow:inset 0px 0px 15px 5px rgba(0,139,234,0.5);}
+
+/**
+ * 상세보기
+ */
+div[data-module=webhard] aside[data-role=detail] {vertical-align:top; background:#fff; width:300px; border-left:1px solid #d9dadb;}
+div[data-module=webhard] aside[data-role=detail] {border-left:1px solid #d9dadb; width:340px;}
+div[data-module=webhard] aside[data-role=detail] > div[data-role=panel] {padding:0px 20px; overflow:hidden;}
+div[data-module=webhard] aside[data-role=detail] div.title {height:58px; line-height:58px; font-size:15px; color:#1a1a1a; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;}
+div[data-module=webhard] aside[data-role=detail] div.title > button {float:right; width:30px; height:30px; margin:14px -5px 0px 10px; font-size:20px; line-height:30px; border:0; background:transparent; color:#666; cursor:pointer;}
+div[data-module=webhard] aside[data-role=detail] ul[data-role=tab] {display:table; width:100%; table-layout:fixed; list-style:none;}
+div[data-module=webhard] aside[data-role=detail] ul[data-role=tab] > li {display:table-cell; width:50px;}
+div[data-module=webhard] aside[data-role=detail] ul[data-role=tab] > li > button {border:1px solid #d9dadb; background:#f7f9fa; color:#999; display:block; width:100%; height:45px; border-bottom:0px; border-right:0px; font-size:13px; cursor:pointer;}
+div[data-module=webhard] aside[data-role=detail] ul[data-role=tab] > li:last-child > button {border-right:1px solid #d9dadb;}
+div[data-module=webhard] aside[data-role=detail] ul[data-role=tab] > li.selected > button {background:#fff; color:#1a1a1a; border-color:#c5c5c5;}
+div[data-module=webhard] aside[data-role=detail] ul[data-role=tab] > li.selected + li > button {border-left:1px solid #c5c5c5;}
+
+div[data-module=webhard] aside[data-role=detail] div[data-tab] {height:calc(100% - 133px); padding-top:20px; padding-bottom:10px; overflow-x:hidden; overflow-y:auto; display:none;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=information] {display:block;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=information] > ul[data-role=data] {list-style:none;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=information] > ul[data-role=data] > li {height:26px; font-size:0px; color:#333;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=information] > ul[data-role=data] > li.bar {margin-top:20px; border-top:1px solid #e8e9eb; height:20px;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=information] > ul[data-role=data] > li > b {display:inline-block; width:100px; height:26px; line-height:26px; font-size:12px; vertical-align:top;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=information] > ul[data-role=data] > li > span {display:inline-block; width:calc(100% - 100px); height:26px; line-height:26px; font-size:12px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; vertical-align:top;}
+
+div[data-module=webhard] aside[data-role=detail] div[data-tab=information] > ul[data-role=button] {list-style:none; display:table; width:100%; table-layout:fixed;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=information] > ul[data-role=button] > li {display:table-cell; width:100%; vertical-align:top;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=information] > ul[data-role=button] > li[data-role=preview] {padding-left:4px;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=information] > ul[data-role=button] > li > button {display:block; width:100%; height:40px; border: 0px; text-align:center; cursor:pointer; font-size:13px;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=information] > ul[data-role=button] > li > button[data-action=download] {background:#0871a6; color:#fff;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=information] > ul[data-role=button] > li > button[data-action=preview] {background:#e1e9ed; color:#4c4c4c;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=activity] > div {border:1px solid #d9dadb; margin:10px 0px; padding:10px;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=activity] > div:first-child {margin-top:0px;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=activity] > div > div.text {line-height:20px; font-size:13px;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=activity] > div > div.text span.folder {font-weight:bold; color:#008cea;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=activity] > div > div.text span.file {font-weight:bold; color:#008cea;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=activity] > div > div.text > i {display:block; float:left; width:32px; height:32px; vertical-align:top; margin:4px 10px 4px 0px;}
+
+div[data-module=webhard] aside[data-role=detail] div[data-tab=activity] > div > ul {list-style:none; padding-left:10px; margin-top:10px;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=activity] > div > ul > li {display:block; height:28px; line-height:28px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:#333;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=activity] > div > ul > li > i {display:block; width:20px; height:20px; margin:2px 5px; float:left; vertical-align:top; background-image:url(../images/icon_type_etc.png); background-repeat:no-repeat; background-position:50% 50%; background-size:contain;}
+div[data-module=webhard] aside[data-role=detail] div[data-tab=activity] > div > ul > li > span.size {float:right; color:#666;}
+
+div[data-module=webhard] aside[data-role=detail] div[data-tab=activity] > div > div.reg_date {font-size:12px; text-align:right; color:#666; margin-top:5px;}
+
+/**
+ * 업로드목록
+ */
+div[data-module=webhard] div[data-role=upload] {position:fixed; right:0; bottom:0; width:341px; z-index:1000; background:#fff; display:none;}
+div[data-module=webhard] div[data-role=upload] > h4 {height:50px; padding:0px 12px; color:#fff; background:#2196f3; line-height:50px; font-size:15px; font-weight:normal;}
+div[data-module=webhard] div[data-role=upload] > h4 > button {float:right; width:30px; height:30px; background:transparent; color:#fff; margin:10px 0px; border:0; cursor:pointer; font-size:16px; color:rgba(255,255,255,0.8);}
+div[data-module=webhard] div[data-role=upload] > h4 > button:hover {background:rgba(0,0,0,0.1); color:#fff;}
+div[data-module=webhard] div[data-role=upload] > ul {border-left:1px solid #e5e5e5; max-height:300px; list-style:none; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+div[data-module=webhard] div[data-role=upload] > ul > li {display:table; table-layout:fixed; border-bottom:1px solid #e5e5e5; width:100%; height:60px;}
+div[data-module=webhard] div[data-role=upload] > ul > li > i {display:table-cell; width:60px; text-align:center; vertical-align:middle;}
+div[data-module=webhard] div[data-role=upload] > ul > li > i > button {display:inline-block; background:#fff; border:1px solid #c2c2c2; border-radius:2px; width:40px; height:40px; cursor:pointer; font-size:16px; line-height:36px; box-sizing:border-box; color:#999; position:relative; display:none;}
+div[data-module=webhard] div[data-role=upload] > ul > li > i > button > div {position:absolute; top:6px; left:44px; height:24px; line-height:24px; background:#2a2a2a; color:#fff; font-size:12px; padding:0px 5px; white-space:nowrap; display:none;}
+div[data-module=webhard] div[data-role=upload] > ul > li > i > button > div:after {right:100%; top:50%; border:solid transparent; content:" "; height:0; width:0; position:absolute; pointer-events:none; border-color:rgba(42,42,42,0); border-right-color:#2a2a2a; border-width:5px; margin-top:-5px;}
+div[data-module=webhard] div[data-role=upload] > ul > li > i > button:hover {color:#333;}
+div[data-module=webhard] div[data-role=upload] > ul > li > i > button:hover > div {display:block;}
+div[data-module=webhard] div[data-role=upload] > ul > li > div {display:table-cell; width:100%; vertical-align:middle; padding-right:10px;}
+div[data-module=webhard] div[data-role=upload] > ul > li > div > div[data-role=meta] {white-space:nowrap; text-overflow:ellipsis; overflow:hidden;}
+div[data-module=webhard] div[data-role=upload] > ul > li > div > div[data-role=meta] > span[data-role=size] {float:right; color:#666;}
+div[data-module=webhard] div[data-role=upload] > ul > li > div > div[data-role=progress] {margin-top:4px; height:20px; border-radius:3px; background:#d7d7d7;}
+div[data-module=webhard] div[data-role=upload] > ul > li > div > div[data-role=progress] > div {height:20px; border-radius:3px; background:#F44336;}
+div[data-module=webhard] div[data-role=upload] > ul > li:hover > i > button {display:inline-block;}
+div[data-module=webhard] div[data-role=upload] > ul > li[data-complete=TRUE] > i > button[data-action=cancel] {display:none !important;}
+div[data-module=webhard] div[data-role=upload] > ul > li[data-complete=TRUE] > i > button[data-action=restart] {display:none !important;}
+div[data-module=webhard] div[data-role=upload] > ul > li[data-complete=FALSE] > i > button[data-action=search] {display:none !important;}
+div[data-module=webhard] div[data-role=upload] > ul > li[data-complete=FALSE][data-cancel=TRUE] > i > button[data-action=cancel] {display:none !important;}
+div[data-module=webhard] div[data-role=upload] > ul > li[data-complete=FALSE][data-cancel=FALSE] > i > button[data-action=restart] {display:none !important;}
+div[data-module=webhard] div[data-role=upload].minimum > h4 > button[data-action=toggle] > i:before {content:"\e909";}
+
+
+/**
+ * 메세지창
+ */
+div[data-module=webhard] div[data-role=message] {position:absolute; left:0; bottom:0px; width:100%; height:auto; z-index:10000; text-align:center;}
+div[data-module=webhard] div[data-role=message] > div {display:inline-block; max-width:calc(100% - 20px); box-sizing:border-box; padding:10px 20px; line-height:1.6; font-size:13px; border-radius:3px; margin:10px;}
+div[data-module=webhard] div[data-role=message] > div.info {background:#2196f3; color:#fff;}
+div[data-module=webhard] div[data-role=message] > div.error {background:#f44336; color:#fff;}
+
+@media (max-width:767px) {
+	/**
+	 * 웹하드 컨테이너
+	 */
+	div[data-module=webhard] section[data-role=container] {display:block;}
+	
+	/**
+	 * 네비바
+	 */
+	div[data-module=webhard] nav[data-role=sidebar] {position:absolute; width:280px; height:100%; top:39px; left:0; z-index:2000; display:none; border-right:0px;}
+	
+	/**
+	 * 네비바 > 폴더트리
+	 */
+	
+	
+	/**
+	 * 탐색기
+	 */
+	div[data-module=webhard] section[data-role=explorer] {display:block;}
+	
+	/**
+	 * 탐색기 > 툴바
+	 */
+	div[data-module=webhard] div[data-role=toolbar] > div[data-role=menu] {width:250px; height:auto; border:1px solid #d9dadb; background:#fff; box-shadow:0px 0px 5px rgba(0,0,0,0.3); font-size:0; top:85px; right:10px; left:auto; bottom:auto; overflow:hidden;}
+	div[data-module=webhard] div[data-role=toolbar] > div[data-role=menu] > button {display:block; width:100%; height:46px; font-size:13px; border:0; padding:6px 14px; margin-right:0px; box-sizing:border-box;}
+	div[data-module=webhard] div[data-role=toolbar] > div[data-role=menu] > span.split {display:block; width:calc(100% - 20px); height:1px; margin:0px 10px; background:#ccc; border-left:0px;}
+	div[data-module=webhard] div[data-role=toolbar] > div[data-role=mode] {display:inline-block; float:none; width:30px; height:30px; vertical-align:middle; position:relative;}
+	div[data-module=webhard] div[data-role=toolbar] > div[data-role=mode] > button {width:30px; height:30px; margin-right:0px; line-height:1; border:1px solid #cacbcc; cursor:pointer; background:#fff; color:#333; border:0; line-height:1;}
+	div[data-module=webhard] div[data-role=toolbar] > div[data-role=mode] > button > i {height:30px; line-height:31px; text-align:center;}
+	div[data-module=webhard] div[data-role=toolbar] > div[data-role=mode] > button[data-mode=card] {border-right:0px;}
+	div[data-module=webhard] div[data-role=toolbar] > div[data-role=mode] > button {font-size:20px;}
+	div[data-module=webhard][data-viewmode=card] div[data-role=toolbar] > div[data-role=mode] > button[data-mode=card] {display:block; color:#333;}
+	div[data-module=webhard][data-viewmode=card] div[data-role=toolbar] > div[data-role=mode] > button[data-mode=grid] {position:absolute; top:0; left:0; z-index:10; opacity:0;}
+	div[data-module=webhard][data-viewmode=grid] div[data-role=toolbar] > div[data-role=mode] > button[data-mode=grid] {display:block; color:#333;}
+	div[data-module=webhard][data-viewmode=grid] div[data-role=toolbar] > div[data-role=mode] > button[data-mode=card] {position:absolute; top:0; left:0; z-index:10; opacity:0;}
+	
+	/**
+	 * 탐색기 > 헤더바
+	 */
+	div[data-module=webhard] div[data-role=headerbar] > ul {display:none; width:250px; height:auto; border:1px solid #d9dadb; background:#fff; box-shadow:0px 0px 5px rgba(0,0,0,0.3); font-size:0; top:127px; right:5px; left:auto; bottom:auto; overflow:hidden;}
+	div[data-module=webhard] div[data-role=headerbar] > ul > li {display:block; width:100% !important; height:auto; border-left:0px;}
+	div[data-module=webhard] div[data-role=headerbar] > ul > li > button {display:block; width:100%; height:46px; font-size:13px; border:0; padding:6px 14px; margin-right:0px; box-sizing:border-box;}
+	
+/* 	div[data-module=webhard] aside[data-role=detail] {display:block; position:absolute; top:0; right:0; height:100%; display:none;} */
+}
+
+@media (min-width:768px) and (max-width:991px) {
+	div[data-module=webhard] nav[data-role=sidebar] {width:200px;}
+	div[data-module=webhard] nav[data-role=sidebar] > div[data-role=resizer] {display:none;}
+	
+/* 	div[data-module=webhard] aside[data-role=detail] {display:block; position:absolute; top:0; right:0; height:100%;} */
+}
+
+@media (min-width:768px) and (max-width:991px) {
+/* 	div[data-module=webhard] aside[data-role=detail] {display:block; position:absolute; top:0; right:0; height:100%;} */
+}
+
+@media (min-width:992px) and (max-width:1199px) {
+	div[data-module=webhard] h4[data-role=name] {display:none;}
+/* 	div[data-module=webhard] aside[data-role=detail] {display:block; position:absolute; top:0; right:0; height:100%;} */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * 모바일 > 웹하드 컨테이너
+ */
+div[data-module=webhard][data-mobile=TRUE] section[data-role=container] {display:block;}
+
+/**
+ * 모바일 > 네비바
+ */
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] {position:absolute; width:250px; height:100%; top:39px; left:0; z-index:2000; display:none; border-right:0px;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] button[data-tag=root] {width:100%; height:50px; line-height:50px; font-size:14px; border:0px; background:transparent; text-align:left; color:#343434;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] button[data-tag=root] > i {display:block; width:40px; height:40px; margin:5px; background:url(../images/icon_root.png) no-repeat 50% 50%; float:left;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] button[data-tag=root].selected {background:#f0f0f0;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] ul.menu > li.type {display:block; height:auto;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] ul.menu > li.type > ul {display:block; height:auto;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] ul.menu > li.type > ul > li {display:block; height:auto;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] ul.menu > li.type > ul > li > button {width:100%; height:50px; line-height:50px; border:0; background:transparent; color:#343434; font-size:14px; text-align:left;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] ul.menu > li.type > ul > li > button > i {display:block; width:40px; height:40px; margin:5px; font-size:16px; line-height:40px; text-align:center; color:#343434; float:left;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] ul.menu > li.type > ul > li > button.selected {background-color:#f0f0f0; color:#000;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] ul.menu > li.type > ul > li > button.selected > i {color:#2196f3;}
+
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] ul.menu > li.tags {padding:0px;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] ul.menu > li.tags > button {height:50px; font-size:14px; line-height:50px;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] ul.menu > li.tags > button > i {width:40px; height:40px; margin:5px; color:#343434 !important; line-height:40px;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] ul.menu > li.tags > button.selected {background-color:#f0f0f0; color:#000;}
+div[data-module=webhard][data-mobile=TRUE] nav[data-role=sidebar] ul.menu > li.tags > button.selected > i {color:#2196f3 !important;}
+
+
+div[data-module=webhard] nav[data-role=sidebar] ul.menu > li.tags > button.selected {background-color:#f1f4f4; margin:3px -10px; padding:0px 10px; background-position-x:10px; width:calc(100% + 20px); padding-left:35px; color:#222;}
+
+/**
+ * 모바일 > 탐색기 > 툴바
+ */
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=menu] {width:250px; height:auto; border:1px solid #d9dadb; background:#fff; box-shadow:0px 0px 5px rgba(0,0,0,0.3); font-size:0; top:85px; right:10px; left:auto; bottom:auto; overflow:hidden;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=menu] > button {display:block; width:100%; height:50px; font-size:13px; border:0; padding:6px; margin-right:0px; box-sizing:border-box;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=menu] > span.split {display:block; width:calc(100% - 20px); height:1px; margin:0px 10px; background:#ccc; border-left:0px;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=mode] {display:inline-block; float:none; width:30px; height:30px; vertical-align:middle; position:relative;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=mode] > button {width:30px; height:30px; margin-right:0px; line-height:1; border:1px solid #cacbcc; cursor:pointer; background:#fff; color:#333; border:0; line-height:1;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=mode] > button > i {height:30px; line-height:31px; text-align:center;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=mode] > button[data-mode=card] {border-right:0px;}
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=mode] > button {font-size:22px;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=toolbar] > div[data-role=mode] > button[data-mode=card] {display:block; color:#333;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=card] div[data-role=toolbar] > div[data-role=mode] > button[data-mode=grid] {position:absolute; top:0; left:0; z-index:10; opacity:0;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=toolbar] > div[data-role=mode] > button[data-mode=grid] {display:block; color:#333;}
+div[data-module=webhard][data-mobile=TRUE][data-viewmode=grid] div[data-role=toolbar] > div[data-role=mode] > button[data-mode=card] {position:absolute; top:0; left:0; z-index:10; opacity:0;}
+
+div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=menu][data-mode=add] {top:auto; bottom:80px; right:20px;}
+
+@media (max-width:400px) {
+	/**
+	 * 모바일 > 탐색기 > 툴바
+	 */
+	div[data-module=webhard][data-mobile=TRUE] div[data-role=toolbar] > div[data-role=menu][data-mode] {width:100%; border:0px; border-top:1px solid #d9dadb; background:#fff; box-shadow:0px 0px 5px rgba(0,0,0,0.3); font-size:0; top:auto; left:0; bottom:0; right:auto;}
+	
+	/**
+	 * 모바일 > 탐색기 > 헤더바
+	 */
+	div[data-module=webhard][data-mobile=TRUE] div[data-role=headerbar] > ul {width:100%; border:0px; border-top:1px solid #d9dadb; background:#fff; box-shadow:0px 0px 5px rgba(0,0,0,0.3); font-size:0; top:auto; left:0; bottom:0; right:auto;}
+}
