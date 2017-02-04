@@ -1079,7 +1079,7 @@ class ModuleWebhard {
 		$meta->date = $folder->update_date;
 		$meta->icon = $this->getIcon('folder');
 		$meta->status = 'PUBLISHED';
-		$meta->download = $this->IM->getModuleUrl('webhard','compress',$folder->idx.'/'.$folder->name,true);
+		$meta->download = $this->IM->getModuleUrl('webhard','compress',$folder->idx.'/'.urlencode($folder->name),true);
 		
 		return $meta;
 	}
@@ -1316,7 +1316,7 @@ class ModuleWebhard {
 		if ($file == null) {
 			return null;
 		} else {
-			$idx = $share == null ? $file->name : $share.'/'.$file->name;
+			$idx = $share == null ? urlencode($file->name) : $share.'/'.urlencode($file->name);
 			return $this->IM->getModuleUrl('webhard',$view,$file->idx,$idx,$isFullUrl);
 		}
 	}

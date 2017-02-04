@@ -136,6 +136,7 @@ var Webhard = {
 		});
 		
 		parent.window.postMessage({event:"init",url:location.href},"*");
+		Webhard.updateDisk();
 	},
 	/**
 	 * 웹하드 호출자를 기록한다.
@@ -3430,6 +3431,8 @@ var Webhard = {
 				Webhard.upload.isUploading = false;
 				Webhard.upload.xhr = null;
 				
+				Webhard.updateDisk();
+				
 				if (Webhard.upload.currentIdx !== null) {
 					var currentFile = Webhard.upload.uploadFiles[Webhard.upload.currentIdx];
 					currentFile.status = "WAIT";
@@ -3694,7 +3697,7 @@ var Webhard = {
 				} else if (result.item.status == "DRAFT") {
 					Webhard.message.show("error",Webhard.getErrorText("DRAFT_FILE"));
 				} else {
-					window.open(result.item.download);
+					location.href = result.item.download;
 				}
 			});
 		},
@@ -3738,7 +3741,7 @@ var Webhard = {
 				},
 				success:function() {
 					setTimeout(function() {
-						window.open(ENV.getProcessUrl("webhard","compress")+"?mode=download&hash="+hash);
+						location.href = ENV.getProcessUrl("webhard","compress")+"?mode=download&hash="+hash;
 						iModule.enable();
 					},1000);
 				},

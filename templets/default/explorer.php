@@ -1,3 +1,8 @@
+<?php
+$IM->loadWebFont('NanumBarunGothic',true);
+$IM->loadWebFont('FontAwesome');
+$IM->loadWebFont('XEIcon');
+?>
 <div data-role="message"></div>
 
 <div data-role="upload">
@@ -40,7 +45,7 @@
 			</div>
 			
 			<ul class="menu">
-				<li>
+				<li class="tree">
 					<ul data-role="tree">
 						<li>
 							<div>
