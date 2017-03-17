@@ -1356,10 +1356,10 @@ class ModuleWebhard {
 				/**
 				 * 해당모듈에 웹하드모듈을 위한 함수가 없을 경우, 접근권한이 있다고 판단한다.
 				 */
-				if (method_exists($mModule,'doWebhard') == false) {
+				if (method_exists($mModule,'syncWebhard') == false) {
 					return '';
 				} else {
-					if ($mModule->doWebhard('checkPermission',$target->data) == true) {
+					if ($mModule->syncWebhard('permission',$target->data) == true) {
 						return 'R';
 					} else {
 						return '';
@@ -1539,18 +1539,37 @@ class ModuleWebhard {
 	 * @return boolean $success
 	 */
 	function unshareFile($hash) {
-		$share = $this->db()->select($this->table->share)->where('hash',$hash)->getOne();
-		if ($share == null) return false;
-		if ($share->midx != $this->IM->getModule('member')->getLogged()) return false;
-		
-		$this->db()->delete($this->table->share)->where('hash',$hash)->execute();
-		
-		$this->addActivity('UNSAHRE_FILE',$share->fidx,json_decode($share->target));
-		
-		if ($this->db()->select($this->table->share)->where('fidx',$share->fidx)->has() == false) {
-			$file = $this->getFile($share->fidx);
-			$this->db()->update($this->table->file,array('is_shared'=>'FALSE'))->where('idx',$file->idx)->execute();
-			$this->updateFolderShared($file->folder);
+		if (is_numeric($hash) == true) {
+			$shared = $this->db()->select($this->table->share)->where('fidx',$hash)->get();
+			for ($i=0, $loop=count($shared);$i<$loop;$i++) {
+				$this->unshareFile($shared[$i]->hash);
+			}
+		} else {
+			$share = $this->db()->select($this->table->share)->where('hash',$hash)->getOne();
+			if ($share == null) return true;
+			if ($share->midx != $this->IM->getModule('member')->getLogged()) return false;
+			
+			$this->db()->delete($this->table->share)->where('hash',$hash)->execute();
+			
+			$this->addActivity('UNSAHRE_FILE',$share->fidx,json_decode($share->target));
+			
+			if ($this->db()->select($this->table->share)->where('fidx',$share->fidx)->has() == false) {
+				$file = $this->getFile($share->fidx);
+				$this->db()->update($this->table->file,array('is_shared'=>'FALSE'))->where('idx',$file->idx)->execute();
+				$this->updateFolderShared($file->folder);
+			}
+			
+			if ($share->type == 'MODULE') {
+				$target = json_decode($share->target);
+				$mModule = $this->IM->getModule($target->module);
+				
+				if (method_exists($mModule,'syncWebhard') == true) {
+					$data = new stdClass();
+					$data->hash = $hash;
+					$data->target = $target->data;
+					$mModule->syncWebhard('unshare',$data);
+				}
+			}
 		}
 		
 		return true;
@@ -1816,11 +1835,7 @@ class ModuleWebhard {
 		$files = $this->db()->select($this->table->file)->where('folder',$folder->idx)->get();
 		for ($i=0, $loop=count($files);$i<$loop;$i++) {
 			$this->db()->delete($this->table->share)->where('fidx',$files[$i]->idx)->execute();
-			if ($files[$i]->is_shared == 'TRUE') {
-				$this->db()->update($this->table->file,array('is_shared'=>'FALSE'))->where('idx',$files[$i]->idx)->execute();
-				$this->addActivity('UNSHARE_FILE',$files[$i]->idx,$files[$i],time());
-			}
-			
+			if ($files[$i]->is_shared == 'TRUE') $this->unshareFile($files[$i]->idx);
 			$this->db()->delete($this->table->favorite)->where('type','FILE')->where('fidx',$files[$i]->idx)->execute();
 		}
 		

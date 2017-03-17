@@ -105,11 +105,10 @@ for ($i=0, $loop=count($select);$i<$loop;$i++) {
 			 * 공유중인 사항 제거
 			 */
 			if ($file->is_shared == true) {
-				$this->addActivity('UNSHARE_FILE',$file->idx,$file,time());
+				$this->unshareFile($file->idx);
 			}
 			
-			$this->db()->delete($this->table->share)->where('fidx',$file->idx)->execute();
-			$this->db()->update($this->table->file,array('is_shared'=>'FALSE','is_delete'=>'TRUE','editor'=>$this->IM->getModule('member')->getLogged(),'update_date'=>time(),'opath'=>$this->getFolderPath($file->folder).'/'.$file->name))->where('idx',$file->idx)->execute();
+			$this->db()->update($this->table->file,array('is_delete'=>'TRUE','editor'=>$this->IM->getModule('member')->getLogged(),'update_date'=>time(),'opath'=>$this->getFolderPath($file->folder).'/'.$file->name))->where('idx',$file->idx)->execute();
 			
 			$select[$i]->success = true;
 			if (isset($parents[$file->folder]) == false) {
