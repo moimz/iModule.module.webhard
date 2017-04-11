@@ -31,15 +31,15 @@
 	"configs":{
 		"templet":{
 			"type":"string",
-			"value":"default"
+			"default":"default"
 		},
 		"root_name":{
 			"type":"string",
-			"value":"My Webhard"
+			"default":"My Webhard"
 		},
 		"root_size":{
 			"type":"int",
-			"value":10000
+			"default":10000
 		}
 	},
 	"databases":{
