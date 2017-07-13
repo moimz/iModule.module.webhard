@@ -1278,6 +1278,7 @@ class ModuleWebhard {
 		$meta->size = $file->size;
 		$meta->date = $file->update_date;
 		$meta->status = $file->status;
+		$meta->realpath = $this->getFilePath($file->path);
 		
 		$meta->filetype = $file->type;
 		$meta->mime = $file->mime;
