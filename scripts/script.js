@@ -1968,8 +1968,8 @@ var Webhard = {
 				var name = $item.data("name");
 				
 				if (Webhard.$container.attr("data-viewmode") == "card") {
-					var limit = name.length;
-					$name.html(name.replace(/\(([0-9]+)\)$/,"<i>($1)</i>").replace(/\(([0-9]+)\)\.([a-z0-9]+)$/i,"<i>($1)</i>.$2"));
+					var limit = name.toString().length;
+					$name.html(name.toString().replace(/\(([0-9]+)\)$/,"<i>($1)</i>").replace(/\(([0-9]+)\)\.([a-z0-9]+)$/i,"<i>($1)</i>.$2"));
 					while ($name.height() > 40) {
 						limit = limit - 1;
 						$name.html(Webhard.substring(name,limit).replace(/\(([0-9]+)\)$/,"<i>($1)</i>").replace(/\(([0-9]+)\)\.([a-z0-9]+)$/i,"<i>($1)</i>.$2"));
