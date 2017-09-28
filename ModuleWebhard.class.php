@@ -1262,6 +1262,7 @@ class ModuleWebhard {
 		} else {
 			$file = $this->getFile($idx);
 		}
+		if ($file == null) return null;
 		
 		$meta = new stdClass();
 		$meta->type = 'file';
