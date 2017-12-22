@@ -30,7 +30,7 @@
 	],
 	"configs":{
 		"templet":{
-			"type":"string",
+			"type":"templet",
 			"default":"default"
 		},
 		"root_name":{
