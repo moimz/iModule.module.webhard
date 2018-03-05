@@ -131,7 +131,7 @@ var Webhard = {
 					Webhard.explorer.folder(idx,path,null,true);
 				}
 			} else {
-				location.href = location.href;
+				location.replace(location.href);
 			}
 		});
 		
@@ -3802,7 +3802,7 @@ var Webhard = {
 					$("*[data-role=limit]",$disk).html(iModule.getFileSize(result.limit));
 					$("*[data-role=progress] > div",$disk).css("width",(result.usage / result.limit * 100) + "%");
 				} else {
-					location.href = location.href;
+					location.replace(location.href);
 				}
 			},
 			error:function() {
