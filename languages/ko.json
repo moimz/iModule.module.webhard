@@ -98,7 +98,7 @@
 				"root_setting":"루트폴더설정",
 				"root_name":"루트폴더명",
 				"root_name_help":"사용자의 루트폴더 기본이름을 설정합니다.<br>{NAME}을 사용하여 회원이름을 추가할 수 있습니다.",
-				"root_size":"옹량제한",
+				"root_size":"용량제한",
 				"root_size_help":"루트폴더의 용량을 MB단위로 제한할 수 있습니다.<br>(1000 입력시 최대 1GB)"
 			}
 		}
