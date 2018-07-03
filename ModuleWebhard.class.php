@@ -120,6 +120,42 @@ class ModuleWebhard {
 	}
 	
 	/**
+	 * URL 을 가져온다.
+	 *
+	 * @param string $view
+	 * @param string $idx
+	 */
+	function getUrl($view=null,$idx=null) {
+		$url = $this->IM->getUrl(null,null,false);
+		$view = $view === null ? $this->IM->getView() : $view;
+		$idx = $idx === null ? $this->IM->getIdx() : $idx;
+		
+		if ($view == null || $view == false) return $url;
+		$url.= '/'.$view;
+		
+		if ($idx == null || $idx == false) return $url;
+		return $url.'/'.$idx;
+	}
+	
+	/**
+	 * view 값을 가져온다.
+	 *
+	 * @param string $view
+	 */
+	function getView() {
+		return $this->IM->getView();
+	}
+	
+	/**
+	 * idx 값을 가져온다.
+	 *
+	 * @param string $idx
+	 */
+	function getIdx() {
+		return $this->IM->getIdx();
+	}
+	
+	/**
 	 * [코어] 사이트 외부에서 현재 모듈의 API를 호출하였을 경우, API 요청을 처리하기 위한 함수로 API 실행결과를 반환한다.
 	 * 소스코드 관리를 편하게 하기 위해 각 요쳥별로 별도의 PHP 파일로 관리한다.
 	 *
@@ -431,8 +467,8 @@ class ModuleWebhard {
 		 * 파일에 직접 접근하는 컨테이너의 경우
 		 */
 		if (in_array($container,array('origin','thumbnail','view','download')) == true) {
-			$fidx = $this->IM->view;
-			$idx = explode('/',Request('idx'));
+			$fidx = $this->getView();
+			$idx = explode('/',$this->getIdx());
 			$share = null;
 			if (count($idx) == 2) list($share,$name) = $idx;
 			elseif (count($idx) == 1) list($name) = $idx;
@@ -526,8 +562,8 @@ class ModuleWebhard {
 		 */
 		$profile = $this->getProfile();
 		
-		$view = $this->IM->view ? $this->IM->view : 'folder';
-		$path = Request('idx');
+		$view = $this->getView() ? $this->getView() : 'folder';
+		$path = $this->getIdx();
 		
 		if ($view == 'folder') {
 			$path = $path ? $this->getRootFolder()->name.'/'.$path : $this->getRootFolder()->name;
@@ -535,7 +571,7 @@ class ModuleWebhard {
 			$idx = end($pathIdxs);
 			
 			
-			if ($this->IM->view != 'folder' || $path != $this->getFolderPath($idx)) {
+			if ($this->getView() != 'folder' || $path != $this->getFolderPath($idx)) {
 				$temp = explode('/',$this->getFolderPath($idx));
 				$root = array_shift($temp);
 				
