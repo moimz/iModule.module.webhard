@@ -1044,7 +1044,7 @@ class ModuleWebhard {
 		if ($extension == 'doc' || $extension == 'docx') $icon = 'icon_large_doc.png';
 		if ($extension == 'ppt' || $extension == 'pptx') $icon = 'icon_large_ppt.png';
 		
-		return $this->IM->getHost().$this->getModule()->getDir().'/images/'.$icon;
+		return $this->IM->getHost(true).$this->getModule()->getDir().'/images/'.$icon;
 	}
 	
 	/**
