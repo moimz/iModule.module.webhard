@@ -25,7 +25,7 @@ $IM->loadWebFont('XEIcon');
 
 <section data-role="nbreadcrumb">
 	<div>
-		<a href="<?php echo $IM->getUrl(false); ?>"><i class="xi xi-home"></i></a><i class="fa fa-angle-right"></i>
+		<a href="<?php echo $IM->getIndexUrl(); ?>"><i class="xi xi-home"></i></a><i class="fa fa-angle-right"></i>
 		<span data-role="root"></span>
 		<span class="ellipsis"><i class="fa fa-angle-right"></i><i class="xi xi-ellipsis-h"></i></span>
 		<span data-role="path"></span>
