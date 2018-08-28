@@ -23,35 +23,7 @@ var config = new Ext.form.Panel({
 		new Ext.form.FieldSet({
 			title:Webhard.getText("admin/configs/form/default_setting"),
 			items:[
-				new Ext.form.ComboBox({
-					fieldLabel:Webhard.getText("admin/configs/form/templet"),
-					name:"templet",
-					store:new Ext.data.JsonStore({
-						proxy:{
-							type:"ajax",
-							simpleSortMode:true,
-							url:ENV.getProcessUrl("webhard","@getTemplets"),
-							reader:{type:"json",root:"lists",totalProperty:"totalCount"}
-						},
-						autoLoad:true,
-						remoteSort:false,
-						sorters:[{property:"sort",direction:"ASC"}],
-						pageSize:0,
-						fields:["value","display"]
-					}),
-					editable:false,
-					displayField:"display",
-					valueField:"value",
-					listeners:{
-						change:function(form,value) {
-							$.send(ENV.getProcessUrl("webhard","@getTempletConfigs"),{templet:value},function(result) {
-								if (result.success == true) {
-									Admin.setTempletConfigs("ModuleConfigTempletConfigs","@templet_configs-",result.configs);
-								}
-							});
-						}
-					}
-				})
+				Admin.templetField(Webhard.getText("admin/configs/form/templet"),"templet","module","webhard",false)
 			]
 		}),
 		new Ext.form.FieldSet({
