@@ -1,6 +1,7 @@
 /**
  * 웹하드 경로
  */
+div[data-module=webhard] {font-size:12px;}
 div[data-module=webhard] section[data-role=nbreadcrumb] {height:38px; border-bottom:1px solid #d8dee5; padding:0px 15px; font-size:0; overflow:hidden;}
 div[data-module=webhard] section[data-role=nbreadcrumb] i {display:inline-block; height:38px; line-height:39px; color:#909499; font-size:14px; margin-right:10px; vertical-align:middle;}
 div[data-module=webhard] section[data-role=nbreadcrumb] a, div[data-module=webhard] section[data-role=nbreadcrumb] button {display:inline-block; height:38px; line-height:39px; color:#222; font-size:12px; text-decoration:none; vertical-align:middle; border:0; background:transparent; cursor:pointer;}
