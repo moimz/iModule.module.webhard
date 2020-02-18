@@ -1,13 +1,14 @@
 <?php
 /**
- * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodule.kr)
+ * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodules.io)
  *
  * 웹하드 관련 모든 기능을 제어한다.
  * 
  * @file /modules/webhard/ModuleWebhard.class.php
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
- * @version 3.0.0.160910
+ * @version 3.0.0
+ * @modified 2020. 2. 18.
  */
 class ModuleWebhard {
 	/**
@@ -50,6 +51,11 @@ class ModuleWebhard {
 	private $permissions = array();
 	private $shareds = array();
 	private $deleteds = array();
+	
+	/**
+	 * 기본 URL (다른 모듈에서 호출되었을 경우에 사용된다.)
+	 */
+	private $baseUrl = null;
 	
 	/**
 	 * 미리보기가 가능한 파일 확장자
@@ -124,74 +130,79 @@ class ModuleWebhard {
 	 *
 	 * @param string $view
 	 * @param string $idx
+	 * @return string $url
 	 */
 	function getUrl($view=null,$idx=null) {
-		$url = $this->IM->getUrl(null,null,false);
-		$view = $view === null ? $this->IM->getView() : $view;
-		$idx = $idx === null ? $this->IM->getIdx() : $idx;
+		$url = $this->baseUrl ? $this->baseUrl : $this->IM->getUrl(null,null,false);
 		
+		$view = $view === null ? $this->getView($this->baseUrl) : $view;
 		if ($view == null || $view == false) return $url;
 		$url.= '/'.$view;
 		
+		$idx = $idx === null ? $this->getIdx($this->baseUrl) : $idx;
 		if ($idx == null || $idx == false) return $url;
+		
 		return $url.'/'.$idx;
+	}
+	
+	/**
+	 * 다른모듈에서 호출된 경우 baseUrl 을 설정한다.
+	 *
+	 * @param string $url
+	 * @return $this
+	 */
+	function setUrl($url) {
+		$this->baseUrl = $this->IM->getUrl(null,null,$url,false);
+		return $this;
 	}
 	
 	/**
 	 * view 값을 가져온다.
 	 *
-	 * @param string $view
+	 * @return string $view
 	 */
 	function getView() {
-		return $this->IM->getView();
+		return $this->IM->getView($this->baseUrl);
 	}
 	
 	/**
 	 * idx 값을 가져온다.
 	 *
-	 * @param string $idx
+	 * @return string $idx
 	 */
 	function getIdx() {
-		return $this->IM->getIdx();
+		return $this->IM->getIdx($this->baseUrl);
 	}
 	
 	/**
 	 * [코어] 사이트 외부에서 현재 모듈의 API를 호출하였을 경우, API 요청을 처리하기 위한 함수로 API 실행결과를 반환한다.
 	 * 소스코드 관리를 편하게 하기 위해 각 요쳥별로 별도의 PHP 파일로 관리한다.
 	 *
+	 * @param string $protocol API 호출 프로토콜 (get, post, put, delete)
 	 * @param string $api API명
+	 * @param any $idx API 호출대상 고유값
+	 * @param object $params API 호출시 전달된 파라메터
 	 * @return object $datas API처리후 반환 데이터 (해당 데이터는 /api/index.php 를 통해 API호출자에게 전달된다.)
 	 * @see /api/index.php
 	 */
-	function getApi($api) {
+	function getApi($protocol,$api,$idx=null,$params=null) {
 		$data = new stdClass();
+		
+		$values = (object)get_defined_vars();
+		$this->IM->fireEvent('beforeGetApi',$this->getModule()->getName(),$api,$values);
 		
 		/**
 		 * 모듈의 api 폴더에 $api 에 해당하는 파일이 있을 경우 불러온다.
 		 */
-		if (is_file($this->getModule()->getPath().'/api/'.$api.'.php') == true) {
-			INCLUDE $this->getModule()->getPath().'/api/'.$api.'.php';
+		if (is_file($this->getModule()->getPath().'/api/'.$api.'.'.$protocol.'.php') == true) {
+			INCLUDE $this->getModule()->getPath().'/api/'.$api.'.'.$protocol.'.php';
 		}
 		
-		/**
-		 * 이벤트를 호출한다.
-		 */
+		unset($values);
 		$values = (object)get_defined_vars();
-		$this->IM->fireEvent('afterGetApi','portfolio',$api,$values,$data);
+		$this->IM->fireEvent('afterGetApi',$this->getModule()->getName(),$api,$values,$data);
 		
 		return $data;
-	}
-	
-	/**
-	 * [코어] 알림메세지를 구성한다.
-	 *
-	 * @param string $code 알림코드
-	 * @param int $fromcode 알림이 발생한 대상의 고유값
-	 * @param array $content 알림데이터
-	 * @return string $push 알림메세지
-	 */
-	function getPush($code,$fromcode,$content) {
-		return null;
 	}
 	
 	/**
@@ -250,32 +261,51 @@ class ModuleWebhard {
 	}
 	
 	/**
+	 * 특정 컨텍스트에 대한 제목을 반환한다.
+	 *
+	 * @param string $context 컨텍스트명
+	 * @return string $title 컨텍스트 제목
+	 */
+	function getContextTitle($context) {
+		return $this->getText('context/'.$context);
+	}
+	
+	/**
 	 * [사이트관리자] 모듈의 컨텍스트 환경설정을 구성한다.
 	 *
 	 * @param object $site 설정대상 사이트
+	 * @param object $values 설정값
 	 * @param string $context 설정대상 컨텍스트명
 	 * @return object[] $configs 환경설정
 	 */
-	function getContextConfigs($site,$context) {
+	function getContextConfigs($site,$values,$context) {
 		$configs = array();
 		
 		$templet = new stdClass();
-		$templet->title = $this->IM->getText('text/templet');
+		$templet->title = $this->getText('admin/configs/form/templet');
 		$templet->name = 'templet';
-		$templet->type = 'select';
-		$templet->data = array();
-		
-		$templet->data[] = array('#',$this->getText('admin/configs/form/default_setting'));
-		
-		$templets = $this->getModule()->getTemplets();
-		for ($i=0, $loop=count($templets);$i<$loop;$i++) {
-			$templet->data[] = array($templets[$i]->getName(),$templets[$i]->getTitle().' ('.$templets[$i]->getDir().')');
-		}
-		
-		$templet->value = count($templet->data) > 0 ? $templet->data[0][0] : '#';
+		$templet->type = 'templet';
+		$templet->target = 'webhard';
+		$templet->use_default = true;
+		$templet->value = $values != null && isset($values->templet) == true ? $values->templet : '#';
 		$configs[] = $templet;
 		
 		return $configs;
+	}
+	
+	/**
+	 * 사이트맵에 나타날 뱃지데이터를 생성한다.
+	 *
+	 * @param string $context 컨텍스트종류
+	 * @param object $configs 사이트맵 관리를 통해 설정된 페이지 컨텍스트 설정
+	 * @return object $badge 뱃지데이터 ($badge->count : 뱃지숫자, $badge->latest : 뱃지업데이트 시각(UNIXTIME), $badge->text : 뱃지텍스트)
+	 * @todo check count information
+	 */
+	function getContextBadge($context,$config) {
+		/**
+		 * null 일 경우 뱃지를 표시하지 않는다.
+		 */
+		return null;
 	}
 	
 	/**
@@ -330,6 +360,8 @@ class ModuleWebhard {
 			if ($string != null) $returnString = $string;
 		}
 		
+		$this->IM->fireEvent('afterGetText',$this->getModule()->getName(),$code,$returnString);
+		
 		/**
 		 * 언어셋 텍스트가 없는경우 iModule 코어에서 불러온다.
 		 */
@@ -366,31 +398,6 @@ class ModuleWebhard {
 	}
 	
 	/**
-	 * 특정 컨텍스트에 대한 제목을 반환한다.
-	 *
-	 * @param string $context 컨텍스트명
-	 * @return string $title 컨텍스트 제목
-	 */
-	function getContextTitle($context) {
-		return $this->getText('admin/contexts/'.$context);
-	}
-	
-	/**
-	 * 사이트맵에 나타날 뱃지데이터를 생성한다.
-	 *
-	 * @param string $context 컨텍스트종류
-	 * @param object $configs 사이트맵 관리를 통해 설정된 페이지 컨텍스트 설정
-	 * @return object $badge 뱃지데이터 ($badge->count : 뱃지숫자, $badge->latest : 뱃지업데이트 시각(UNIXTIME), $badge->text : 뱃지텍스트)
-	 * @todo check count information
-	 */
-	function getContextBadge($context,$config) {
-		/**
-		 * null 일 경우 뱃지를 표시하지 않는다.
-		 */
-		return null;
-	}
-	
-	/**
 	 * 템플릿 정보를 가져온다.
 	 *
 	 * @param string $this->getTemplet($configs) 템플릿명
@@ -403,57 +410,21 @@ class ModuleWebhard {
 		 * 사이트맵 관리를 통해 설정된 페이지 컨텍스트 설정일 경우
 		 */
 		if (is_object($templet) == true) {
+			$templet_configs = $templet !== null && isset($templet->templet_configs) == true ? $templet->templet_configs : null;
 			$templet = $templet !== null && isset($templet->templet) == true ? $templet->templet : '#';
+		} else {
+			$templet_configs = null;
 		}
 		
 		/**
 		 * 템플릿명이 # 이면 모듈 기본설정에 설정된 템플릿을 사용한다.
 		 */
-		$templet = $templet == '#' ? $this->getModule()->getConfig('templet') : $templet;
-		return $this->getModule()->getTemplet($templet);
-	}
-	
-	/**
-	 * 페이지 컨텍스트를 가져온다.
-	 *
-	 * @param string $context 컨테이너 종류
-	 * @param object $configs 사이트맵 관리를 통해 설정된 페이지 컨텍스트 설정
-	 * @return string $html 컨텍스트 HTML
-	 */
-	function getContext($context,$configs=null) {
-		/**
-		 * 컨텍스트 컨테이너를 설정한다.
-		 */
-		$html = PHP_EOL.'<!-- WEBHARD MODULE -->'.PHP_EOL.'<div data-role="context" data-type="module" data-module="'.$this->getModule()->getName().'" data-container="'.($configs != null && isset($configs->container) == true ? 'TRUE' : 'FALSE').'">'.PHP_EOL;
-		
-		$this->IM->addHeadResource('style',$this->getModule()->getDir().'/styles/style.css');
-		$this->IM->addHeadResource('script',$this->getModule()->getDir().'/scripts/script.js');
-		
-		/**
-		 * 컨텍스트 헤더
-		 */
-		$html.= $this->getHeader($context,$configs);
-		
-		/**
-		 * 컨테이너 종류에 따라 컨텍스트를 가져온다.
-		 */
-		switch ($context) {
-			case 'explorer' :
-				$html.= $this->getExplorerContext($configs,$configs != null && isset($configs->select) == true ? $configs->select : null);
-				break;
+		if ($templet == '#') {
+			$templet = $this->getModule()->getConfig('templet');
+			$templet_configs = $this->getModule()->getConfig('templet_configs');
 		}
 		
-		/**
-		 * 컨텍스트 푸터
-		 */
-		$html.= $this->getFooter($context,$configs);
-		
-		/**
-		 * 컨텍스트 컨테이너를 설정한다.
-		 */
-		$html.= PHP_EOL.'</div>'.PHP_EOL.'<!--// WEBHARD MODULE -->'.PHP_EOL;
-		
-		return $html;
+		return $this->getModule()->getTemplet($templet,$templet_configs);
 	}
 	
 	/**
@@ -499,6 +470,49 @@ class ModuleWebhard {
 		$header = $this->IM->getHeader();
 		
 		return $header.$html.$footer;
+	}
+	
+	/**
+	 * 페이지 컨텍스트를 가져온다.
+	 *
+	 * @param string $context 컨테이너 종류
+	 * @param object $configs 사이트맵 관리를 통해 설정된 페이지 컨텍스트 설정
+	 * @return string $html 컨텍스트 HTML
+	 */
+	function getContext($context,$configs=null) {
+		/**
+		 * 컨텍스트 컨테이너를 설정한다.
+		 */
+		$html = PHP_EOL.'<!-- WEBHARD MODULE -->'.PHP_EOL.'<div data-role="context" data-type="module" data-module="'.$this->getModule()->getName().'" data-base-url="'.($this->baseUrl == null ? $this->IM->getUrl(null,null,false) : $this->baseUrl).'" data-container="'.($configs != null && isset($configs->container) == true ? 'TRUE' : 'FALSE').'">'.PHP_EOL;
+		
+		$this->IM->addHeadResource('style',$this->getModule()->getDir().'/styles/style.css');
+		$this->IM->addHeadResource('script',$this->getModule()->getDir().'/scripts/script.js');
+		
+		/**
+		 * 컨텍스트 헤더
+		 */
+		$html.= $this->getHeader($context,$configs);
+		
+		/**
+		 * 컨테이너 종류에 따라 컨텍스트를 가져온다.
+		 */
+		switch ($context) {
+			case 'explorer' :
+				$html.= $this->getExplorerContext($configs,$configs != null && isset($configs->select) == true ? $configs->select : null);
+				break;
+		}
+		
+		/**
+		 * 컨텍스트 푸터
+		 */
+		$html.= $this->getFooter($context,$configs);
+		
+		/**
+		 * 컨텍스트 컨테이너를 설정한다.
+		 */
+		$html.= PHP_EOL.'</div>'.PHP_EOL.'<!--// WEBHARD MODULE -->'.PHP_EOL;
+		
+		return $html;
 	}
 	
 	/**
@@ -582,6 +596,7 @@ class ModuleWebhard {
 		}
 		
 		$this->IM->loadLanguage('module','webhard',$this->getModule()->getPackage()->language);
+		
 		$header = PHP_EOL.'<form id="ModuleWebhardExplorerForm">'.PHP_EOL;
 		$header.= '<input type="file" id="ModuleWebhardUploadInput" multiple style="display:none;">'.PHP_EOL;
 		$header.= '<input type="hidden" name="view" value="'.$view.'">'.PHP_EOL;

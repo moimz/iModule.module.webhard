@@ -1,4 +1,17 @@
 <?php
+/**
+ * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodules.io)
+ *
+ * 웹하드 기본템플릿 - 파일탐색
+ * 
+ * @file /modules/webhard/templets/default/explorer.php
+ * @author Arzz (arzz@arzz.com)
+ * @license MIT License
+ * @version 3.0.0
+ * @modified 2020. 2. 18.
+ */
+if (defined('__IM__') == false) exit;
+
 $IM->loadWebFont('NanumBarunGothic',true);
 $IM->loadWebFont('FontAwesome');
 $IM->loadWebFont('XEIcon');

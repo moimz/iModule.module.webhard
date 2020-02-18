@@ -1,5 +1,13 @@
 /**
- * 웹하드 경로
+ * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodules.io)
+ *
+ * 웹하드 기본템플릿 - 스타일시트
+ * 
+ * @file /modules/webhard/templets/default/styles/style.css
+ * @author Arzz (arzz@arzz.com)
+ * @license MIT License
+ * @version 3.0.0
+ * @modified 2020. 2. 18.
  */
 div[data-module=webhard] {font-size:12px;}
 div[data-module=webhard] section[data-role=nbreadcrumb] {height:38px; border-bottom:1px solid #d8dee5; padding:0px 15px; font-size:0; overflow:hidden;}

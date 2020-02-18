@@ -1,18 +1,15 @@
 <?php
 /**
- * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodule.kr)
+ * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodules.io)
  * 
  * 즐겨찾기 상태를 업데이트한다.
  *
  * @file /modules/webhard/process/updateFavorite.php
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
- * @version 3.0.0.160923
- *
- * @param string $modal 모달종류
- * @return object $results
+ * @version 3.0.0
+ * @modified 2020. 2. 18.
  */
-
 if (defined('__IM__') == false) exit;
 
 $type = Request('type');

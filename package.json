@@ -12,18 +12,14 @@
 		"name":"Arzz",
 		"email":"arzz@arzz.com"
 	},
-	"homepage":"https://www.imodule.kr",
-	"versionChecker":"http://www.moimz.com/ko/api/moimz/getLatest",
+	"homepage":"https://www.imodules.io",
+	"versionChecker":"https://api.moimz.com/download/latest",
 	"dependencies":{
-		"core":"3.0.0",
-		"attachment":"3.0.0",
-		"member":"3.0.0"
+		"core":"3.0.0"
 	},
 	"language":"ko",
 	"admin":true,
 	"context":true,
-	"global":false,
-	"article":false,
 	"widget":true,
 	"attachments":[
 		"webhard"
@@ -40,6 +36,23 @@
 		"root_size":{
 			"type":"int",
 			"default":10000
+		},
+		"use_in_admin":{
+			"type":"boolean",
+			"default":false
+		}
+	},
+	"targets":{
+		"admin":{
+			"afterGetData":[
+				"configs"
+			],
+			"afterGetContext":[
+				"panel"
+			],
+			"checkPermission":[
+				"menu"
+			]
 		}
 	},
 	"databases":{
@@ -47,169 +60,205 @@
 			"columns":{
 				"reg_date":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"활동시각"
 				},
 				"target":{
 					"type":"varchar",
-					"length":12
+					"length":12,
+					"comment":"활동대상"
 				},
 				"type":{
 					"type":"varchar",
-					"length":15
+					"length":15,
+					"comment":"활동형태"
 				},
 				"midx":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"회원고유값"
 				},
 				"data":{
-					"type":"longtext"
+					"type":"longtext",
+					"comment":"활동데이터"
 				}
 			},
 			"indexes":{
 				"reg_date,target,type,midx":"primary_key",
 				"target,reg_date":"index"
-			}
+			},
+			"comment":"웹하드 활동기록 테이블"
 		},
 		"webhard_compress_table":{
 			"columns":{
 				"hash":{
 					"type":"char",
-					"length":32
+					"length":32,
+					"comment":"압축파일고유값"
 				},
 				"midx":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"회원고유값"
 				},
 				"files":{
-					"type":"longtext"
+					"type":"longtext",
+					"comment":"압축대상파일"
 				},
 				"status":{
 					"type":"enum",
 					"length":"'WAIT','COMPRESSING','COMPRESSED','DOWNLOADED'",
-					"default":"WAIT"
+					"default":"WAIT",
+					"comment":"압축상태"
 				},
 				"reg_date":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"압축일"
 				}
 			},
 			"indexes":{
 				"hash":"primary_key"
-			}
+			},
+			"comment":"웹하드 압축파일생성기록 테이블"
 		},
 		"webhard_profile_table":{
 			"columns":{
 				"midx":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"회원고유값"
 				},
 				"disk_usage":{
 					"type":"bigint",
 					"length":15,
-					"default":0
+					"default":0,
+					"comment":"디스크사용량"
 				},
 				"disk_limit":{
 					"type":"bigint",
-					"length":15
+					"length":15,
+					"comment":"디스크제한용량"
 				}
 			},
 			"indexes":{
 				"midx":"primary_key"
-			}
+			},
+			"comment":"웹하드 프로필 테이블"
 		},
 		"webhard_folder_table":{
 			"columns":{
 				"idx":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"폴더고유값"
 				},
 				"code":{
 					"type":"varchar",
 					"length":50,
-					"is_null":true
+					"is_null":true,
+					"comment":"폴더코드값"
 				},
 				"owner":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"폴더소유자"
 				},
 				"creator":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"폴더생성자"
 				},
 				"editor":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"최종수정자"
 				},
 				"parent":{
 					"type":"int",
 					"length":11,
-					"default":0
+					"default":0,
+					"comment":"상위폴더(0일 경우 최상위폴더)"
 				},
 				"linked":{
 					"type":"int",
 					"length":11,
-					"default":0
+					"default":0,
+					"comment":"공유된폴더의 원본 폴더고유값"
 				},
 				"name":{
 					"type":"varchar",
-					"length":255
+					"length":255,
+					"comment":"폴더명"
 				},
 				"size":{
 					"type":"bigint",
 					"length":15,
-					"default":0
+					"default":0,
+					"comment":"폴더용량"
 				},
 				"permission":{
 					"type":"varchar",
 					"length":3,
-					"default":"RWD"
+					"default":"RWD",
+					"comment":"폴더권한"
 				},
 				"description":{
 					"type":"text",
-					"is_null":true
+					"is_null":true,
+					"comment":"폴더설명"
 				},
 				"reg_date":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"생성일"
 				},
 				"update_date":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"최종수정일"
 				},
 				"is_shared":{
 					"type":"enum",
 					"length":"'TRUE','FALSE'",
-					"default":"FALSE"
+					"default":"FALSE",
+					"comment":"폴더공유여부"
 				},
 				"is_shared_file":{
 					"type":"enum",
 					"length":"'TRUE','FALSE'",
-					"default":"FALSE"
+					"default":"FALSE",
+					"comment":"폴더내공유파일존재여부"
 				},
 				"is_shared_child":{
 					"type":"enum",
 					"length":"'TRUE','FALSE'",
-					"default":"FALSE"
+					"default":"FALSE",
+					"comment":"폴더내공유폴더존재여부"
 				},
 				"is_linked_child":{
 					"type":"enum",
 					"length":"'TRUE','FALSE'",
-					"default":"FALSE"
+					"default":"FALSE",
+					"comment":"폴더내공유받은폴더존재여부"
 				},
 				"is_lock":{
 					"type":"enum",
 					"length":"'TRUE','FALSE'",
-					"default":"FALSE"
+					"default":"FALSE",
+					"comment":"잠금여부"
 				},
 				"is_delete":{
 					"type":"enum",
 					"length":"'TRUE','FALSE'",
-					"default":"FALSE"
+					"default":"FALSE",
+					"comment":"삭제여부"
 				},
 				"opath":{
 					"type":"varchar",
 					"length":255,
-					"is_null":true
+					"is_null":true,
+					"comment":"원본경로"
 				}
 			},
 			"indexes":{
@@ -222,125 +271,153 @@
 				"linked":"index",
 				"is_delete":"index"
 			},
-			"auto_increment":"idx"
+			"auto_increment":"idx",
+			"comment":"웹하드 폴더 테이블"
 		},
 		"webhard_favorite_table":{
 			"columns":{
 				"type":{
 					"type":"enum",
-					"length":"'FILE','FOLDER'"
+					"length":"'FILE','FOLDER'",
+					"comment":"대상종류"
 				},
 				"fidx":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"대상의고유값"
 				},
 				"midx":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"회원고유값"
 				}
 			},
 			"indexes":{
 				"type,fidx,midx":"primary_key",
 				"type,fidx":"index"
-			}
+			},
+			"comment":"웹하드 즐겨찾기 테이블"
 		},
 		"webhard_file_table":{
 			"columns":{
 				"idx":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"파일고유값"
 				},
 				"code":{
 					"type":"varchar",
 					"length":50,
-					"is_null":true
+					"is_null":true,
+					"comment":"파일코드값"
 				},
 				"folder":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"파일이존재하는폴더고유값"
 				},
 				"owner":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"파일소유자"
 				},
 				"creator":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"",
+					"comment":"파일생성자"
 				},
 				"editor":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"파일최종수정자"
 				},
 				"path":{
 					"type":"varchar",
-					"length":255
+					"length":255,
+					"comment":"파일경로"
 				},
 				"name":{
 					"type":"varchar",
-					"length":180
+					"length":180,
+					"comment":"파일명"
 				},
 				"type":{
 					"type":"varchar",
-					"length":10
+					"length":10,
+					"comment":"파일종류"
 				},
 				"mime":{
 					"type":"varchar",
-					"length":100
+					"length":100,
+					"comment":"파일MIME"
 				},
 				"size":{
 					"type":"bigint",
-					"length":15
+					"length":15,
+					"comment":"파일용량"
 				},
 				"width":{
 					"type":"int",
 					"length":5,
-					"default":0
+					"default":0,
+					"comment":"이미지가로크기"
 				},
 				"height":{
 					"type":"int",
 					"length":5,
-					"default":0
+					"default":0,
+					"comment":"이미지세로크기"
 				},
 				"description":{
 					"type":"text",
-					"is_null":true
+					"is_null":true,
+					"comment":"설명"
 				},
 				"reg_date":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"생성일"
 				},
 				"update_date":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"최종수정일"
 				},
 				"status":{
 					"type":"enum",
 					"length":"'DRAFT','PUBLISHED'",
-					"default":"DRAFT"
+					"default":"DRAFT",
+					"comment":"파일상태"
 				},
 				"extra":{
 					"type":"text",
-					"is_null":true
+					"is_null":true,
+					"comment":"파일추가정보"
 				},
 				"is_shared":{
 					"type":"enum",
 					"length":"'TRUE','FALSE'",
-					"default":"FALSE"
+					"default":"FALSE",
+					"comment":"공유여부"
 				},
 				"is_lock":{
 					"type":"enum",
 					"length":"'TRUE','FALSE'",
-					"default":"FALSE"
+					"default":"FALSE",
+					"comment":"잠금여부"
 				},
 				"is_delete":{
 					"type":"enum",
 					"length":"'TRUE','FALSE'",
-					"default":"FALSE"
+					"default":"FALSE",
+					"comment":"삭제여부"
 				},
 				"opath":{
 					"type":"varchar",
 					"length":255,
-					"is_null":true
+					"is_null":true,
+					"comment":"파일원본경로"
 				}
 			},
 			"indexes":{
@@ -353,62 +430,75 @@
 				"reg_date,folder,is_delete":"index",
 				"owner,creator,editor,is_delete":"index"
 			},
-			"auto_increment":"idx"
+			"auto_increment":"idx",
+			"comment":"웹하드 파일 테이블"
 		},
 		"webhard_link_table":{
 			"columns":{
 				"hash":{
 					"type":"char",
-					"length":32
+					"length":32,
+					"comment":"링크고유값"
 				},
 				"fidx":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"링크될대상의 고유값"
 				},
 				"email":{
 					"type":"varchar",
 					"length":100,
-					"is_null":true
+					"is_null":true,
+					"comment":"링크를받은대상의이메일주소"
 				},
 				"reg_date":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"링크생성일"
 				}
 			},
 			"indexes":{
 				"hash":"primary_key",
 				"fidx":"index"
-			}
+			},
+			"comment":"웹하드 외부공유링크 테이블"
 		},
 		"webhard_share_table":{
 			"columns":{
 				"hash":{
 					"type":"char",
-					"length":32
+					"length":32,
+					"comment":"공유고유값"
 				},
 				"midx":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"공유받은회원고유값"
 				},
 				"type":{
 					"type":"enum",
-					"length":"'MODULE','GOOGLE','LINK'"
+					"length":"'MODULE','GOOGLE','LINK'",
+					"comment":"공유받은대상"
 				},
 				"fidx":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"공유대상의고유값"
 				},
 				"target":{
 					"type":"text",
-					"is_null":true
+					"is_null":true,
+					"comment":"공유대상의세부값"
 				},
 				"reg_date":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"공유일시"
 				},
 				"expire_date":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"공유만료일시"
 				}
 			},
 			"indexes":{
@@ -416,26 +506,31 @@
 				"fidx":"index",
 				"type,fidx":"index",
 				"midx,type,fidx":"index"
-			}
+			},
+			"comment":"웹하드 공유 테이블"
 		},
 		"webhard_share_log_table":{
 			"columns":{
 				"hash":{
 					"type":"char",
-					"length":32
+					"length":32,
+					"comment":"공유고유값"
 				},
 				"reg_date":{
 					"type":"int",
-					"length":11
+					"length":11,
+					"comment":"일시"
 				},
 				"user_agent":{
 					"type":"varchar",
-					"length":255
+					"length":255,
+					"comment":"접근기록"
 				}
 			},
 			"indexes":{
 				"hash,reg_date":"index"
-			}
+			},
+			"comment":"웹하드 공유기록 테이블"
 		}
 	}
 }

@@ -1,12 +1,13 @@
 /**
- * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodule.kr)
+ * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodules.io)
  *
- * 웹하드 관련 모든 기능을 제어한다.
+ * 웹하드관련 화면 UI 이벤트를 처리한다.
  * 
- * @file /modules/webhard/ModuleWebhard.class.php
+ * @file /modules/webhard/scripts/script.js
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
- * @version 3.0.0.160910
+ * @version 3.0.0
+ * @modified 2020. 2. 18.
  */
 var Webhard = {
 	mode:"webhard",

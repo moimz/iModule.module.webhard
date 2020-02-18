@@ -1,3 +1,14 @@
+/**
+ * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodules.io)
+ *
+ * IE관련 오류를 수정한다.
+ * 
+ * @file /modules/webhard/scripts/ie.js
+ * @author Arzz (arzz@arzz.com)
+ * @license MIT License
+ * @version 3.0.0
+ * @modified 2020. 2. 18.
+ */
 $(document).ready(function() {
 	var getInternetExplorerVersion = function() {
 		var rv = -1;

@@ -1,19 +1,15 @@
 <?php
 /**
- * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodule.kr)
+ * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodules.io)
  * 
  * 업로드할 파일을 확인하고 DB에 정보를 저장한다.
  *
  * @file /modules/webhard/process/checkFile.php
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
- * @version 3.0.0.160923
- *
- * @param int $target 파일을 업로드할 폴더 고유번호
- * @param object[] $files 업로드할 파일
- * @return object $results
+ * @version 3.0.0
+ * @modified 2020. 2. 18.
  */
-
 if (defined('__IM__') == false) exit;
 
 $target = Request('target');

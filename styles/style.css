@@ -1,14 +1,14 @@
 /**
- * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodule.kr)
+ * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodules.io)
  * 
  * 웹하드 탐색기 기본 스타일을 지정한다.
  *
  * @file /modules/webhard/styles/style.css
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
- * @version 3.0.0.160923
+ * @version 3.0.0
+ * @modified 2020. 2. 18.
  */
-
 body {overflow-x:hidden;}
 body.dragging, body.dragging * {-webkit-touch-callout:none; -webkit-user-select:none; -khtml-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none; cursor:move !important;}
 body.resizing, body.resizing * {cursor:ew-resize !important;}

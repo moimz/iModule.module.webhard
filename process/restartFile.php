@@ -1,18 +1,14 @@
 <?php
 /**
- * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodule.kr)
+ * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodules.io)
  * 
  * 업로드 취소/실패한 파일의 업로드를 재개한다.
  *
  * @file /modules/webhard/process/restartFile.php
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
- * @version 3.0.0.160923
- *
- * @param int $idx 업로드 재개할 파일의 고유번호
- * @return object $results
+ * @version 3.0.0
  */
-
 if (defined('__IM__') == false) exit;
 
 $idx = Request('idx');

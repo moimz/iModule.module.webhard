@@ -1,6 +1,6 @@
 <?php
 /**
- * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodule.kr)
+ * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodules.io)
  *
  * 웹하드 설정을 위한 설정폼을 생성한다.
  * 
@@ -8,7 +8,7 @@
  * @author Arzz (arzz@arzz.com)
  * @license GPLv3
  * @version 3.0.0
- * @modified 2018. 3. 18.
+ * @modified 2020. 2. 18.
  */
 if (defined('__IM__') == false) exit;
 ?>
@@ -23,7 +23,13 @@ var config = new Ext.form.Panel({
 		new Ext.form.FieldSet({
 			title:Webhard.getText("admin/configs/form/default_setting"),
 			items:[
-				Admin.templetField(Webhard.getText("admin/configs/form/templet"),"templet","module","webhard",false)
+				Admin.templetField(Webhard.getText("admin/configs/form/templet"),"templet","module","webhard",false),
+				new Ext.form.Checkbox({
+					fieldLabel:Webhard.getText("admin/configs/form/use_in_admin"),
+					boxLabel:Webhard.getText("admin/configs/form/use_in_admin_help"),
+					name:"use_in_admin",
+					uncheckedValue:""
+				})
 			]
 		}),
 		new Ext.form.FieldSet({
@@ -47,11 +53,6 @@ var config = new Ext.form.Panel({
 					]
 				})
 			]
-		}),
-		new Ext.form.FieldSet({
-			id:"ModuleConfigTempletConfigs",
-			title:Admin.getText("text/templet_configs"),
-			hidden:true
 		})
 	]
 });

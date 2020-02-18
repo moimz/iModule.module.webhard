@@ -1,19 +1,15 @@
 <?php
 /**
- * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodule.kr)
+ * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodules.io)
  * 
  * 폴더하부의 아이템(폴더, 파일)을 가져온다.
  *
  * @file /modules/webhard/process/getItems.php
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
- * @version 3.0.0.160923
- *
- * @param string $view 종류
- * @param string $path 경로
- * @return object $results
+ * @version 3.0.0
+ * @modified 2020. 2. 18.
  */
-
 if (defined('__IM__') == false) exit;
 
 $view = Request('view');

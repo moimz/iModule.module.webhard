@@ -1,19 +1,14 @@
 <?php
 /**
- * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodule.kr)
+ * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodules.io)
  * 
  * 새폴더를 생성한다.
  *
  * @file /modules/webhard/process/create.php
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
- * @version 3.0.0.160923
- *
- * @param int $parent 생성할 부모폴더 고유번호
- * @param string $name 폴더명
- * @return object $results
+ * @version 3.0.0
  */
-
 if (defined('__IM__') == false) exit;
 
 $parent = Request('parent');

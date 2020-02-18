@@ -1,19 +1,15 @@
 <?php
 /**
- * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodule.kr)
+ * 이 파일은 iModule 웹하드모듈의 일부입니다. (https://www.imodules.io)
  * 
  * 항목을 압축하여 다운로드 한다.
  *
  * @file /modules/webhard/process/compress.php
  * @author Arzz (arzz@arzz.com)
  * @license MIT License
- * @version 3.0.0.160923
- *
- * @param string $mode 압축모드
- * @param int $files 압축할 대상
- * @return object $results
+ * @version 3.0.0
+ * @modified 2020. 2. 18.
  */
-
 if (defined('__IM__') == false) exit;
 
 $mode = Request('mode');
