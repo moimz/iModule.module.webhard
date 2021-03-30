@@ -59,9 +59,9 @@ class ModuleWebhard {
 	
 	/**
 	 * 미리보기가 가능한 파일 확장자
-	 * 문서의 경우 구글드라이브 API를 이용하여 미리보기를 처리한다.
+	 * @todo 문서의 경우 구글드라이브 API를 이용하여 미리보기를 처리한다.
 	 */
-	public $enablePreview = array('jpg','gif','png','jpeg','ppt','pptx','rtf','doc','docx','xls','xlsx','pdf');
+	public $enablePreview = array('jpg','gif','png','jpeg');//,'ppt','pptx','rtf','doc','docx','xls','xlsx','pdf');
 	
 	
 	/**
