@@ -152,7 +152,7 @@ $IM->loadWebFont('XEIcon');
 					
 					<span class="split"></span>
 					
-					<button data-action="detail">
+					<button type="button" data-action="detail">
 						<i class="xi xi-info-circle"></i>
 						<span><?php echo $me->getText('toolbar/detail'); ?></span>
 					</button>

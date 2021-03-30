@@ -632,7 +632,6 @@ var Webhard = {
 		 * 모바일 디바이스에서 툴바버튼
 		 */
 		menu:function(visible,mode) {
-			
 			var $menu = $("div[data-role=menu]",Webhard.$toolbar);
 			
 			var visible = visible === undefined || visible === null ? $menu.is(":visible") !== true : visible;
