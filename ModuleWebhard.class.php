@@ -2058,8 +2058,9 @@ class ModuleWebhard {
 			
 			/**
 			 * 파일을 바로 다운로드 받기 위한 헤더 설정
+			 * 읽을 수 없는 파일인 경우, 무조건 다운로드 되도록 한다.
 			 */
-			if ($type == 'download') {
+			if ($type == 'download' || in_array(strtolower(pathinfo($file->name,PATHINFO_EXTENSION)),$this->enablePreview) == false) {
 				header("Pragma: public");
 				header("Expires: 0");
 				header("Cache-Control: must-revalidate, post-check=0, pre-check=0"); 
@@ -2070,9 +2071,8 @@ class ModuleWebhard {
 				header('Content-Length: '.$file->size);
 			}
 			
-			//http://portfolio.moimz.link/ko/module/webhard/thumbnail/8/2.jpg
 			readfile($this->getFilePath($file->path));
-//			exit;
+			exit;
 		} else {
 			return $this->IM->printError('FORBIDDEN');
 		}
