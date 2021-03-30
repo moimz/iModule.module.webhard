@@ -2231,18 +2231,18 @@ class ModuleWebhard {
 		
 		if ($folder->is_linked == true) {
 			$children = $this->db()->select($this->table->folder,'sum(size) as size')->where('parent',$folder->linked)->where('is_delete','FALSE')->getOne();
-			$children = isset($children->size) == true ? $children->size : 0;
+			$children = isset($children->size) == true && $children->size > 0 ? $children->size : 0;
 			
 			$files = $this->db()->select($this->table->file,'sum(size) as size')->where('folder',$folder->linked)->where('is_delete','FALSE')->getOne();
-			$files = isset($files->size) == true ? $files->size : 0;
+			$files = isset($files->size) == true && $files->size > 0 ? $files->size : 0;
 			
 			$size = $children + $files;
 		} else {
 			$children = $this->db()->select($this->table->folder,'sum(size) as size')->where('parent',$folder->idx)->where('is_delete','FALSE')->getOne();
-			$children = isset($children->size) == true ? $children->size : 0;
+			$children = isset($children->size) == true && $children->size > 0 ? $children->size : 0;
 			
 			$files = $this->db()->select($this->table->file,'sum(size) as size')->where('folder',$folder->idx)->where('is_delete','FALSE')->getOne();
-			$files = isset($files->size) == true ? $files->size : 0;
+			$files = isset($files->size) == true && $files->size > 0 ? $files->size : 0;
 			
 			$size = $children + $files;
 			
