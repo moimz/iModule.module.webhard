@@ -1277,6 +1277,8 @@ class ModuleWebhard {
 			if ($share != null) {
 				$this->permissions[$idx] = $share->permission;
 				return $this->permissions[$idx];
+			} else {
+				return '';
 			}
 		}
 		
@@ -1380,7 +1382,7 @@ class ModuleWebhard {
 	 *
 	 * @param int $idx 파일 고유번호
 	 * @param string $share 공유코드
-	 * @param string $permission 폴더권한
+	 * @param string $permission 파일권한
 	 */
 	function getFilePermission($idx,$share=null) {
 		$file = $this->getFile($idx);
